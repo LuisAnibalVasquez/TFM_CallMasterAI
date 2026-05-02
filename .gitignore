@@ -39,3 +39,6 @@ yarn-error.log*
 
 # Supabase
 .supabase
+
+# Scripts con secretos
+apps/backend/scripts/seed.ts
