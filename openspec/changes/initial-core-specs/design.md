@@ -20,6 +20,13 @@ Implementación de un sistema multi-tenant SaaS utilizando una arquitectura serv
 **Alternatives considered**: Cifrado en la capa de aplicación (NestJS).
 **Rationale**: Mayor seguridad al no exponer la clave de cifrado en el código. La base de datos se encarga de cifrar/descifrar mediante Store Procedures protegidos por RLS.
 
+### Decision: Protección de PII (Teléfonos de Clientes)
+**Choice**: Cifrado AES-256 + Hashing HMAC + Enmascaramiento en UI.
+**Rationale**: 
+1. **Cifrado**: Los teléfonos se guardan cifrados en `phone_encrypted` para ser usados por el proveedor de IA.
+2. **Hashing**: Se guarda un `phone_hash` para permitir búsquedas exactas (indexadas) sin necesidad de descifrar toda la tabla.
+3. **Enmascaramiento**: El Frontend por defecto solo mostrará los últimos 4 dígitos (ej. `*******1234`).
+
 ## Data Flow
 
 ```ascii
