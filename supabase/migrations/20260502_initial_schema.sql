@@ -4,7 +4,7 @@ create extension if not exists "pgcrypto";
 
 -- 2. Crear tabla de roles
 create table public.roles (
-    id uuid primary key default uuid_generate_v4(),
+    id uuid primary key default gen_random_uuid(),
     name text not null unique,
     created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
@@ -14,7 +14,7 @@ insert into public.roles (name) values ('PlatformOwner'), ('TenantAdmin');
 
 -- 3. Crear tabla de tenants
 create table public.tenants (
-    id uuid primary key default uuid_generate_v4(),
+    id uuid primary key default gen_random_uuid(),
     name text not null,
     phone text,
     contact_email text not null unique,
@@ -37,7 +37,7 @@ create table public.profiles (
 
 -- 5. Crear tablas de campañas y llamadas
 create table public.campaigns (
-    id uuid primary key default uuid_generate_v4(),
+    id uuid primary key default gen_random_uuid(),
     tenant_id uuid not null references public.tenants(id) on delete cascade,
     name text not null,
     status text not null default 'Created',
@@ -49,7 +49,7 @@ create table public.campaigns (
 );
 
 create table public.calls (
-    id uuid primary key default uuid_generate_v4(),
+    id uuid primary key default gen_random_uuid(),
     campaign_id uuid not null references public.campaigns(id) on delete cascade,
     customer_name text not null,
     phone_encrypted text not null, -- Teléfono cifrado
@@ -64,25 +64,16 @@ create table public.calls (
 );
 
 -- 6. Funciones de Cifrado (Security)
--- Nota: La master_key se debería configurar vía: 
--- alter database postgres set "app.settings.master_key" = 'CasioperaH.5780';
-
-create or replace function public.encrypt_secret(secret text)
+create or replace function public.encrypt_secret(secret text, master_key text)
 returns text as $$
-declare
-    master_key text;
 begin
-    master_key := current_setting('app.settings.master_key');
     return encode(encrypt(secret::bytea, master_key::bytea, 'aes'), 'hex');
 end;
 $$ language plpgsql security definer;
 
-create or replace function public.decrypt_secret(encrypted_text text)
+create or replace function public.decrypt_secret(encrypted_text text, master_key text)
 returns text as $$
-declare
-    master_key text;
 begin
-    master_key := current_setting('app.settings.master_key');
     return convert_from(decrypt(decode(encrypted_text, 'hex'), master_key::bytea, 'aes'), 'utf8');
 end;
 $$ language plpgsql security definer;
