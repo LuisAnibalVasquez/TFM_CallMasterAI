@@ -10,8 +10,8 @@
 
 ## Phase 2: Supabase Infrastructure & Security
 
-- [ ] 2.1 Crear migraciones iniciales en `supabase/migrations` (Tabas: roles, profiles, tenants, campaigns, calls).
-- [ ] 2.2 Configurar extensión `pgcrypto` y funciones de cifrado AES-256 en PostgreSQL.
+- [x] 2.1 Crear migraciones iniciales en `supabase/migrations` (Tabas: roles, profiles, tenants, campaigns, calls).
+- [x] 2.2 Configurar extensión `pgcrypto` y funciones de cifrado AES-256 en PostgreSQL.
 - [ ] 2.3 Implementar `SupabaseAuthService` en `apps/backend/src/modules/auth/infrastructure/providers`.
 - [ ] 2.4 Configurar Swagger en `apps/backend/src/main.ts` para documentar la API.
 
