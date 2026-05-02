@@ -2,11 +2,11 @@
 
 ## Phase 1: Foundation & Backend Core (Clean Architecture)
 
-- [ ] 1.1 Configurar `apps/backend/tsconfig.json` y `nest-cli.json` con soporte para alias y decoradores.
-- [ ] 1.2 Implementar `packages/shared` con interfaces base de `Tenant`, `Campaign`, `Call` y `Role`.
-- [ ] 1.3 Crear Entidades de Dominio en `apps/backend/src/modules/campaigns/domain/entities` (Campaign, Client).
-- [ ] 1.4 Definir Port `IAgentProvider` en `apps/backend/src/modules/campaigns/domain/ports/agent-provider.port.ts`.
-- [ ] 1.5 Implementar `VoiceflowProvider` en `apps/backend/src/modules/campaigns/infrastructure/providers`.
+- [x] 1.1 Configurar `apps/backend/tsconfig.json` y `nest-cli.json` con soporte para alias y decoradores.
+- [x] 1.2 Implementar `packages/shared` con interfaces base de `Tenant`, `Campaign`, `Call` y `Role`.
+- [x] 1.3 Crear Entidades de Dominio en `apps/backend/src/modules/campaigns/domain/entities` (Campaign, Client).
+- [x] 1.4 Definir Port `IAgentProvider` en `apps/backend/src/modules/campaigns/domain/ports/agent-provider.port.ts`.
+- [x] 1.5 Implementar `VoiceflowProvider` en `apps/backend/src/modules/campaigns/infrastructure/providers`.
 
 ## Phase 2: Supabase Infrastructure & Security
 

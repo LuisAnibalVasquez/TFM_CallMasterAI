@@ -26,7 +26,8 @@
     "@supabase/supabase-js": "^2.43.1",
     "inngest": "^3.19.1",
     "reflect-metadata": "^0.2.0",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "@callmaster/shared": "*"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
