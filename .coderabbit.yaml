@@ -1,0 +1,11 @@
+language: "es-ES"
+early_access: false
+reviews:
+  profile: "standard"
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+chat:
+  auto_reply: true
