@@ -5,6 +5,12 @@ import { AppModule } from "./app.module";
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Habilitar CORS para que el frontend pueda hacer peticiones
+  app.enableCors({
+    origin: true, // En desarrollo permite todos, en produccion lo limitaremos al dominio de vercel
+    credentials: true,
+  });
+
   // Configuración de Swagger
   const config = new DocumentBuilder()
     .setTitle("Call Master AI API")
