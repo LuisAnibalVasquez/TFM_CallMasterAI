@@ -1,0 +1,104 @@
+import { Link } from "react-router-dom";
+import { ArrowRight, Sparkles } from "lucide-react";
+import { Button } from "../../../shared/components/ui/button";
+import { DashboardMockup } from "./dashboard-mockup";
+
+export function Hero() {
+  return (
+    <section className="relative isolate overflow-hidden bg-background">
+      {/* Único halo brand muy tenue, nada más */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-32 right-1/4 -z-10 h-[420px] w-[420px] rounded-full bg-primary/4 blur-[120px]"
+      />
+
+      <div className="mx-auto max-w-7xl px-4 pb-20 pt-16 sm:px-6 sm:pt-24 lg:px-8 lg:pb-28 lg:pt-32">
+        <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-10">
+          {/* Copy */}
+          <div className="lg:col-span-6">
+            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5">
+              <Sparkles
+                className="h-3.5 w-3.5 text-foreground/70"
+                strokeWidth={2}
+              />
+              <span className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
+                Powered by Voiceflow · Multi-tenant
+              </span>
+            </div>
+
+            <h1 className="mt-6 text-balance text-4xl font-semibold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+              Escala tus llamadas.{" "}
+              <span className="text-muted-foreground">Automatiza con</span>{" "}
+              <span className="text-primary">Inteligencia Artificial</span>.
+            </h1>
+
+            <p className="mt-6 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
+              Orquesta, ejecuta y monitorea campañas masivas de llamadas con
+              Agentes de IA. La plataforma todo-en-uno para Call Centers y
+              agencias que necesitan escala, seguridad y analítica en tiempo
+              real.
+            </p>
+
+            <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+              <Button
+                asChild
+                size="lg"
+                className="h-12 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
+              >
+                <Link to="/signup" className="inline-flex items-center gap-2">
+                  Empezar ahora
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="h-12 border-border bg-background text-foreground hover:bg-secondary hover:text-foreground"
+              >
+                <Link to="/login">Log In</Link>
+              </Button>
+            </div>
+
+            {/* Trust strip */}
+            <dl className="mt-10 grid max-w-md grid-cols-3 gap-6 border-t border-border pt-6">
+              <Stat value="10M+" label="Llamadas / mes" />
+              <Stat value="99.9%" label="Uptime SLA" />
+              <Stat value="AES-256" label="Encriptación" mono />
+            </dl>
+          </div>
+
+          {/* Visual */}
+          <div className="relative lg:col-span-6">
+            <DashboardMockup />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Stat({
+  value,
+  label,
+  mono = false,
+}: {
+  value: string;
+  label: string;
+  mono?: boolean;
+}) {
+  return (
+    <div>
+      <dt className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+        {label}
+      </dt>
+      <dd
+        className={`mt-1 text-xl font-semibold tracking-tight text-foreground ${
+          mono ? "font-mono text-base" : ""
+        }`}
+      >
+        {value}
+      </dd>
+    </div>
+  );
+}

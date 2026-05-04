@@ -1,19 +1,21 @@
-import { TopAppBar } from "../components/TopAppBar";
-import { HeroSection } from "../components/HeroSection";
-import { FeaturesGrid } from "../components/FeaturesGrid";
-import { HowItWorks } from "../components/HowItWorks";
-import { Footer } from "../components/Footer";
+import { Navbar } from "../components/navbar";
+import { Hero } from "../components/hero";
+import { Features } from "../components/features";
+import { HowItWorks } from "../components/how-it-works";
+import { SocialProof } from "../components/social-proof";
+import { Footer } from "../components/footer";
 
 export function LandingPage() {
   return (
-    <>
-      <TopAppBar />
-      <main className="pt-24">
-        <HeroSection />
-        <FeaturesGrid />
+    <div className="min-h-screen bg-background text-foreground">
+      <Navbar />
+      <main>
+        <Hero />
+        <Features />
         <HowItWorks />
+        <SocialProof />
       </main>
       <Footer />
-    </>
+    </div>
   );
 }
