@@ -1,27 +1,21 @@
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
-
-const LandingPage = () => {
-  return (
-    <div style={{ textAlign: "center", padding: "50px" }}>
-      <h1>Welcome to Call Master AI</h1>
-      <p>The ultimate SaaS for AI Campaign Management.</p>
-      <Link to="/login">
-        <button
-          style={{ padding: "10px 20px", fontSize: "16px", cursor: "pointer" }}
-        >
-          Log In
-        </button>
-      </Link>
-    </div>
-  );
-};
+import { LandingPage } from "./features/landing/pages/LandingPage";
 
 const LoginPage = () => {
   return (
-    <div style={{ textAlign: "center", padding: "50px" }}>
-      <h2>Log In</h2>
-      <p>Authentication form will go here.</p>
-      <Link to="/">← Back to Home</Link>
+    <div className="flex flex-col items-center justify-center min-h-screen">
+      <div className="glass-panel p-12 rounded-3xl ai-glow-border glow-bloom text-center max-w-md w-full mx-auto">
+        <h2 className="font-h2 text-h2 text-white mb-4">Log In</h2>
+        <p className="font-body-md text-on-surface-variant mb-8">
+          Authentication form will go here.
+        </p>
+        <Link
+          to="/"
+          className="text-blue-400 hover:text-blue-300 transition-colors"
+        >
+          ← Back to Home
+        </Link>
+      </div>
     </div>
   );
 };
