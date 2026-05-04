@@ -1,33 +1,28 @@
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LandingPage } from "./features/landing/pages/LandingPage";
-
-const LoginPage = () => {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
-      <div className="glass-panel p-12 rounded-3xl ai-glow-border glow-bloom text-center max-w-md w-full mx-auto">
-        <h2 className="font-h2 text-h2 text-white mb-4">Log In</h2>
-        <p className="font-body-md text-on-surface-variant mb-8">
-          Authentication form will go here.
-        </p>
-        <Link
-          to="/"
-          className="text-blue-400 hover:text-blue-300 transition-colors"
-        >
-          ← Back to Home
-        </Link>
-      </div>
-    </div>
-  );
-};
+import { LoginPage } from "./features/auth/pages/LoginPage";
+import { Toaster } from "./shared/components/ui/toaster";
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<LoginPage />} />
-      </Routes>
-    </BrowserRouter>
+    <>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          {/* Temporary placeholder routes for post-login redirection */}
+          <Route
+            path="/admin/dashboard"
+            element={<div className="p-8">Platform Owner Dashboard</div>}
+          />
+          <Route
+            path="/dashboard"
+            element={<div className="p-8">Tenant Admin Dashboard</div>}
+          />
+        </Routes>
+      </BrowserRouter>
+      <Toaster />
+    </>
   );
 }
 

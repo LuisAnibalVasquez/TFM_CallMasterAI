@@ -48,7 +48,7 @@ export function Features() {
   return (
     <section
       id="features"
-      className="relative border-t border-border bg-background py-20 sm:py-28"
+      className="relative border-t border-border bg-card py-20 sm:py-28"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
@@ -79,8 +79,8 @@ export function Features() {
 
 function FeatureCard({ icon: Icon, title, description, tag }: Feature) {
   return (
-    <article className="group relative flex flex-col rounded-2xl border border-border bg-card p-6 shadow-sm transition-all hover:border-foreground/20 hover:shadow-md">
-      <div className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-secondary ring-1 ring-border">
+    <article className="group relative flex flex-col rounded-2xl border border-border bg-background p-6 shadow-soft transition-all hover:shadow-soft-lg">
+      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-secondary">
         <Icon className="h-5 w-5 text-foreground" strokeWidth={2} />
       </div>
 
@@ -90,7 +90,7 @@ function FeatureCard({ icon: Icon, title, description, tag }: Feature) {
       </p>
 
       <div className="mt-5 flex items-center gap-2 border-t border-border pt-4">
-        <span className="h-1.5 w-1.5 rounded-full bg-accent shadow-[0_0_6px_var(--accent)]" />
+        <span className="h-1.5 w-1.5 rounded-full bg-accent" />
         <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
           {tag}
         </span>

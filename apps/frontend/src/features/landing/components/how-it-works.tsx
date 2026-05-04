@@ -42,19 +42,19 @@ export function HowItWorks() {
         </div>
 
         <ol className="relative mt-16 grid gap-8 lg:grid-cols-3 lg:gap-6">
-          {/* Línea conectora (solo desktop) */}
+          {/* Línea conectora */}
           <div
             aria-hidden="true"
-            className="absolute left-0 right-0 top-7 hidden h-px bg-gradient-to-r from-transparent via-border to-transparent lg:block"
+            className="absolute left-0 right-0 top-7 hidden h-px bg-border lg:block"
           />
 
           {STEPS.map((step) => (
             <li key={step.n} className="relative">
               <div className="flex items-center gap-4">
-                <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-border bg-background shadow-sm">
+                <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-card shadow-soft">
                   <step.icon
                     className="h-6 w-6 text-foreground"
-                    strokeWidth={2}
+                    strokeWidth={1.75}
                   />
                 </div>
                 <span className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">

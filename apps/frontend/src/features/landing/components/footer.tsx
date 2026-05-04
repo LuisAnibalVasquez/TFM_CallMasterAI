@@ -30,14 +30,14 @@ const SOCIAL = [
 
 export function Footer() {
   return (
-    <footer className="relative border-t border-border bg-muted/40">
+    <footer className="relative border-t border-border bg-background">
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
         <div className="grid gap-10 lg:grid-cols-12">
           <div className="lg:col-span-4">
             <Link to="/" className="flex items-center gap-2.5">
-              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/8 ring-1 ring-primary/20">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-foreground">
                 <PhoneCall
-                  className="h-4.5 w-4.5 text-primary"
+                  className="h-4 w-4 text-background"
                   strokeWidth={2.25}
                 />
               </span>
@@ -61,7 +61,7 @@ export function Footer() {
                   <Link
                     to={href}
                     aria-label={label}
-                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground"
+                    className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                   >
                     <Icon className="h-4 w-4" />
                   </Link>
@@ -81,7 +81,7 @@ export function Footer() {
             reservados
           </p>
           <div className="flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-accent shadow-[0_0_6px_var(--accent)] animate-pulse-soft" />
+            <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse-soft" />
             <span className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
               All systems operational
             </span>
@@ -91,7 +91,7 @@ export function Footer() {
         {/* Sello AxionAI */}
         <div className="mt-8 flex items-center justify-center border-t border-border pt-8">
           <p className="text-center font-mono text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
-            Call Master AI <span className="mx-1.5 text-border">/</span> an{" "}
+            Call Master AI <span className="mx-2 text-border">/</span> an{" "}
             <span className="font-semibold text-foreground">AxionAI</span>{" "}
             product
           </p>

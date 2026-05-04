@@ -11,7 +11,7 @@ const NAV_LINKS = [
 
 export function Navbar() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/85 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-card/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link
           to="/"
@@ -19,14 +19,11 @@ export function Navbar() {
           aria-label="Call Master AI — Inicio"
         >
           <span
-            className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-secondary ring-1 ring-border"
+            className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-foreground"
             aria-hidden="true"
           >
-            <PhoneCall
-              className="h-4.5 w-4.5 text-foreground"
-              strokeWidth={2.25}
-            />
-            <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-accent shadow-[0_0_8px_var(--accent)] animate-pulse-soft" />
+            <PhoneCall className="h-4 w-4 text-background" strokeWidth={2.25} />
+            <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-accent ring-2 ring-card animate-pulse-soft" />
           </span>
           <div className="flex flex-col leading-none">
             <span className="text-sm font-semibold tracking-tight text-foreground">
@@ -46,7 +43,7 @@ export function Navbar() {
             <Link
               key={link.href}
               to={link.href}
-              className="rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+              className="rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
             >
               {link.label}
             </Link>

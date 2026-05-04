@@ -1,28 +1,26 @@
 import { Activity, ArrowUpRight, PhoneCall, Users } from "lucide-react";
 
-/**
- * Mockup minimalista de un dashboard flotante (light mode).
- * Pieza de apoyo del Hero — vector puro, sin imágenes externas.
- */
 export function DashboardMockup() {
   return (
     <div
       aria-hidden="true"
-      className="border-gradient relative w-full overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-xl shadow-foreground/5 sm:p-5"
+      className="relative w-full overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-soft-lg sm:p-5"
     >
       {/* Top bar */}
       <div className="flex items-center justify-between border-b border-border pb-3">
         <div className="flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-destructive/60" />
-          <span className="h-2.5 w-2.5 rounded-full bg-accent/60" />
-          <span className="h-2.5 w-2.5 rounded-full bg-primary/60" />
+          <span className="h-2.5 w-2.5 rounded-full bg-muted ring-1 ring-border" />
+          <span className="h-2.5 w-2.5 rounded-full bg-muted ring-1 ring-border" />
+          <span className="h-2.5 w-2.5 rounded-full bg-muted ring-1 ring-border" />
           <span className="ml-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
             campaign / black-friday-2026
           </span>
         </div>
-        <span className="hidden items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-2 py-0.5 font-mono text-[10px] text-accent-foreground sm:flex">
+        <span className="hidden items-center gap-1.5 rounded-full border border-border bg-background px-2.5 py-1 sm:flex">
           <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse-soft" />
-          <span className="text-foreground">LIVE</span>
+          <span className="font-mono text-[10px] uppercase tracking-widest text-foreground">
+            Live
+          </span>
         </span>
       </div>
 
@@ -39,11 +37,11 @@ export function DashboardMockup() {
           label="Conversión"
           value="34.6%"
           delta="+4.1%"
-          accent
+          highlight
         />
         <KpiCard
           icon={<Activity className="h-3.5 w-3.5" />}
-          label="Agentes activos"
+          label="Agentes"
           value="48"
           delta="online"
         />
@@ -60,13 +58,12 @@ export function DashboardMockup() {
               últimas 24 h
             </p>
           </div>
-          <span className="inline-flex items-center gap-1 text-xs font-medium text-primary">
+          <span className="inline-flex items-center gap-1 text-xs font-medium text-accent">
             <ArrowUpRight className="h-3 w-3" />
             +12.4%
           </span>
         </div>
 
-        {/* SVG line chart */}
         <svg
           viewBox="0 0 320 90"
           className="h-20 w-full"
@@ -76,12 +73,8 @@ export function DashboardMockup() {
         >
           <defs>
             <linearGradient id="cmai-area" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor="#3D7BFF" stopOpacity="0.18" />
-              <stop offset="100%" stopColor="#3D7BFF" stopOpacity="0" />
-            </linearGradient>
-            <linearGradient id="cmai-line" x1="0" x2="1" y1="0" y2="0">
-              <stop offset="0%" stopColor="#3D7BFF" />
-              <stop offset="100%" stopColor="#10D9C4" />
+              <stop offset="0%" stopColor="#3366FF" stopOpacity="0.12" />
+              <stop offset="100%" stopColor="#3366FF" stopOpacity="0" />
             </linearGradient>
           </defs>
           <path
@@ -91,7 +84,7 @@ export function DashboardMockup() {
           <path
             d="M0,70 L20,62 L40,66 L60,50 L80,55 L100,40 L120,46 L140,30 L160,38 L180,22 L200,28 L220,18 L240,26 L260,14 L280,20 L300,10 L320,16"
             fill="none"
-            stroke="url(#cmai-line)"
+            stroke="#3366FF"
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -102,8 +95,8 @@ export function DashboardMockup() {
       {/* Live waveform */}
       <div className="mt-3 flex items-center justify-between rounded-xl border border-border bg-background px-4 py-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary ring-1 ring-border">
-            <PhoneCall className="h-3.5 w-3.5 text-foreground" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary">
+            <PhoneCall className="h-4 w-4 text-foreground" />
           </div>
           <div>
             <p className="text-xs font-medium text-foreground">
@@ -136,13 +129,13 @@ function KpiCard({
   label,
   value,
   delta,
-  accent = false,
+  highlight = false,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
   delta: string;
-  accent?: boolean;
+  highlight?: boolean;
 }) {
   return (
     <div className="rounded-xl border border-border bg-background p-3">
@@ -155,7 +148,7 @@ function KpiCard({
       </p>
       <p
         className={`font-mono text-[10px] ${
-          accent ? "text-primary" : "text-muted-foreground"
+          highlight ? "text-accent" : "text-muted-foreground"
         }`}
       >
         {delta}

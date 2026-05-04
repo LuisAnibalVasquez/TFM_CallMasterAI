@@ -6,30 +6,30 @@ import { DashboardMockup } from "./dashboard-mockup";
 export function Hero() {
   return (
     <section className="relative isolate overflow-hidden bg-background">
-      {/* Único halo brand muy tenue, nada más */}
+      {/* Sutil gradiente decorativo */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -top-32 right-1/4 -z-10 h-[420px] w-[420px] rounded-full bg-primary/4 blur-[120px]"
+        className="pointer-events-none absolute -top-40 right-0 -z-10 h-[500px] w-[700px] rounded-full bg-primary/[0.04] blur-[100px]"
       />
 
       <div className="mx-auto max-w-7xl px-4 pb-20 pt-16 sm:px-6 sm:pt-24 lg:px-8 lg:pb-28 lg:pt-32">
-        <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-10">
+        <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-14">
           {/* Copy */}
           <div className="lg:col-span-6">
-            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5">
-              <Sparkles
-                className="h-3.5 w-3.5 text-foreground/70"
-                strokeWidth={2}
-              />
+            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 shadow-soft">
+              <Sparkles className="h-3.5 w-3.5 text-primary" strokeWidth={2} />
               <span className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-                Powered by Voiceflow · Multi-tenant
+                Powered by Voiceflow
               </span>
             </div>
 
             <h1 className="mt-6 text-balance text-4xl font-semibold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
               Escala tus llamadas.{" "}
               <span className="text-muted-foreground">Automatiza con</span>{" "}
-              <span className="text-primary">Inteligencia Artificial</span>.
+              <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                Inteligencia Artificial
+              </span>
+              .
             </h1>
 
             <p className="mt-6 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
@@ -43,7 +43,7 @@ export function Hero() {
               <Button
                 asChild
                 size="lg"
-                className="h-12 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
+                className="h-12 bg-foreground text-background shadow-soft hover:bg-foreground/90"
               >
                 <Link to="/signup" className="inline-flex items-center gap-2">
                   Empezar ahora
