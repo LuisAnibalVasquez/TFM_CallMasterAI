@@ -32,7 +32,9 @@ describe("AuthGuard", () => {
     const context = mockExecutionContext();
 
     await expect(authGuard.canActivate(context)).rejects.toThrow(
-      new UnauthorizedException("Missing or invalid Authorization header"),
+      new UnauthorizedException(
+        "Missing authentication token in cookies or Authorization header",
+      ),
     );
   });
 
@@ -40,7 +42,9 @@ describe("AuthGuard", () => {
     const context = mockExecutionContext("Basic somedata");
 
     await expect(authGuard.canActivate(context)).rejects.toThrow(
-      new UnauthorizedException("Missing or invalid Authorization header"),
+      new UnauthorizedException(
+        "Missing authentication token in cookies or Authorization header",
+      ),
     );
   });
 

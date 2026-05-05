@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Call Master AI - Escala tus llamadas con IA</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Roboto+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary": "#d0bcff",
+                    "on-secondary-fixed-variant": "#5516be",
+                    "on-surface": "#d4e4fa",
+                    "on-secondary": "#3c0091",
+                    "secondary-fixed-dim": "#d0bcff",
+                    "on-secondary-fixed": "#23005c",
+                    "primary-container": "#4d8eff",
+                    "on-tertiary-fixed": "#002113",
+                    "inverse-on-surface": "#233143",
+                    "on-primary": "#002e6a",
+                    "tertiary-fixed-dim": "#4edea3",
+                    "tertiary-fixed": "#6ffbbe",
+                    "error": "#ffb4ab",
+                    "primary-fixed": "#d8e2ff",
+                    "tertiary-container": "#00a572",
+                    "secondary-container": "#571bc1",
+                    "background": "#051424",
+                    "on-primary-fixed-variant": "#004395",
+                    "surface-container-highest": "#273647",
+                    "on-primary-container": "#00285d",
+                    "surface-variant": "#273647",
+                    "secondary-fixed": "#e9ddff",
+                    "surface": "#051424",
+                    "on-primary-fixed": "#001a42",
+                    "on-secondary-container": "#c4abff",
+                    "on-surface-variant": "#c2c6d6",
+                    "inverse-surface": "#d4e4fa",
+                    "tertiary": "#4edea3",
+                    "surface-bright": "#2c3a4c",
+                    "primary": "#adc6ff",
+                    "surface-container-low": "#0d1c2d",
+                    "surface-dim": "#051424",
+                    "on-tertiary-fixed-variant": "#005236",
+                    "outline-variant": "#424754",
+                    "surface-container": "#122131",
+                    "surface-container-lowest": "#010f1f",
+                    "error-container": "#93000a",
+                    "on-error": "#690005",
+                    "on-error-container": "#ffdad6",
+                    "on-tertiary-container": "#00311f",
+                    "primary-fixed-dim": "#adc6ff",
+                    "on-background": "#d4e4fa",
+                    "outline": "#8c909f",
+                    "on-tertiary": "#003824",
+                    "surface-tint": "#adc6ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xl": "64px",
+                    "xs": "4px",
+                    "md": "24px",
+                    "gutter": "24px",
+                    "base": "8px",
+                    "lg": "40px",
+                    "sm": "12px",
+                    "margin": "32px"
+            },
+            "fontFamily": {
+                    "display": ["Plus Jakarta Sans"],
+                    "h3": ["Plus Jakarta Sans"],
+                    "h1": ["Plus Jakarta Sans"],
+                    "technical-sm": ["Roboto Mono"],
+                    "h2": ["Plus Jakarta Sans"],
+                    "body-lg": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "body-sm": ["Plus Jakarta Sans"],
+                    "technical-md": ["Roboto Mono"],
+                    "label-caps": ["Plus Jakarta Sans"]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body {
+            background-color: #051424;
+            color: #d4e4fa;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .glass-panel {
+            background: rgba(18, 33, 49, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .ai-glow-border {
+            position: relative;
+        }
+        .ai-glow-border::after {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(to right, #8B5CF6, #3B82F6);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+        .glow-bloom {
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-slate-950/80 backdrop-blur-md border-b border-white/10 shadow-[0_4px_20px_rgba(59,130,246,0.15)]">
+<nav class="flex justify-between items-center px-6 py-4 max-w-7xl mx-auto">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-blue-500" style="font-variation-settings: 'FILL' 1;">hub</span>
+<span class="text-xl font-bold text-white bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-violet-500 font-['Plus_Jakarta_Sans'] tracking-tight">Call Master AI</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-slate-400 hover:text-white transition-all duration-300 active:scale-95">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+</nav>
+</header>
+<main class="pt-24">
+<!-- Hero Section -->
+<section class="px-6 py-12 flex flex-col items-center text-center relative overflow-hidden">
+<!-- Background Glows -->
+<div class="absolute -top-24 -left-24 w-64 h-64 bg-blue-600/10 blur-[100px] rounded-full"></div>
+<div class="absolute top-1/2 -right-24 w-80 h-80 bg-violet-600/10 blur-[120px] rounded-full"></div>
+<h1 class="font-display text-display mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-slate-400">
+                Escala tus llamadas. Automatiza con Inteligencia Artificial.
+            </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-10 max-w-md mx-auto">
+                La plataforma SaaS definitiva para orquestar campañas masivas con agentes de IA de Voiceflow.
+            </p>
+<div class="flex flex-col gap-4 w-full max-w-xs">
+<button class="bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-transform duration-200">
+                    Empezar ahora
+                </button>
+<button class="border border-outline-variant text-on-surface font-semibold py-4 rounded-xl hover:bg-white/5 transition-all duration-300">
+                    Log In
+                </button>
+</div>
+<div class="mt-16 w-full max-w-md mx-auto">
+<div class="glass-panel rounded-2xl p-4 ai-glow-border glow-bloom">
+<img alt="Call Master AI Dashboard Mockup" class="rounded-lg w-full h-auto opacity-90" data-alt="A sophisticated dark-mode dashboard interface displayed on a sleek mobile device mockup, featuring glowing electric blue and neon violet data nodes connecting in a complex neural network. The lighting is low-key with vibrant emissive glows representing active AI call orchestration processes. The background is a deep obsidian black, emphasizing the minimalist technical aesthetic of the high-fidelity data visualization and analytics cards." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTe2tKJaPuhTFqT2fTkZ5UwsuDMfohXjQw5Guc7Ml-e5kXvpRbkknirX9j97wVTtSHZz2dMEasOsCRSYhv3FWQT5lbE99rA1mF44Vk2robdnQlRFB5OOMfuEyz-jEo9jewl5wkHvKjVkk5CzdCtCIvp2u2aijSS_mghgt2DpQKzMWDfIm5BwAVr6brYXMTLLzK9DYMnJj16bPF_lKOfx_6lKV7xL76DLhKQbbj5t-rDQszxI22dSB-QiH_snOjOnE5XCGK6ELyCe8"/>
+</div>
+</div>
+</section>
+<!-- Social Proof -->
+<section class="py-12 bg-surface-container-lowest/50 border-y border-white/5">
+<p class="text-center font-technical-sm text-slate-500 uppercase tracking-widest mb-8">Powered by Voiceflow &amp; Trusted Partners</p>
+<div class="flex flex-wrap justify-center items-center gap-8 px-6 opacity-40 grayscale">
+<span class="font-bold text-xl text-white">Voiceflow</span>
+<span class="font-technical-md text-white">ORBITAL</span>
+<span class="font-technical-md text-white">SYNTHETIC</span>
+<span class="font-technical-md text-white">NEXUS</span>
+</div>
+</section>
+<!-- Features Bento Grid -->
+<section class="px-6 py-20">
+<div class="mb-12">
+<h2 class="font-h1 text-h1 text-white mb-4">Potencia Cognitiva</h2>
+<div class="h-1 w-20 bg-gradient-to-r from-blue-500 to-violet-500 rounded-full"></div>
+</div>
+<div class="grid grid-cols-1 gap-6">
+<!-- Feature 1 -->
+<div class="glass-panel p-6 rounded-2xl flex flex-col gap-4">
+<div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-blue-400">layers</span>
+</div>
+<div>
+<h3 class="font-h3 text-h3 text-white mb-2">Orquestación masiva</h3>
+<p class="font-body-sm text-on-surface-variant">Gestiona miles de llamadas simultáneas sin esfuerzo con nuestro motor de escalado elástico.</p>
+</div>
+</div>
+<!-- Feature 2 -->
+<div class="glass-panel p-6 rounded-2xl flex flex-col gap-4 ai-glow-border">
+<div class="w-12 h-12 rounded-xl bg-violet-500/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-violet-400">shield</span>
+</div>
+<div>
+<h3 class="font-h3 text-h3 text-white mb-2">Seguridad de grado bancario</h3>
+<p class="font-body-sm text-on-surface-variant">Encriptación de extremo a extremo y protocolos de seguridad robustos para proteger tus datos sensibles.</p>
+</div>
+</div>
+<!-- Feature 3 -->
+<div class="glass-panel p-6 rounded-2xl flex flex-col gap-4">
+<div class="w-12 h-12 rounded-xl bg-tertiary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary">groups</span>
+</div>
+<div>
+<h3 class="font-h3 text-h3 text-white mb-2">Multi-tenant</h3>
+<p class="font-body-sm text-on-surface-variant">Estructura de cuentas flexible y jerárquica diseñada para agencias y grandes empresas.</p>
+</div>
+</div>
+<!-- Feature 4 -->
+<div class="glass-panel p-6 rounded-2xl flex flex-col gap-4">
+<div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-blue-400">analytics</span>
+</div>
+<div>
+<h3 class="font-h3 text-h3 text-white mb-2">Analítica en tiempo real</h3>
+<p class="font-body-sm text-on-surface-variant">Dashboards de alto nivel con métricas precisas para decisiones estratégicas basadas en datos.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- How It Works -->
+<section class="px-6 py-20 bg-surface-container-low/30 relative">
+<h2 class="font-h1 text-h1 text-white text-center mb-16">¿Cómo funciona?</h2>
+<div class="relative flex flex-col gap-12 max-w-xs mx-auto">
+<!-- Vertical Line -->
+<div class="absolute left-[23px] top-4 bottom-4 w-0.5 bg-gradient-to-b from-blue-500/50 via-violet-500/50 to-blue-500/50"></div>
+<!-- Step 1 -->
+<div class="flex gap-6 relative z-10">
+<div class="flex-shrink-0 w-12 h-12 rounded-full bg-slate-900 border border-blue-500/50 flex items-center justify-center text-blue-400 font-bold">1</div>
+<div>
+<h4 class="font-h3 text-h3 text-white mb-1">Sube tu CSV</h4>
+<p class="font-body-sm text-on-surface-variant">Importa tus contactos en segundos con nuestra herramienta inteligente de mapeo de campos.</p>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="flex gap-6 relative z-10">
+<div class="flex-shrink-0 w-12 h-12 rounded-full bg-slate-900 border border-violet-500/50 flex items-center justify-center text-violet-400 font-bold">2</div>
+<div>
+<h4 class="font-h3 text-h3 text-white mb-1">Conecta tu IA</h4>
+<p class="font-body-sm text-on-surface-variant">Integra tus agentes de Voiceflow mediante API con un solo clic para una ejecución inmediata.</p>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="flex gap-6 relative z-10">
+<div class="flex-shrink-0 w-12 h-12 rounded-full bg-slate-900 border border-blue-500/50 flex items-center justify-center text-blue-400 font-bold pulse">3</div>
+<div>
+<h4 class="font-h3 text-h3 text-white mb-1">Monitorea</h4>
+<p class="font-body-sm text-on-surface-variant">Observa los resultados en tiempo real con IA analizando sentimientos y KPIs clave.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- CTA Section -->
+<section class="px-6 py-20">
+<div class="glass-panel p-8 rounded-3xl ai-glow-border glow-bloom text-center">
+<h2 class="font-h2 text-h2 text-white mb-4">¿Listo para transformar tus llamadas?</h2>
+<p class="font-body-md text-on-surface-variant mb-8">Únete a las empresas que ya están automatizando con precisión cognitiva.</p>
+<button class="w-full bg-white text-slate-950 font-bold py-4 rounded-xl active:scale-95 transition-all">
+                    Empieza tu prueba gratis
+                </button>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-slate-950 w-full border-t border-white/10 mt-auto">
+<div class="w-full py-16 px-8 max-w-7xl mx-auto flex flex-col gap-12">
+<div class="flex flex-col gap-6">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-blue-500" style="font-variation-settings: 'FILL' 1;">hub</span>
+<span class="text-lg font-semibold text-white font-['Plus_Jakarta_Sans']">Call Master AI</span>
+</div>
+<p class="text-slate-500 text-sm font-['Plus_Jakarta_Sans'] max-w-xs">
+                    Built for Cognitive Precision. Orchestrate massive call campaigns with human-like AI agents.
+                </p>
+</div>
+<div class="grid grid-cols-2 gap-8">
+<div class="flex flex-col gap-4">
+<p class="font-label-caps text-on-primary-fixed-variant">PRODUCTO</p>
+<nav class="flex flex-col gap-2">
+<a class="font-['Plus_Jakarta_Sans'] text-sm uppercase tracking-widest text-slate-500 hover:text-blue-400 transition-colors" href="#">Massive Orchestration</a>
+<a class="font-['Plus_Jakarta_Sans'] text-sm uppercase tracking-widest text-slate-500 hover:text-blue-400 transition-colors" href="#">Security</a>
+<a class="font-['Plus_Jakarta_Sans'] text-sm uppercase tracking-widest text-slate-500 hover:text-blue-400 transition-colors" href="#">Multi-tenant</a>
+<a class="font-['Plus_Jakarta_Sans'] text-sm uppercase tracking-widest text-slate-500 hover:text-blue-400 transition-colors" href="#">Analytics</a>
+</nav>
+</div>
+<div class="flex flex-col gap-4">
+<p class="font-label-caps text-on-primary-fixed-variant">LEGAL</p>
+<nav class="flex flex-col gap-2">
+<a class="font-['Plus_Jakarta_Sans'] text-sm uppercase tracking-widest text-slate-500 hover:text-blue-400 transition-colors" href="#">Privacy</a>
+<a class="font-['Plus_Jakarta_Sans'] text-sm uppercase tracking-widest text-slate-500 hover:text-blue-400 transition-colors" href="#">Terms</a>
+<a class="font-['Plus_Jakarta_Sans'] text-sm uppercase tracking-widest text-slate-500 hover:text-blue-400 transition-colors" href="#">Cookies</a>
+</nav>
+</div>
+</div>
+<div class="flex justify-between items-center pt-8 border-t border-white/5">
+<p class="font-['Plus_Jakarta_Sans'] text-sm uppercase tracking-widest text-slate-500">© 2024 Call Master AI.</p>
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-slate-500 hover:text-blue-400 transition-colors cursor-pointer">share</span>
+<span class="material-symbols-outlined text-slate-500 hover:text-blue-400 transition-colors cursor-pointer">alternate_email</span>
+</div>
+</div>
+</div>
+</footer>
+</body></html>

@@ -1,9 +1,18 @@
 import { NestFactory } from "@nestjs/core";
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 import { AppModule } from "./app.module";
+import * as cookieParser from "cookie-parser";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.use(cookieParser());
+
+  // Habilitar CORS para que el frontend pueda hacer peticiones
+  app.enableCors({
+    origin: true, // En desarrollo permite todos, en produccion lo limitaremos al dominio de vercel
+    credentials: true,
+  });
 
   // Configuración de Swagger
   const config = new DocumentBuilder()
