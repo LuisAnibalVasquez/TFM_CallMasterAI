@@ -28,6 +28,41 @@ export class SupabaseAuthService {
     return data.user;
   }
 
+  async signIn(email: string, password: string) {
+    const { data, error } = await this.supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error || !data.session) {
+      throw new UnauthorizedException("Invalid credentials");
+    }
+
+    return data.session;
+  }
+
+  async signUp(email: string, password: string) {
+    const { data, error } = await this.supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    if (error || !data.user) {
+      throw new UnauthorizedException(error?.message || "Registration failed");
+    }
+
+    return data;
+  }
+
+  async signOut(token: string) {
+    const { error } = await this.supabase.auth.admin.signOut(token);
+    if (error) {
+      // Just log it or handle it, but typically we want to just invalidate
+      console.warn("Error signing out:", error.message);
+    }
+    return true;
+  }
+
   async getUserProfile(userId: string) {
     // Buscar el perfil y el rol asociado
     const { data, error } = await this.supabase
