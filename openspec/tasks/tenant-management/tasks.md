@@ -34,25 +34,25 @@ Chain strategy: stacked-to-main
 
 - [x] 2.1 Create `apps/backend/src/modules/tenants/domain/entities/tenant.entity.ts` — domain entity with `canBeDeleted()`, `toggleStatus()` validation
 - [x] 2.2 Create `apps/backend/src/modules/tenants/domain/ports/tenant-repository.port.ts` — `ITenantRepository` port interface
-- [ ] 2.3 Modify `apps/backend/src/modules/tenants/application/dto/create-tenant.dto.ts` — add `contactPerson`, `sandboxConfig`, `productionConfig`, `logoUrl` fields with validation
-- [ ] 2.4 Create `apps/backend/src/modules/tenants/application/dto/update-tenant.dto.ts` — status toggle (`active`↔`suspended`), config update DTO
-- [ ] 2.5 Create `apps/backend/src/modules/tenants/application/use-cases/create-tenant.use-case.ts` — orchestrates encryption RPC call, tenant insert, admin user creation, returns temp password once
-- [ ] 2.6 Create `apps/backend/src/modules/tenants/application/use-cases/delete-tenant.use-case.ts` — checks campaign count, rejects with 409 if > 0, deletes if 0
-- [ ] 2.7 Create `apps/backend/src/modules/tenants/application/use-cases/update-tenant.use-case.ts` — status toggle or config update
-- [ ] 2.8 Create `apps/backend/src/modules/tenants/application/use-cases/list-tenants.use-case.ts` — paginated tenant list
+- [x] 2.3 Modify `apps/backend/src/modules/tenants/application/dto/create-tenant.dto.ts` — add `contactPerson`, `sandboxConfig`, `productionConfig`, `logoUrl` fields with validation
+- [x] 2.4 Create `apps/backend/src/modules/tenants/application/dto/update-tenant.dto.ts` — status toggle (`active`↔`suspended`), config update DTO
+- [x] 2.5 Create `apps/backend/src/modules/tenants/application/use-cases/create-tenant.use-case.ts` — orchestrates encryption RPC call, tenant insert, admin user creation, returns temp password once
+- [x] 2.6 Create `apps/backend/src/modules/tenants/application/use-cases/delete-tenant.use-case.ts` — checks campaign count, rejects with 409 if > 0, deletes if 0
+- [x] 2.7 Create `apps/backend/src/modules/tenants/application/use-cases/update-tenant.use-case.ts` — status toggle or config update
+- [x] 2.8 Create `apps/backend/src/modules/tenants/application/use-cases/list-tenants.use-case.ts` — paginated tenant list
 
 ## Phase 3: Backend Controller & Wiring
 
-- [ ] 3.1 Modify `apps/backend/src/modules/tenants/infrastructure/providers/tenants.service.ts` — refactor to delegate to use-cases, add campaign-count guard, status update
-- [ ] 3.2 Modify `apps/backend/src/modules/tenants/application/tenants.controller.ts` — add `PUT`, `DELETE` endpoints (PlatformOwner guarded)
-- [ ] 3.3 Modify `apps/backend/src/modules/tenants/tenants.module.ts` — register `EncryptionService`, import `CampaignsModule`
-- [ ] 3.4 Modify `packages/shared/src/interfaces/tenant.interface.ts` — add `CreateTenantInput`, `UpdateTenantInput` types
+- [x] 3.1 Modify `apps/backend/src/modules/tenants/infrastructure/providers/tenants.service.ts` — refactor to delegate to use-cases, add campaign-count guard, status update
+- [x] 3.2 Modify `apps/backend/src/modules/tenants/application/tenants.controller.ts` — add `PUT`, `DELETE` endpoints (PlatformOwner guarded)
+- [x] 3.3 Modify `apps/backend/src/modules/tenants/tenants.module.ts` — register `EncryptionService`, import `CampaignsModule`
+- [x] 3.4 Modify `packages/shared/src/interfaces/tenant.interface.ts` — add `CreateTenantInput`, `UpdateTenantInput` types
 
 ## Phase 4: Backend Tests
 
-- [ ] 4.1 Unit test: `create-tenant.use-case.spec.ts` — verifies encryption called with plaintext before insert, temp password returned once
-- [ ] 4.2 Unit test: `delete-tenant.use-case.spec.ts` — rejects when campaign count > 0, deletes when count = 0
-- [ ] 4.3 Unit test: `update-tenant.use-case.spec.ts` — toggles status, updates config
+- [x] 4.1 Unit test: `create-tenant.use-case.spec.ts` — verifies encryption called with plaintext before insert, temp password returned once
+- [x] 4.2 Unit test: `delete-tenant.use-case.spec.ts` — rejects when campaign count > 0, deletes when count = 0
+- [x] 4.3 Unit test: `update-tenant.use-case.spec.ts` — toggles status, updates config
 - [ ] 4.4 Integration test: pgcrypto encrypt→store→decrypt roundtrip against real Supabase local instance
 
 ## Phase 5: Frontend Implementation

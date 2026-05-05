@@ -10,4 +10,6 @@ export interface ITenantRepository {
   update(id: string, tenant: Partial<Tenant>): Promise<Tenant>;
   delete(id: string): Promise<void>;
   countCampaigns(tenantId: string): Promise<number>;
+  createAdminUser(email: string, password: string): Promise<{ userId: string }>;
+  linkUserToTenant(userId: string, tenantId: string): Promise<void>;
 }

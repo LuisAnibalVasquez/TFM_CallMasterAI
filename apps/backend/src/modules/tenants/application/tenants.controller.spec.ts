@@ -2,7 +2,9 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { TenantsController } from "./tenants.controller";
 import { TenantsService } from "../infrastructure/providers/tenants.service";
 import { CreateTenantDto } from "./dto/create-tenant.dto";
+import { UpdateTenantDto } from "./dto/update-tenant.dto";
 import { SupabaseAuthService } from "../../auth/infrastructure/providers/supabase-auth.service";
+import { TenantStatus } from "@callmaster/shared";
 
 describe("TenantsController", () => {
   let controller: TenantsController;
@@ -12,6 +14,8 @@ describe("TenantsController", () => {
     const mockTenantsService = {
       createTenant: jest.fn(),
       getAllTenants: jest.fn(),
+      updateTenant: jest.fn(),
+      deleteTenant: jest.fn(),
     };
 
     const mockAuthService = {
@@ -46,6 +50,14 @@ describe("TenantsController", () => {
       const dto: CreateTenantDto = {
         name: "Test Tenant",
         contactEmail: "tenant@test.com",
+        sandboxConfig: {
+          apiUrl: "https://sandbox.voiceflow.com",
+          apiKey: "sk-sandbox",
+        },
+        productionConfig: {
+          apiUrl: "https://api.voiceflow.com",
+          apiKey: "sk-prod",
+        },
       };
 
       const expectedResult = {
@@ -66,14 +78,59 @@ describe("TenantsController", () => {
   });
 
   describe("getAllTenants", () => {
-    it("should call tenantsService.getAllTenants and return list", async () => {
-      const expectedList = [{ id: "1", name: "Tenant 1" }];
+    it("should call tenantsService.getAllTenants with default pagination", async () => {
+      const expectedList = {
+        data: [{ id: "1", name: "Tenant 1" }],
+        total: 1,
+        page: 1,
+        limit: 20,
+      };
       tenantsService.getAllTenants.mockResolvedValue(expectedList as any);
 
       const result = await controller.getAllTenants();
 
-      expect(tenantsService.getAllTenants).toHaveBeenCalled();
+      expect(tenantsService.getAllTenants).toHaveBeenCalledWith(1, 20);
       expect(result).toEqual(expectedList);
+    });
+
+    it("should pass page and limit query params", async () => {
+      tenantsService.getAllTenants.mockResolvedValue({
+        data: [],
+        total: 0,
+        page: 2,
+        limit: 10,
+      } as any);
+
+      await controller.getAllTenants(2, 10);
+
+      expect(tenantsService.getAllTenants).toHaveBeenCalledWith(2, 10);
+    });
+  });
+
+  describe("updateTenant", () => {
+    it("should call tenantsService.updateTenant with id and dto", async () => {
+      const dto: UpdateTenantDto = {
+        name: "Updated Name",
+        status: TenantStatus.SUSPENDED,
+      };
+      const expected = { id: "tenant-1", name: "Updated Name" };
+      tenantsService.updateTenant.mockResolvedValue(expected as any);
+
+      const result = await controller.updateTenant("tenant-1", dto);
+
+      expect(tenantsService.updateTenant).toHaveBeenCalledWith("tenant-1", dto);
+      expect(result).toEqual(expected);
+    });
+  });
+
+  describe("deleteTenant", () => {
+    it("should call tenantsService.deleteTenant with the tenant id", async () => {
+      tenantsService.deleteTenant.mockResolvedValue(undefined);
+
+      const result = await controller.deleteTenant("tenant-1");
+
+      expect(tenantsService.deleteTenant).toHaveBeenCalledWith("tenant-1");
+      expect(result).toBeUndefined();
     });
   });
 });
