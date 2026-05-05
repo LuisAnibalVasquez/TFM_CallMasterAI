@@ -16,27 +16,35 @@ import {
   ApiResponse,
   ApiQuery,
 } from "@nestjs/swagger";
-import { TenantsService } from "../infrastructure/providers/tenants.service";
 import { CreateTenantDto } from "./dto/create-tenant.dto";
 import { UpdateTenantDto } from "./dto/update-tenant.dto";
 import { AuthGuard } from "../../auth/infrastructure/guards/auth.guard";
 import { RolesGuard } from "../../auth/infrastructure/guards/roles.guard";
 import { Roles } from "../../auth/application/decorators/roles.decorator";
 import { UserRole } from "@callmaster/shared";
+import { CreateTenantUseCase } from "./use-cases/create-tenant.use-case";
+import { UpdateTenantUseCase } from "./use-cases/update-tenant.use-case";
+import { ListTenantsUseCase } from "./use-cases/list-tenants.use-case";
+import { DeleteTenantUseCase } from "./use-cases/delete-tenant.use-case";
 
 @ApiTags("tenants")
 @ApiBearerAuth()
 @UseGuards(AuthGuard, RolesGuard)
 @Controller("tenants")
 export class TenantsController {
-  constructor(private readonly tenantsService: TenantsService) {}
+  constructor(
+    private readonly createTenantUseCase: CreateTenantUseCase,
+    private readonly listTenantsUseCase: ListTenantsUseCase,
+    private readonly updateTenantUseCase: UpdateTenantUseCase,
+    private readonly deleteTenantUseCase: DeleteTenantUseCase,
+  ) {}
 
   @Post()
   @Roles(UserRole.PlatformOwner)
   @ApiOperation({ summary: "Create a new Tenant (PlatformOwner only)" })
   @ApiResponse({ status: 201, description: "Tenant and admin user created" })
   async createTenant(@Body() createTenantDto: CreateTenantDto) {
-    return this.tenantsService.createTenant(createTenantDto);
+    return this.createTenantUseCase.execute(createTenantDto);
   }
 
   @Get()
@@ -49,7 +57,7 @@ export class TenantsController {
     @Query("page") page?: number,
     @Query("limit") limit?: number,
   ) {
-    return this.tenantsService.getAllTenants(page || 1, limit || 20);
+    return this.listTenantsUseCase.execute(page || 1, limit || 20);
   }
 
   @Put(":id")
@@ -65,7 +73,7 @@ export class TenantsController {
     @Param("id") id: string,
     @Body() updateTenantDto: UpdateTenantDto,
   ) {
-    return this.tenantsService.updateTenant(id, updateTenantDto);
+    return this.updateTenantUseCase.execute(id, updateTenantDto);
   }
 
   @Delete(":id")
@@ -82,6 +90,6 @@ export class TenantsController {
   })
   @ApiResponse({ status: 404, description: "Tenant not found" })
   async deleteTenant(@Param("id") id: string) {
-    return this.tenantsService.deleteTenant(id);
+    return this.deleteTenantUseCase.execute(id);
   }
 }

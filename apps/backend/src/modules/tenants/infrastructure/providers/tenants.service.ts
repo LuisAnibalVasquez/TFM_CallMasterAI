@@ -1,12 +1,6 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
-import { CreateTenantDto } from "../../application/dto/create-tenant.dto";
-import { UpdateTenantDto } from "../../application/dto/update-tenant.dto";
-import { CreateTenantUseCase } from "../../application/use-cases/create-tenant.use-case";
-import { DeleteTenantUseCase } from "../../application/use-cases/delete-tenant.use-case";
-import { UpdateTenantUseCase } from "../../application/use-cases/update-tenant.use-case";
-import { ListTenantsUseCase } from "../../application/use-cases/list-tenants.use-case";
 import { Tenant } from "../../domain/entities/tenant.entity";
 import { ITenantRepository } from "../../domain/ports/tenant-repository.port";
 
@@ -14,13 +8,7 @@ import { ITenantRepository } from "../../domain/ports/tenant-repository.port";
 export class TenantsService implements ITenantRepository {
   private supabaseAdmin: SupabaseClient;
 
-  constructor(
-    private configService: ConfigService,
-    private createTenantUseCase: CreateTenantUseCase,
-    private deleteTenantUseCase: DeleteTenantUseCase,
-    private updateTenantUseCase: UpdateTenantUseCase,
-    private listTenantsUseCase: ListTenantsUseCase,
-  ) {
+  constructor(private configService: ConfigService) {
     const supabaseUrl = this.configService.get<string>("SUPABASE_URL");
     const serviceRoleKey = this.configService.get<string>("SERVICE_ROLE_KEY");
 
@@ -30,24 +18,6 @@ export class TenantsService implements ITenantRepository {
         persistSession: false,
       },
     });
-  }
-
-  // ─── Public API (called by controller) ───────────────────────────────
-
-  async createTenant(dto: CreateTenantDto) {
-    return this.createTenantUseCase.execute(dto);
-  }
-
-  async getAllTenants(page = 1, limit = 20) {
-    return this.listTenantsUseCase.execute(page, limit);
-  }
-
-  async updateTenant(tenantId: string, dto: UpdateTenantDto) {
-    return this.updateTenantUseCase.execute(tenantId, dto);
-  }
-
-  async deleteTenant(tenantId: string) {
-    return this.deleteTenantUseCase.execute(tenantId);
   }
 
   // ─── ITenantRepository implementation ────────────────────────────────
