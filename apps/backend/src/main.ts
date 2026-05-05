@@ -10,7 +10,7 @@ async function bootstrap() {
 
   // Habilitar CORS para que el frontend pueda hacer peticiones
   app.enableCors({
-    origin: true, // En desarrollo permite todos, en produccion lo limitaremos al dominio de vercel
+    origin: ["http://localhost:5173", "http://127.0.0.1:5173"], // En desarrollo permite Vite local, en producción cambiar a dominio de Vercel
     credentials: true,
   });
 
@@ -31,7 +31,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup("docs", app, document);
 
-  await app.listen(3000);
+  await app.listen(3000, "0.0.0.0");
   console.log(`Application is running on: http://localhost:3000`);
   console.log(`Swagger documentation: http://localhost:3000/docs`);
 }
