@@ -83,7 +83,7 @@ describe("tenantService", () => {
 
     const result = await tenantService.update("1", {
       name: "Updated",
-      status: "suspended",
+      status: TenantStatus.SUSPENDED,
     });
 
     expect(mockPut).toHaveBeenCalledWith("/tenants/1", {
