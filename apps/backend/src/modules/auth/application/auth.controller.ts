@@ -1,7 +1,22 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from "@nestjs/common";
-import { ApiTags, ApiOperation, ApiResponse, ApiBody } from "@nestjs/swagger";
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+  Req,
+} from "@nestjs/common";
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+} from "@nestjs/swagger";
 import { SupabaseAuthService } from "../infrastructure/providers/supabase-auth.service";
 import { AuthCredentialsDto, AuthResponseDto } from "./dto/auth.dto";
+import { AuthGuard } from "../infrastructure/guards/auth.guard";
 
 @ApiTags("auth")
 @Controller("auth")
@@ -41,5 +56,20 @@ export class AuthController {
   })
   async register(@Body() credentials: AuthCredentialsDto) {
     return this.authService.signUp(credentials.email, credentials.password);
+  }
+
+  @Post("logout")
+  @UseGuards(AuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Log out user and invalidate session" })
+  @ApiResponse({ status: 200, description: "Successfully logged out" })
+  @ApiResponse({ status: 401, description: "Unauthorized" })
+  async logout(@Req() request: any) {
+    const token = request.headers.authorization?.split(" ")[1];
+    if (token) {
+      await this.authService.signOut(token);
+    }
+    return { message: "Logged out successfully" };
   }
 }

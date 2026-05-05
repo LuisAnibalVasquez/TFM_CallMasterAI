@@ -6,6 +6,8 @@ import { Label } from "../../../shared/components/ui/label";
 import { Card, CardContent } from "../../../shared/components/ui/card";
 import { useToast } from "../../../shared/hooks/use-toast";
 import { PhoneCall, Loader2 } from "lucide-react";
+import { apiClient, ApiError } from "../../../shared/api/ApiClient";
+import { UserRole } from "@callmaster/shared";
 
 export function LoginPage() {
   const [email, setEmail] = useState("");
@@ -19,19 +21,10 @@ export function LoginPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:3000/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
+      const data = await apiClient.post<any>("/auth/login", {
+        email,
+        password,
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Credenciales inválidas");
-      }
 
       // Store tokens
       localStorage.setItem("access_token", data.access_token);
@@ -45,17 +38,21 @@ export function LoginPage() {
 
       // Redirect based on role
       const userRole = data.user?.role;
-      if (userRole === "PlatformOwner") {
+      if (userRole === UserRole.PlatformOwner) {
         navigate("/admin/dashboard");
+      } else if (userRole === UserRole.TenantAdmin) {
+        navigate("/dashboard");
       } else {
+        // Fallback for unknown roles
         navigate("/dashboard");
       }
     } catch (error: unknown) {
+      const message =
+        error instanceof ApiError ? error.message : "Error desconocido";
       toast({
         variant: "destructive",
         title: "Error de autenticación",
-        description:
-          error instanceof Error ? error.message : "Error desconocido",
+        description: message,
       });
     } finally {
       setIsLoading(false);

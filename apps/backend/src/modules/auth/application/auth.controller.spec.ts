@@ -11,6 +11,9 @@ describe("AuthController", () => {
     const mockAuthService = {
       signIn: jest.fn(),
       signUp: jest.fn(),
+      signOut: jest.fn(),
+      validateToken: jest.fn(),
+      getUserProfile: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -81,6 +84,27 @@ describe("AuthController", () => {
         credentials.password,
       );
       expect(result).toEqual(mockUserResponse);
+    });
+  });
+
+  describe("logout", () => {
+    it("should call authService.signOut and return success message", async () => {
+      authService.signOut.mockResolvedValue(true);
+      const mockRequest = { headers: { authorization: "Bearer valid-token" } };
+
+      const result = await controller.logout(mockRequest);
+
+      expect(authService.signOut).toHaveBeenCalledWith("valid-token");
+      expect(result).toEqual({ message: "Logged out successfully" });
+    });
+
+    it("should return success even if token is missing (though guard would normally catch this)", async () => {
+      const mockRequest = { headers: {} };
+
+      const result = await controller.logout(mockRequest);
+
+      expect(authService.signOut).not.toHaveBeenCalled();
+      expect(result).toEqual({ message: "Logged out successfully" });
     });
   });
 });
