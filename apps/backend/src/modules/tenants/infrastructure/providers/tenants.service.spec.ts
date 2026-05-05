@@ -182,6 +182,7 @@ describe("TenantsService", () => {
             id: "1",
             name: "Tenant 1",
             contact_email: "a@b.com",
+            contact_person: "John Doe",
             status: "active",
             sandbox_config: {},
             production_config: {},
@@ -194,6 +195,27 @@ describe("TenantsService", () => {
       const result = await service.findAll({ page: 1, limit: 20 });
       expect(result.data).toHaveLength(1);
       expect(result.total).toBe(1);
+      expect(result.data[0].contactPerson).toBe("John Doe");
+    });
+
+    it("should map row without contact_person to undefined", async () => {
+      supabaseAdminMock.range.mockResolvedValue({
+        data: [
+          {
+            id: "2",
+            name: "Tenant 2",
+            contact_email: "b@c.com",
+            status: "active",
+            sandbox_config: {},
+            production_config: {},
+          },
+        ],
+        count: 1,
+        error: null,
+      });
+
+      const result = await service.findAll({ page: 1, limit: 20 });
+      expect(result.data[0].contactPerson).toBeUndefined();
     });
   });
 

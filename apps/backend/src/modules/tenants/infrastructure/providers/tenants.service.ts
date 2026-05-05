@@ -60,6 +60,7 @@ export class TenantsService implements ITenantRepository {
         name: tenant.name,
         phone: tenant.phone,
         contact_email: tenant.contactEmail,
+        contact_person: tenant.contactPerson || null,
         logo_url: tenant.logoUrl,
         status: tenant.status,
         sandbox_config: tenant.sandboxConfig,
@@ -123,6 +124,8 @@ export class TenantsService implements ITenantRepository {
     if (delta.phone !== undefined) updatePayload.phone = delta.phone;
     if (delta.contactEmail !== undefined)
       updatePayload.contact_email = delta.contactEmail;
+    if (delta.contactPerson !== undefined)
+      updatePayload.contact_person = delta.contactPerson || null;
     if (delta.logoUrl !== undefined) updatePayload.logo_url = delta.logoUrl;
     if (delta.status !== undefined) updatePayload.status = delta.status;
     if (delta.sandboxConfig !== undefined)
