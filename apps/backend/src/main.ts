@@ -8,9 +8,13 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
-  // Habilitar CORS para que el frontend pueda hacer peticiones
+  // Configurar orígenes permitidos usando variables de entorno para Producción
+  const allowedOrigins = process.env.FRONTEND_URL
+    ? process.env.FRONTEND_URL.split(",")
+    : ["http://localhost:5173", "http://127.0.0.1:5173"];
+
   app.enableCors({
-    origin: ["http://localhost:5173", "http://127.0.0.1:5173"], // En desarrollo permite Vite local, en producción cambiar a dominio de Vercel
+    origin: allowedOrigins,
     credentials: true,
   });
 
