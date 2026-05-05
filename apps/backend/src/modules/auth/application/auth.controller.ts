@@ -4,7 +4,6 @@ import {
   Body,
   HttpCode,
   HttpStatus,
-  UseGuards,
   Req,
   Res,
 } from "@nestjs/common";
@@ -18,7 +17,6 @@ import {
 } from "@nestjs/swagger";
 import { SupabaseAuthService } from "../infrastructure/providers/supabase-auth.service";
 import { AuthCredentialsDto, AuthResponseDto } from "./dto/auth.dto";
-import { AuthGuard } from "../infrastructure/guards/auth.guard";
 
 @ApiTags("auth")
 @Controller("auth")
@@ -73,33 +71,60 @@ export class AuthController {
     status: 400,
     description: "Bad request or registration failed",
   })
-  async register(@Body() credentials: AuthCredentialsDto) {
-    return this.authService.signUp(credentials.email, credentials.password);
+  async register(
+    @Body() credentials: AuthCredentialsDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const { user, session } = await this.authService.signUp(
+      credentials.email,
+      credentials.password,
+    );
+
+    if (session) {
+      // Set HttpOnly cookies
+      const isProduction = process.env.NODE_ENV === "production";
+      response.cookie("access_token", session.access_token, {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: "strict",
+        maxAge: 3600 * 1000, // 1 hour
+      });
+      response.cookie("refresh_token", session.refresh_token, {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: "strict",
+        maxAge: 7 * 24 * 3600 * 1000, // 7 days
+      });
+    }
+
+    return { user };
   }
 
   @Post("logout")
-  @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
   @ApiOperation({ summary: "Log out user and invalidate session" })
   @ApiResponse({ status: 200, description: "Successfully logged out" })
-  @ApiResponse({ status: 401, description: "Unauthorized" })
   async logout(
     @Req() request: any,
     @Res({ passthrough: true }) response: Response,
   ) {
     // Check both cookie and header
     const token =
-      request.cookies?.["access_token"] ||
-      request.headers.authorization?.split(" ")[1];
+      request.cookies?.["access_token"] ??
+      (request.headers.authorization?.startsWith("Bearer ")
+        ? request.headers.authorization.split(" ")[1]
+        : undefined);
 
-    if (token) {
-      await this.authService.signOut(token);
+    try {
+      if (token) {
+        await this.authService.signOut(token);
+      }
+    } finally {
+      // Clear cookies
+      response.clearCookie("access_token");
+      response.clearCookie("refresh_token");
     }
-
-    // Clear cookies
-    response.clearCookie("access_token");
-    response.clearCookie("refresh_token");
 
     return { message: "Logged out successfully" };
   }

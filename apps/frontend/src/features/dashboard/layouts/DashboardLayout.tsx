@@ -19,7 +19,8 @@ export function DashboardLayout() {
     user = null;
   }
 
-  if (!user) {
+  if (!user || typeof user.email !== "string" || user.email.length < 1) {
+    localStorage.removeItem("user");
     // Redirect to login if not authenticated
     return <Navigate to="/login" replace />;
   }

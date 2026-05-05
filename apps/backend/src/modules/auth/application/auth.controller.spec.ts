@@ -79,7 +79,9 @@ describe("AuthController", () => {
 
       authService.signUp.mockResolvedValue(mockUserResponse as any);
 
-      const result = await controller.register(credentials);
+      const mockResponse = { cookie: jest.fn() } as any;
+
+      const result = await controller.register(credentials, mockResponse);
 
       expect(authService.signUp).toHaveBeenCalledWith(
         credentials.email,

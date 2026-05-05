@@ -138,7 +138,7 @@ export function LoginPage() {
                       Iniciando sesión...
                     </>
                   ) : (
-                    "Log In"
+                    "Iniciar sesión"
                   )}
                 </Button>
               </div>
