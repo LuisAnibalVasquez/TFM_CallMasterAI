@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
+import { TenantStatus } from "@callmaster/shared";
 import { TenantList } from "./TenantList";
 
 // Mock the hooks
@@ -75,7 +76,7 @@ describe("TenantList", () => {
           phone: "+1234567890",
           contactEmail: "admin@acme.com",
           contactPerson: "John Doe",
-          status: "active",
+          status: TenantStatus.ACTIVE,
           sandboxConfig: {
             apiUrl: "https://sandbox.api.com",
             encryptedKey: "enc1",
@@ -88,7 +89,7 @@ describe("TenantList", () => {
           phone: "",
           contactEmail: "admin@beta.com",
           contactPerson: undefined,
-          status: "suspended",
+          status: TenantStatus.SUSPENDED,
           sandboxConfig: { apiUrl: "", encryptedKey: "" },
           productionConfig: { apiUrl: "", encryptedKey: "" },
         },

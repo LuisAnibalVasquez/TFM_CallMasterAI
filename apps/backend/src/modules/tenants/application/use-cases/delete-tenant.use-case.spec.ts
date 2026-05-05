@@ -1,5 +1,5 @@
 import { Test, TestingModule } from "@nestjs/testing";
-import { ConflictException } from "@nestjs/common";
+import { ConflictException, NotFoundException } from "@nestjs/common";
 import { DeleteTenantUseCase } from "./delete-tenant.use-case";
 import { ITenantRepository } from "../../domain/ports/tenant-repository.port";
 
@@ -38,7 +38,24 @@ describe("DeleteTenantUseCase", () => {
     jest.clearAllMocks();
   });
 
+  it("should throw NotFoundException if tenant does not exist", async () => {
+    tenantRepository.findById.mockResolvedValue(null);
+
+    await expect(useCase.execute(tenantId)).rejects.toThrow(NotFoundException);
+    await expect(useCase.execute(tenantId)).rejects.toThrow(
+      `Tenant with ID ${tenantId} not found`,
+    );
+
+    expect(tenantRepository.countCampaigns).not.toHaveBeenCalled();
+    expect(tenantRepository.delete).not.toHaveBeenCalled();
+  });
+
   it("should delete the tenant when campaign count is 0", async () => {
+    tenantRepository.findById.mockResolvedValue({
+      id: tenantId,
+      name: "Test",
+      status: "active",
+    } as any);
     tenantRepository.countCampaigns.mockResolvedValue(0);
     tenantRepository.delete.mockResolvedValue(undefined);
 
@@ -49,6 +66,11 @@ describe("DeleteTenantUseCase", () => {
   });
 
   it("should reject deletion when campaign count is greater than 0", async () => {
+    tenantRepository.findById.mockResolvedValue({
+      id: tenantId,
+      name: "Test",
+      status: "active",
+    } as any);
     tenantRepository.countCampaigns.mockResolvedValue(5);
 
     await expect(useCase.execute(tenantId)).rejects.toThrow(ConflictException);
@@ -60,6 +82,11 @@ describe("DeleteTenantUseCase", () => {
   });
 
   it("should reject deletion when campaign count is 1", async () => {
+    tenantRepository.findById.mockResolvedValue({
+      id: tenantId,
+      name: "Test",
+      status: "active",
+    } as any);
     tenantRepository.countCampaigns.mockResolvedValue(1);
 
     await expect(useCase.execute(tenantId)).rejects.toThrow(ConflictException);
@@ -68,6 +95,11 @@ describe("DeleteTenantUseCase", () => {
   });
 
   it("should propagate repository errors during count", async () => {
+    tenantRepository.findById.mockResolvedValue({
+      id: tenantId,
+      name: "Test",
+      status: "active",
+    } as any);
     tenantRepository.countCampaigns.mockRejectedValue(
       new Error("DB connection failed"),
     );
@@ -80,6 +112,11 @@ describe("DeleteTenantUseCase", () => {
   });
 
   it("should propagate repository errors during delete", async () => {
+    tenantRepository.findById.mockResolvedValue({
+      id: tenantId,
+      name: "Test",
+      status: "active",
+    } as any);
     tenantRepository.countCampaigns.mockResolvedValue(0);
     tenantRepository.delete.mockRejectedValue(
       new Error("FK constraint violation"),

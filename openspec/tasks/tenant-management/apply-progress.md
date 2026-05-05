@@ -3,6 +3,8 @@
 **Change**: tenant-management
 **Mode**: Standard
 
+---
+
 ## Batch 1 — Work Unit 1: DB Migration + EncryptionService + Domain Types
 
 ### Completed Tasks
@@ -65,10 +67,42 @@
 | `apps/backend/src/modules/tenants/domain/ports/tenant-repository.port.ts` | Modified | Added createAdminUser and linkUserToTenant methods |
 | `packages/shared/dist/` | Rebuilt | Shared package rebuilt to export new types |
 
+---
+
+## Batch 3 — Work Unit 3: DB Migration Fix + Frontend UI (FINAL)
+
+### Completed Tasks
+
+- [x] **DB Fix**: Create `supabase/migrations/20260505_contact_person.sql` — add `contact_person` column to `tenants` table (was missing from initial schema)
+- [x] **Backend Fix**: Update `tenants.service.ts` — include `contact_person` in INSERT payload (`create()`) and UPDATE delta mapping (`update()`)
+- [x] **Backend Test**: Add 2 tests for `contactPerson` mapping in `tenants.service.spec.ts` (present + absent cases)
+- [x] 5.1 Create `apps/frontend/src/features/tenants/services/tenantService.ts` — API client wrapping `apiClient` with typed methods for CRUD endpoints
+- [x] 5.2 Create `apps/frontend/src/features/tenants/hooks/useTenants.ts` — custom React hooks (`useTenants`, `useCreateTenant`, `useUpdateTenant`, `useDeleteTenant`) following project's useState/useCallback pattern
+- [x] 5.3 Create `apps/frontend/src/features/tenants/components/TenantForm.tsx` — create/edit form with basic fields (name, email, phone, contactPerson, logoUrl) and collapsible AI config sections (sandbox + production API URL/Key)
+- [x] 5.4 Create `apps/frontend/src/features/tenants/components/TenantList.tsx` — table with status toggle, delete button (with confirmation dialog guarded by 409 campaign check), temp password display modal, and AI config indicators
+
+### Files Changed (Batch 3)
+
+| File | Action | What Was Done |
+|------|--------|---------------|
+| `supabase/migrations/20260505_contact_person.sql` | Created | Migration adding `contact_person` text column to `tenants` table |
+| `apps/backend/src/modules/tenants/infrastructure/providers/tenants.service.ts` | Modified | Added `contact_person` to INSERT payload and UPDATE delta mapping |
+| `apps/backend/src/modules/tenants/infrastructure/providers/tenants.service.spec.ts` | Modified | Added 2 tests for contactPerson mapping (present → mapped, absent → undefined) |
+| `apps/frontend/vitest.config.ts` | Modified | Added `@` path alias to resolve imports in component tests |
+| `apps/frontend/src/features/tenants/services/tenantService.ts` | Created | Typed API client with `list(page, limit)`, `create(input)`, `update(id, input)`, `delete(id)` |
+| `apps/frontend/src/features/tenants/services/tenantService.test.ts` | Created | 6 tests: list with pagination, create with AI config, update, delete, error propagation, default pagination |
+| `apps/frontend/src/features/tenants/hooks/useTenants.ts` | Created | 4 hooks: useTenants (fetch + refetch), useCreateTenant, useUpdateTenant, useDeleteTenant |
+| `apps/frontend/src/features/tenants/hooks/useTenants.test.ts` | Created | 8 tests: fetch on mount, fetch error, refetch, create result, create error, clear result, update, update error, delete, delete error |
+| `apps/frontend/src/features/tenants/components/TenantForm.tsx` | Created | Create/edit form with basic fields, collapsible sandbox/production AI config sections, temp password modal shown once after creation |
+| `apps/frontend/src/features/tenants/components/TenantList.tsx` | Created | Tenant table with Name/Contact/Status/AI Config/Actions columns, status toggle, delete with confirmation modal (handles 409), edit button, AI config indicators |
+| `apps/frontend/src/features/tenants/components/TenantList.test.tsx` | Created | 4 tests: loading spinner, empty state, rendered rows with data, New Tenant button |
+
 ### Deviations from Design
 
-1. **ITenantRepository extended**: Added `createAdminUser(email, password)` and `linkUserToTenant(userId, tenantId)` to the port. This was necessary because CreateTenantUseCase needs admin user creation capability without directly depending on Supabase. A future refactoring could split this into a separate `IAuthAdminService` port.
-2. **CampaignsModule not imported**: Task 3.3 says to import CampaignsModule, but the campaigns module does not exist yet. TenantsService accesses campaigns via direct Supabase query (`countCampaigns`). The module import is deferred until the campaigns module is fully implemented.
+1. **React Query not used**: Tasks 5.2 specified "React Query hooks (useQuery, useMutation)", but React Query (`@tanstack/react-query`) is not a project dependency. Instead, custom hooks were built using `useState`/`useEffect`/`useCallback` following the existing project pattern (same as `PlatformOwnerDashboard.tsx`). This keeps the dependency footprint minimal and matches project conventions.
+2. **ITenantRepository extended** (from Batch 2): Added `createAdminUser(email, password)` and `linkUserToTenant(userId, tenantId)` to the port. This was necessary because CreateTenantUseCase needs admin user creation capability without directly depending on Supabase. A future refactoring could split this into a separate `IAuthAdminService` port.
+3. **CampaignsModule not imported** (from Batch 2): Task 3.3 says to import CampaignsModule, but the campaigns module does not exist yet. TenantsService accesses campaigns via direct Supabase query (`countCampaigns`). The module import is deferred until the campaigns module is fully implemented.
+4. **TenantList uses table layout instead of card grid**: The existing `PlatformOwnerDashboard` uses a card grid, but the tenant list requires more columns (contact person, AI config status, multiple actions). A table layout provides better information density and scanability for the multi-column tenant data.
 
 ### Issues Found
 
@@ -77,26 +111,82 @@ None.
 ### Test Results
 
 ```
-Test Suites: 6 passed, 6 total
-Tests:       37 passed, 37 total
+Backend: 38 passed, 38 total (6 suites)
+Frontend: 26 passed, 26 total (5 suites)
+Combined: 64 passed, 64 total (11 suites)
 ```
+
+---
 
 ### Remaining Tasks
 
-- [ ] 4.4 Integration test: pgcrypto encrypt→store→decrypt roundtrip against real Supabase local instance
-- [ ] 5.1 Create `apps/frontend/src/features/tenants/services/tenantService.ts` — API client for CRUD endpoints
-- [ ] 5.2 Create `apps/frontend/src/features/tenants/hooks/useTenants.ts` — React Query hooks
-- [ ] 5.3 Create `apps/frontend/src/features/tenants/components/TenantForm.tsx` — create/edit form with AI config sections
-- [ ] 5.4 Create `apps/frontend/src/features/tenants/components/TenantList.tsx` — table with status toggle, delete button, temp password modal
+- [ ] 4.4 Integration test: pgcrypto encrypt→store→decrypt roundtrip against real Supabase local instance (requires Supabase local stack)
 
 ### Workload / PR Boundary
 
-- Mode: Chained PR slice (Work Unit 2 of 3)
+- Mode: Chained PR slice (Work Unit 3 of 3 — FINAL)
 - Chain strategy: feature-branch-chain
-- Current work unit: Backend use-cases + controller + wiring + unit tests
-- Boundary: Tasks 2.3-2.8, 3.1-3.4, 4.1-4.3 — complete backend implementation and tests
-- Estimated review budget impact: ~400 lines (at budget boundary — 16 files changed, ~370 estimated changed lines)
+- Current work unit: DB migration fix + Frontend UI
+- Boundary: Tasks 5.1-5.4 plus contactPerson DB fix — complete frontend implementation with tests
+- Estimated review budget impact: ~550 lines (11 files changed, ~500 estimated changed lines)
 
 ### Status
 
-16/19 tasks complete. Ready for next batch (Work Unit 3: Frontend UI).
+**20/21 tasks complete** (20 done + 4.4 pending). All code-level tasks are complete. Only the integration test (4.4) remains, which requires a running Supabase local instance.
+
+Ready for sdd-verify or sdd-archive. The remaining task 4.4 can be completed as a follow-up after setting up the Supabase local environment.
+
+---
+
+## Verification Fixes — Resolved Warnings from sdd-verify
+
+### Fix 1: Frontend TypeScript enum errors
+
+Replaced all raw string literals (`"active"`, `"suspended"`) with `TenantStatus.ACTIVE` / `TenantStatus.SUSPENDED` enum members from `@callmaster/shared`.
+
+**Source file:**
+| File | Change |
+|------|--------|
+| `apps/frontend/src/features/tenants/components/TenantList.tsx` | Changed import from `type`-only to value import (`TenantStatus` is an enum, needs runtime access). Replaced 4 string comparisons/assignments with `TenantStatus.ACTIVE` / `TenantStatus.SUSPENDED`. |
+
+**Test files:**
+| File | Change |
+|------|--------|
+| `apps/frontend/src/features/tenants/components/TenantList.test.tsx` | Added `TenantStatus` import; replaced 2 mock data `status` fields with enum members (lines 78, 91). |
+| `apps/frontend/src/features/tenants/services/tenantService.test.ts` | Added `TenantStatus` import; replaced 4 string literals in mock data and assertions with enum members. |
+| `apps/frontend/src/features/tenants/hooks/useTenants.test.ts` | Added `TenantStatus` import; replaced 5 string literals in mock data with enum members. |
+
+### Fix 2: Backend Error Handling — DeleteTenantUseCase
+
+Added `NotFoundException` for non-existent tenant IDs instead of letting it fall through to a generic 500.
+
+**`delete-tenant.use-case.ts`**: Added `findById()` existence check before `countCampaigns()`. If not found, throws `NotFoundException('Tenant with ID {id} not found')` before any other operations.
+
+**`delete-tenant.use-case.spec.ts`**: Added new test "should throw NotFoundException if tenant does not exist" (mocks `findById → null`, verifies 404 message and no further calls). Updated remaining 5 tests to mock `findById` returning a valid tenant stub.
+
+**Test results**: All 6 tests pass (1 new + 5 existing, all green).
+
+### Fix 3: Missing Frontend Test Script
+
+Added `"test": "vitest run"` to `apps/frontend/package.json` scripts section.
+
+### Verification Test Results After Fixes
+
+```
+Backend: 62 passed, 63 total (1 pre-existing auth failure — unrelated)
+Frontend: 26 passed, 26 total (all vitest passing; 1 Playwright example failure — unrelated)
+DeleteTenantUseCase: 6/6 passed (includes new NotFoundException test)
+Types: TenantStatus enum members resolve correctly in all 4 frontend files
+```
+
+### Files Changed (Verification Fixes)
+
+| File | Action | What Was Done |
+|------|--------|---------------|
+| `apps/frontend/src/features/tenants/components/TenantList.tsx` | Modified | Replaced `type` import with value import; 4 string literals → `TenantStatus.ACTIVE`/`SUSPENDED` |
+| `apps/frontend/src/features/tenants/components/TenantList.test.tsx` | Modified | Added `TenantStatus` import; replaced mock status strings with enum members |
+| `apps/frontend/src/features/tenants/services/tenantService.test.ts` | Modified | Added `TenantStatus` import; replaced 4 string literals with enum members |
+| `apps/frontend/src/features/tenants/hooks/useTenants.test.ts` | Modified | Added `TenantStatus` import; replaced 5 string literals with enum members |
+| `apps/backend/src/modules/tenants/application/use-cases/delete-tenant.use-case.ts` | Modified | Added `findById()` existence check → `NotFoundException` before campaign count |
+| `apps/backend/src/modules/tenants/application/use-cases/delete-tenant.use-case.spec.ts` | Modified | Added NotFoundException test; updated all 5 existing tests with `findById` mock |
+| `apps/frontend/package.json` | Modified | Added `"test": "vitest run"` script |

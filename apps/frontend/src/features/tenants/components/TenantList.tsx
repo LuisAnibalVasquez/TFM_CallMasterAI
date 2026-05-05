@@ -26,7 +26,7 @@ import {
   useDeleteTenant,
 } from "../hooks/useTenants";
 import { TenantForm } from "./TenantForm";
-import type { Tenant, TenantStatus } from "@callmaster/shared";
+import { TenantStatus, type Tenant } from "@callmaster/shared";
 
 interface DeleteConfirmation {
   tenantId: string;
@@ -47,7 +47,9 @@ export function TenantList() {
 
   const handleToggleStatus = async (tenant: Tenant) => {
     const newStatus: TenantStatus =
-      tenant.status === "active" ? "suspended" : "active";
+      tenant.status === TenantStatus.ACTIVE
+        ? TenantStatus.SUSPENDED
+        : TenantStatus.ACTIVE;
 
     try {
       await updateTenant(tenant.id, { status: newStatus });
@@ -164,7 +166,7 @@ export function TenantList() {
   // ─── Status Badge ────────────────────────────────────────────────────
 
   const StatusBadge = ({ status }: { status: TenantStatus }) => {
-    const isActive = status === "active";
+    const isActive = status === TenantStatus.ACTIVE;
     return (
       <div className="flex items-center gap-2">
         <span
@@ -349,12 +351,12 @@ export function TenantList() {
                             disabled={isUpdating}
                             onClick={() => handleToggleStatus(tenant)}
                             title={
-                              tenant.status === "active"
+                              tenant.status === TenantStatus.ACTIVE
                                 ? "Suspend tenant"
                                 : "Activate tenant"
                             }
                           >
-                            {tenant.status === "active" ? (
+                            {tenant.status === TenantStatus.ACTIVE ? (
                               <PowerOff className="h-4 w-4 text-amber-500" />
                             ) : (
                               <Power className="h-4 w-4 text-green-500" />

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, waitFor, act } from "@testing-library/react";
+import { TenantStatus } from "@callmaster/shared";
 import {
   useTenants,
   useCreateTenant,
@@ -36,7 +37,7 @@ describe("useTenants", () => {
           name: "Acme",
           phone: "",
           contactEmail: "a@b.com",
-          status: "active",
+          status: TenantStatus.ACTIVE,
           sandboxConfig: { apiUrl: "", encryptedKey: "" },
           productionConfig: { apiUrl: "", encryptedKey: "" },
         },
@@ -97,7 +98,7 @@ describe("useTenants", () => {
           name: "Beta",
           phone: "",
           contactEmail: "b@b.com",
-          status: "active",
+          status: TenantStatus.ACTIVE,
           sandboxConfig: { apiUrl: "", encryptedKey: "" },
           productionConfig: { apiUrl: "", encryptedKey: "" },
         },
@@ -126,7 +127,7 @@ describe("useCreateTenant", () => {
         name: "Acme",
         phone: "",
         contactEmail: "a@b.com",
-        status: "active",
+        status: TenantStatus.ACTIVE,
         sandboxConfig: { apiUrl: "", encryptedKey: "" },
         productionConfig: { apiUrl: "", encryptedKey: "" },
       },
@@ -213,7 +214,7 @@ describe("useUpdateTenant", () => {
     const mockUpdated = {
       id: "1",
       name: "Updated",
-      status: "suspended",
+      status: TenantStatus.SUSPENDED,
     };
     vi.mocked(tenantService.update).mockResolvedValue(mockUpdated as any);
 
@@ -223,7 +224,7 @@ describe("useUpdateTenant", () => {
     await act(async () => {
       returned = await result.current.updateTenant("1", {
         name: "Updated",
-        status: "suspended",
+        status: TenantStatus.SUSPENDED,
       });
     });
 

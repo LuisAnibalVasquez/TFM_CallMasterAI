@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { TenantStatus } from "@callmaster/shared";
 
 // Mock apiClient before importing tenantService
 const mockGet = vi.fn();
@@ -25,7 +26,12 @@ describe("tenantService", () => {
   it("should list tenants with pagination params", async () => {
     const mockResponse = {
       data: [
-        { id: "1", name: "Acme", contactEmail: "a@b.com", status: "active" },
+        {
+          id: "1",
+          name: "Acme",
+          contactEmail: "a@b.com",
+          status: TenantStatus.ACTIVE,
+        },
       ],
       total: 1,
       page: 1,
@@ -68,7 +74,11 @@ describe("tenantService", () => {
   });
 
   it("should update a tenant by ID", async () => {
-    const mockTenant = { id: "1", name: "Updated", status: "suspended" };
+    const mockTenant = {
+      id: "1",
+      name: "Updated",
+      status: TenantStatus.SUSPENDED,
+    };
     mockPut.mockResolvedValue(mockTenant);
 
     const result = await tenantService.update("1", {
@@ -78,7 +88,7 @@ describe("tenantService", () => {
 
     expect(mockPut).toHaveBeenCalledWith("/tenants/1", {
       name: "Updated",
-      status: "suspended",
+      status: TenantStatus.SUSPENDED,
     });
     expect(result).toEqual(mockTenant);
   });
