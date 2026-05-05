@@ -45,15 +45,15 @@ describe("AuthController", () => {
 
       authService.signIn.mockResolvedValue(mockSession as any);
 
-      const result = await controller.login(credentials);
+      const mockResponse = { cookie: jest.fn() } as any;
+
+      const result = await controller.login(credentials, mockResponse);
 
       expect(authService.signIn).toHaveBeenCalledWith(
         credentials.email,
         credentials.password,
       );
       expect(result).toEqual({
-        access_token: "access-token",
-        refresh_token: "refresh-token",
         user: { id: "user-id" },
       });
     });
@@ -64,7 +64,9 @@ describe("AuthController", () => {
         new UnauthorizedException("Invalid credentials"),
       );
 
-      await expect(controller.login(credentials)).rejects.toThrow(
+      const mockResponse = { cookie: jest.fn() } as any;
+
+      await expect(controller.login(credentials, mockResponse)).rejects.toThrow(
         UnauthorizedException,
       );
     });
@@ -91,19 +93,23 @@ describe("AuthController", () => {
     it("should call authService.signOut and return success message", async () => {
       authService.signOut.mockResolvedValue(true);
       const mockRequest = { headers: { authorization: "Bearer valid-token" } };
+      const mockResponse = { clearCookie: jest.fn() } as any;
 
-      const result = await controller.logout(mockRequest);
+      const result = await controller.logout(mockRequest, mockResponse);
 
       expect(authService.signOut).toHaveBeenCalledWith("valid-token");
+      expect(mockResponse.clearCookie).toHaveBeenCalledWith("access_token");
       expect(result).toEqual({ message: "Logged out successfully" });
     });
 
     it("should return success even if token is missing (though guard would normally catch this)", async () => {
       const mockRequest = { headers: {} };
+      const mockResponse = { clearCookie: jest.fn() } as any;
 
-      const result = await controller.logout(mockRequest);
+      const result = await controller.logout(mockRequest, mockResponse);
 
       expect(authService.signOut).not.toHaveBeenCalled();
+      expect(mockResponse.clearCookie).toHaveBeenCalledWith("access_token");
       expect(result).toEqual({ message: "Logged out successfully" });
     });
   });

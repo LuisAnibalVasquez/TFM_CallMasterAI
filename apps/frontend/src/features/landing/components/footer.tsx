@@ -58,13 +58,25 @@ export function Footer() {
             <ul className="mt-6 flex items-center gap-2">
               {SOCIAL.map(({ href, label, icon: Icon }) => (
                 <li key={label}>
-                  <Link
-                    to={href}
-                    aria-label={label}
-                    className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                  >
-                    <Icon className="h-4 w-4" />
-                  </Link>
+                  {href.startsWith("http") ? (
+                    <a
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={label}
+                      className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    >
+                      <Icon className="h-4 w-4" />
+                    </a>
+                  ) : (
+                    <Link
+                      to={href}
+                      aria-label={label}
+                      className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    >
+                      <Icon className="h-4 w-4" />
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>

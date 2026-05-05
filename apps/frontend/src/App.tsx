@@ -12,6 +12,19 @@ function App() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route
+            path="/signup"
+            element={
+              <div className="min-h-screen bg-background flex flex-col justify-center py-12 sm:px-6 lg:px-8 text-center">
+                <h2 className="text-3xl font-semibold tracking-tight">
+                  Solicitud de Acceso
+                </h2>
+                <p className="mt-2 text-muted-foreground">
+                  Página de registro en construcción.
+                </p>
+              </div>
+            }
+          />
 
           <Route element={<DashboardLayout />}>
             <Route

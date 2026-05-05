@@ -2,6 +2,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { TenantsController } from "./tenants.controller";
 import { TenantsService } from "../infrastructure/providers/tenants.service";
 import { CreateTenantDto } from "./dto/create-tenant.dto";
+import { SupabaseAuthService } from "../../auth/infrastructure/providers/supabase-auth.service";
 
 describe("TenantsController", () => {
   let controller: TenantsController;

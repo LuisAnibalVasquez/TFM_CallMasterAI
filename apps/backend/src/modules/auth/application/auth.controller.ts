@@ -6,7 +6,9 @@ import {
   HttpStatus,
   UseGuards,
   Req,
+  Res,
 } from "@nestjs/common";
+import { Response } from "express";
 import {
   ApiTags,
   ApiOperation,
@@ -33,14 +35,31 @@ export class AuthController {
     type: AuthResponseDto,
   })
   @ApiResponse({ status: 401, description: "Invalid credentials" })
-  async login(@Body() credentials: AuthCredentialsDto) {
+  async login(
+    @Body() credentials: AuthCredentialsDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
     const session = await this.authService.signIn(
       credentials.email,
       credentials.password,
     );
+
+    // Set HttpOnly cookies
+    const isProduction = process.env.NODE_ENV === "production";
+    response.cookie("access_token", session.access_token, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: "strict",
+      maxAge: 3600 * 1000, // 1 hour
+    });
+    response.cookie("refresh_token", session.refresh_token, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: "strict",
+      maxAge: 7 * 24 * 3600 * 1000, // 7 days
+    });
+
     return {
-      access_token: session.access_token,
-      refresh_token: session.refresh_token,
       user: session.user,
     };
   }
@@ -65,11 +84,23 @@ export class AuthController {
   @ApiOperation({ summary: "Log out user and invalidate session" })
   @ApiResponse({ status: 200, description: "Successfully logged out" })
   @ApiResponse({ status: 401, description: "Unauthorized" })
-  async logout(@Req() request: any) {
-    const token = request.headers.authorization?.split(" ")[1];
+  async logout(
+    @Req() request: any,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    // Check both cookie and header
+    const token =
+      request.cookies?.["access_token"] ||
+      request.headers.authorization?.split(" ")[1];
+
     if (token) {
       await this.authService.signOut(token);
     }
+
+    // Clear cookies
+    response.clearCookie("access_token");
+    response.clearCookie("refresh_token");
+
     return { message: "Logged out successfully" };
   }
 }

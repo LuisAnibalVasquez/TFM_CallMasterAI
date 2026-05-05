@@ -31,13 +31,21 @@ export class ApiClient {
     endpoint: string,
     params?: Record<string, string | number | boolean>,
   ): string {
-    const url = new URL(`${this.baseUrl}${endpoint}`);
+    const fullUrl = this.baseUrl
+      ? new URL(`${this.baseUrl}${endpoint}`)
+      : new URL(
+          endpoint,
+          typeof window !== "undefined"
+            ? window.location.origin
+            : "http://localhost",
+        );
+
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
-        url.searchParams.append(key, String(value));
+        fullUrl.searchParams.append(key, String(value));
       });
     }
-    return url.toString();
+    return fullUrl.toString();
   }
 
   async request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
@@ -51,6 +59,7 @@ export class ApiClient {
         "Content-Type": "application/json",
         ...headers,
       },
+      credentials: "include", // Use cookies for auth
     };
 
     // Include credentials (cookies) by default for auth endpoints if needed,

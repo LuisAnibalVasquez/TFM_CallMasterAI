@@ -1,4 +1,4 @@
-import { Outlet, Link, useNavigate } from "react-router-dom";
+import { Outlet, Link, useNavigate, Navigate } from "react-router-dom";
 import { useToast } from "../../../shared/hooks/use-toast";
 import { Button } from "../../../shared/components/ui/button";
 import { PhoneCall, LogOut, LayoutDashboard, Building2 } from "lucide-react";
@@ -10,28 +10,26 @@ export function DashboardLayout() {
   const { toast } = useToast();
 
   // Basic auth check
-  const token = localStorage.getItem("access_token");
-  const userStr = localStorage.getItem("user");
-  const user = userStr ? JSON.parse(userStr) : null;
+  let user: { email?: string; role?: UserRole } | null;
+  try {
+    const userStr = localStorage.getItem("user");
+    user = userStr ? JSON.parse(userStr) : null;
+  } catch {
+    localStorage.removeItem("user");
+    user = null;
+  }
 
-  if (!token || !user) {
+  if (!user) {
     // Redirect to login if not authenticated
-    navigate("/login");
-    return null;
+    return <Navigate to="/login" replace />;
   }
 
   const handleLogout = async () => {
     try {
-      await apiClient.post("/auth/logout", undefined, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await apiClient.post("/auth/logout", undefined);
     } catch (error) {
       console.warn("Error during logout API call", error);
     } finally {
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("refresh_token");
       localStorage.removeItem("user");
 
       toast({

@@ -34,14 +34,11 @@ export function PlatformOwnerDashboard() {
   });
 
   const { toast } = useToast();
-  const token = localStorage.getItem("access_token");
 
   const fetchTenants = async () => {
     setIsLoading(true);
     try {
-      const data = await apiClient.get<Tenant[]>("/tenants", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const data = await apiClient.get<Tenant[]>("/tenants");
       setTenants(data);
     } catch (error: any) {
       const message =
@@ -61,15 +58,11 @@ export function PlatformOwnerDashboard() {
     setIsCreating(true);
 
     try {
-      const data = await apiClient.post<any>("/tenants", formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const data = await apiClient.post<any>("/tenants", formData);
 
       toast({
         title: "Tenant creado exitosamente",
-        description: `Usuario: ${data.adminCredentials.email} | Clave: ${data.adminCredentials.temporaryPassword} (Guárdala!)`,
+        description: `Usuario administrador creado: ${data.adminCredentials.email}. (Credenciales enviadas por canal seguro)`,
       });
 
       setShowCreateForm(false);
