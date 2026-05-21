@@ -41,7 +41,8 @@ export class AuthGuard implements CanActivate {
       };
 
       return true;
-    } catch {
+    } catch (error) {
+      console.error("AuthGuard Error:", error);
       throw new UnauthorizedException("Authentication failed");
     }
   }

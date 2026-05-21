@@ -31,14 +31,16 @@ export class ApiClient {
     endpoint: string,
     params?: Record<string, string | number | boolean>,
   ): string {
-    const fullUrl = this.baseUrl
-      ? new URL(`${this.baseUrl}${endpoint}`)
-      : new URL(
-          endpoint,
-          typeof window !== "undefined"
-            ? window.location.origin
-            : "http://localhost",
-        );
+    const basePath = this.baseUrl ? `${this.baseUrl}${endpoint}` : endpoint;
+    const baseOrigin =
+      typeof window !== "undefined"
+        ? window.location.origin
+        : "http://localhost";
+
+    // Si basePath ya es una URL absoluta (ej. http://localhost:3000/api),
+    // new URL(basePath, baseOrigin) la va a tomar bien ignorando el baseOrigin.
+    // Si es relativa (ej. /api), usará baseOrigin.
+    const fullUrl = new URL(basePath, baseOrigin);
 
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
