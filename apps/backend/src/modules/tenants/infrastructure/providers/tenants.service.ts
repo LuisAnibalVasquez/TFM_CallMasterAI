@@ -183,6 +183,40 @@ export class TenantsService implements ITenantRepository {
     }
   }
 
+  async listUsersByTenant(tenantId: string): Promise<string[]> {
+    const { data, error } = await this.supabaseAdmin
+      .from("profiles")
+      .select("id")
+      .eq("tenant_id", tenantId);
+
+    if (error) {
+      throw new InternalServerErrorException(
+        `Failed to list users for tenant: ${error.message}`,
+      );
+    }
+
+    return (data ?? []).map((row: { id: string }) => row.id);
+  }
+
+  async deleteAuthUser(userId: string): Promise<void> {
+    const { error } = await this.supabaseAdmin.auth.admin.deleteUser(userId);
+
+    if (error) {
+      // Idempotent: ignore "User not found" (user may have been manually removed)
+      if (
+        error.message?.includes("not found") ||
+        error.message?.includes("Not Found") ||
+        error.message?.includes("not_found")
+      ) {
+        return;
+      }
+
+      throw new InternalServerErrorException(
+        `Failed to delete auth user: ${error.message}`,
+      );
+    }
+  }
+
   // ─── Helpers ─────────────────────────────────────────────────────────
 
   private mapToTenant(row: any): Tenant {
