@@ -37,25 +37,32 @@ describe("AuthController", () => {
   describe("login", () => {
     it("should return session details on successful login", async () => {
       const credentials = { email: "test@test.com", password: "password123" };
-      const mockSession = {
+      const mockSessionResponse = {
         access_token: "access-token",
         refresh_token: "refresh-token",
         user: { id: "user-id" },
       };
 
-      authService.signIn.mockResolvedValue(mockSession as any);
+      authService.signIn.mockResolvedValue(mockSessionResponse as any);
+      authService.getUserProfile.mockResolvedValue({
+        role: "PlatformOwner",
+      } as any);
 
-      const mockResponse = { cookie: jest.fn() } as any;
+      const mockResponse = { cookie: jest.fn() };
 
-      const result = await controller.login(credentials, mockResponse);
+      const result = await controller.login(credentials, mockResponse as any);
 
       expect(authService.signIn).toHaveBeenCalledWith(
         credentials.email,
         credentials.password,
       );
       expect(result).toEqual({
-        user: { id: "user-id" },
+        user: {
+          ...mockSessionResponse.user,
+          role: "PlatformOwner",
+        },
       });
+      expect(mockResponse.cookie).toHaveBeenCalledTimes(2);
     });
 
     it("should bubble up exceptions from authService.signIn", async () => {
@@ -87,7 +94,7 @@ describe("AuthController", () => {
         credentials.email,
         credentials.password,
       );
-      expect(result).toEqual(mockUserResponse);
+      expect(result).toEqual({ user: mockUserResponse.user });
     });
   });
 
