@@ -2,15 +2,21 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { CampaignsController } from "./campaigns.controller";
 import { CreateCampaignUseCase } from "../../application/use-cases/create-campaign.use-case";
 import { ListCampaignsUseCase } from "../../application/use-cases/list-campaigns.use-case";
+import { StartCampaignUseCase } from "../../application/use-cases/start-campaign.use-case";
+import { CancelCampaignUseCase } from "../../application/use-cases/cancel-campaign.use-case";
 import { Campaign } from "../../domain/entities/campaign.entity";
 import { CanActivate } from "@nestjs/common";
 import { AuthGuard } from "../../../auth/infrastructure/guards/auth.guard";
 import { RolesGuard } from "../../../auth/infrastructure/guards/roles.guard";
+import { CampaignStatus } from "@callmaster/shared";
 
 describe("CampaignsController", () => {
   let controller: CampaignsController;
   let createCampaignUseCase: jest.Mocked<CreateCampaignUseCase>;
   let listCampaignsUseCase: jest.Mocked<ListCampaignsUseCase>;
+  let startCampaignUseCase: jest.Mocked<StartCampaignUseCase>;
+  let cancelCampaignUseCase: jest.Mocked<CancelCampaignUseCase>;
+  let mockRepo: { getTemplateDownloadUrl: jest.Mock };
 
   const mockGuard: CanActivate = { canActivate: jest.fn(() => true) };
 
@@ -21,6 +27,15 @@ describe("CampaignsController", () => {
     listCampaignsUseCase = {
       execute: jest.fn(),
     } as any;
+    startCampaignUseCase = {
+      execute: jest.fn(),
+    } as any;
+    cancelCampaignUseCase = {
+      execute: jest.fn(),
+    } as any;
+    mockRepo = {
+      getTemplateDownloadUrl: jest.fn(),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CampaignsController],
@@ -32,6 +47,18 @@ describe("CampaignsController", () => {
         {
           provide: ListCampaignsUseCase,
           useValue: listCampaignsUseCase,
+        },
+        {
+          provide: StartCampaignUseCase,
+          useValue: startCampaignUseCase,
+        },
+        {
+          provide: CancelCampaignUseCase,
+          useValue: cancelCampaignUseCase,
+        },
+        {
+          provide: "ICampaignRepository",
+          useValue: mockRepo,
         },
       ],
     })
@@ -133,6 +160,83 @@ describe("CampaignsController", () => {
       expect(listCampaignsUseCase.execute).toHaveBeenCalledWith("tenant-1", {
         page: 1,
         limit: 20,
+      });
+    });
+  });
+
+  describe("POST /campaigns/:id/start", () => {
+    const mockRequest = {
+      user: { tenantId: "tenant-1", role: "TenantAdmin" },
+    };
+
+    it("should delegate to StartCampaignUseCase", async () => {
+      const started = new Campaign({
+        id: "c1",
+        tenantId: "tenant-1",
+        name: "Test",
+        status: CampaignStatus.IN_PROGRESS,
+        environment: "Sandbox" as any,
+        csvUrl: "",
+        totalCalls: 10,
+        successfulCalls: 0,
+        failedCalls: 0,
+        totalCost: 0,
+        createdAt: new Date(),
+      });
+      startCampaignUseCase.execute.mockResolvedValue(started);
+
+      const result = await controller.start(mockRequest as any, "c1");
+
+      expect(startCampaignUseCase.execute).toHaveBeenCalledWith({
+        campaignId: "c1",
+        tenantId: "tenant-1",
+      });
+      expect(result.status).toBe(CampaignStatus.IN_PROGRESS);
+    });
+  });
+
+  describe("POST /campaigns/:id/cancel", () => {
+    const mockRequest = {
+      user: { tenantId: "tenant-1", role: "TenantAdmin" },
+    };
+
+    it("should delegate to CancelCampaignUseCase", async () => {
+      const cancelled = new Campaign({
+        id: "c1",
+        tenantId: "tenant-1",
+        name: "Test",
+        status: CampaignStatus.CANCELLED,
+        environment: "Sandbox" as any,
+        csvUrl: "",
+        totalCalls: 10,
+        successfulCalls: 5,
+        failedCalls: 3,
+        totalCost: 7.5,
+        createdAt: new Date(),
+      });
+      cancelCampaignUseCase.execute.mockResolvedValue(cancelled);
+
+      const result = await controller.cancel(mockRequest as any, "c1");
+
+      expect(cancelCampaignUseCase.execute).toHaveBeenCalledWith({
+        campaignId: "c1",
+        tenantId: "tenant-1",
+      });
+      expect(result.status).toBe(CampaignStatus.CANCELLED);
+    });
+  });
+
+  describe("GET /campaigns/template", () => {
+    it("should return a presigned URL for the template bucket", async () => {
+      mockRepo.getTemplateDownloadUrl.mockResolvedValue(
+        "https://storage.supabase.co/template/template.csv?token=abc",
+      );
+
+      const result = await controller.downloadTemplate();
+
+      expect(mockRepo.getTemplateDownloadUrl).toHaveBeenCalled();
+      expect(result).toEqual({
+        url: "https://storage.supabase.co/template/template.csv?token=abc",
       });
     });
   });

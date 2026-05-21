@@ -27,6 +27,9 @@ describe("CreateCampaignUseCase", () => {
       update: jest.fn(),
       bulkInsertCalls: jest.fn(),
       findCallsByCampaign: jest.fn(),
+      updateCall: jest.fn(),
+      redactCalls: jest.fn(),
+      getTemplateDownloadUrl: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({

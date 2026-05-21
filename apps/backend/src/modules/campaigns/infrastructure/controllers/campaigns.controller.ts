@@ -8,6 +8,8 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Param,
+  Inject,
 } from "@nestjs/common";
 import {
   ApiTags,
@@ -15,12 +17,16 @@ import {
   ApiBearerAuth,
   ApiResponse,
   ApiQuery,
+  ApiParam,
 } from "@nestjs/swagger";
 import { AuthGuard } from "../../../auth/infrastructure/guards/auth.guard";
 import { RolesGuard } from "../../../auth/infrastructure/guards/roles.guard";
 import { CreateCampaignDto } from "../../application/dto/create-campaign.dto";
 import { CreateCampaignUseCase } from "../../application/use-cases/create-campaign.use-case";
 import { ListCampaignsUseCase } from "../../application/use-cases/list-campaigns.use-case";
+import { StartCampaignUseCase } from "../../application/use-cases/start-campaign.use-case";
+import { CancelCampaignUseCase } from "../../application/use-cases/cancel-campaign.use-case";
+import { ICampaignRepository } from "../../domain/ports/campaign-repository.port";
 
 @ApiTags("campaigns")
 @ApiBearerAuth()
@@ -30,6 +36,10 @@ export class CampaignsController {
   constructor(
     private readonly createCampaignUseCase: CreateCampaignUseCase,
     private readonly listCampaignsUseCase: ListCampaignsUseCase,
+    private readonly startCampaignUseCase: StartCampaignUseCase,
+    private readonly cancelCampaignUseCase: CancelCampaignUseCase,
+    @Inject("ICampaignRepository")
+    private readonly campaignRepository: ICampaignRepository,
   ) {}
 
   @Post()
@@ -66,5 +76,43 @@ export class CampaignsController {
       page: page || 1,
       limit: limit || 20,
     });
+  }
+
+  @Post(":id/start")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Start a campaign (change status to In-Progress)" })
+  @ApiParam({ name: "id", description: "Campaign ID" })
+  @ApiResponse({ status: 200, description: "Campaign started" })
+  @ApiResponse({ status: 400, description: "Invalid status transition" })
+  @ApiResponse({ status: 404, description: "Campaign not found" })
+  async start(@Request() req: any, @Param("id") id: string) {
+    return this.startCampaignUseCase.execute({
+      campaignId: id,
+      tenantId: req.user.tenantId,
+    });
+  }
+
+  @Post(":id/cancel")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Cancel a campaign (change status to Cancelled)" })
+  @ApiParam({ name: "id", description: "Campaign ID" })
+  @ApiResponse({ status: 200, description: "Campaign cancelled" })
+  @ApiResponse({ status: 400, description: "Invalid status transition" })
+  @ApiResponse({ status: 404, description: "Campaign not found" })
+  async cancel(@Request() req: any, @Param("id") id: string) {
+    return this.cancelCampaignUseCase.execute({
+      campaignId: id,
+      tenantId: req.user.tenantId,
+    });
+  }
+
+  @Get("template")
+  @ApiOperation({
+    summary: "Get a presigned URL for downloading the CSV template",
+  })
+  @ApiResponse({ status: 200, description: "Presigned URL" })
+  async downloadTemplate() {
+    const url = await this.campaignRepository.getTemplateDownloadUrl();
+    return { url };
   }
 }

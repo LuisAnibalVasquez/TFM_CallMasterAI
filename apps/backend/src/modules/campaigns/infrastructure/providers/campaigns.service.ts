@@ -170,6 +170,70 @@ export class CampaignsService implements ICampaignRepository {
     return (data || []).map((row: any) => this.mapToCall(row));
   }
 
+  async updateCall(
+    callId: string,
+    delta: Partial<CallRecord>,
+  ): Promise<CallRecord> {
+    const updatePayload: Record<string, unknown> = {};
+
+    if (delta.status !== undefined) updatePayload.status = delta.status;
+    if (delta.duration !== undefined) updatePayload.duration = delta.duration;
+    if (delta.cost !== undefined) updatePayload.cost = delta.cost;
+    if (delta.voiceflowTranscriptId !== undefined)
+      updatePayload.voiceflow_transcript_id = delta.voiceflowTranscriptId;
+
+    const { data, error } = await this.supabaseAdmin
+      .from("calls")
+      .update(updatePayload)
+      .eq("id", callId)
+      .select()
+      .single();
+
+    if (error || !data) {
+      throw new InternalServerErrorException(
+        `Failed to update call: ${error?.message || "Call not found"}`,
+      );
+    }
+
+    return this.mapToCall(data);
+  }
+
+  async redactCalls(campaignId: string): Promise<number> {
+    const { error, count } = await this.supabaseAdmin
+      .from("calls")
+      .update(
+        {
+          customer_name: "[redacted]",
+          phone_encrypted: "[redacted]",
+          phone_hash: "[redacted]",
+        },
+        { count: "exact" },
+      )
+      .eq("campaign_id", campaignId);
+
+    if (error) {
+      throw new InternalServerErrorException(
+        `Failed to redact calls: ${error.message}`,
+      );
+    }
+
+    return count ?? 0;
+  }
+
+  async getTemplateDownloadUrl(): Promise<string> {
+    const { data, error } = await this.supabaseAdmin.storage
+      .from("template")
+      .createSignedUrl("template.csv", 300); // 5-minute expiry
+
+    if (error || !data?.signedUrl) {
+      throw new InternalServerErrorException(
+        `Failed to generate template URL: ${error?.message || "Unknown error"}`,
+      );
+    }
+
+    return data.signedUrl;
+  }
+
   // ─── Pure helpers ──────────────────────────────────────────────────
 
   private mapToCampaign(row: any): Campaign {
