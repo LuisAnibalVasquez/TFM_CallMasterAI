@@ -1,0 +1,49 @@
+import { Injectable } from "@nestjs/common";
+import {
+  IAgentProvider,
+  CallResponse,
+} from "../../domain/ports/agent-provider.port";
+import { Client } from "../../domain/entities/client.entity";
+
+@Injectable()
+export class VoiceflowProvider implements IAgentProvider {
+  async triggerCall(
+    client: Client,
+    config: { apiUrl: string; apiKey: string },
+  ): Promise<CallResponse> {
+    try {
+      // In a real scenario, we would use axios or fetch here
+      // const response = await fetch(config.apiUrl, {
+      //   method: 'POST',
+      //   headers: {
+      //     Authorization: config.apiKey,
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify({
+      //     action: 'trigger',
+      //     payload: {
+      //       customer_name: client.name,
+      //       customer_phone: client.phone,
+      //       customer_age: client.age,
+      //       customer_language: client.language,
+      //     },
+      //   }),
+      // });
+
+      console.log(
+        `[VoiceflowProvider] Triggering call for ${client.name} at ${client.phone} using ${config.apiUrl}`,
+      );
+
+      // Simulating a successful trigger
+      return {
+        success: true,
+        externalId: `vf_${crypto.randomUUID()}`,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  }
+}

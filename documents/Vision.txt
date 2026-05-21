@@ -1,0 +1,55 @@
+
+En este primer audio se definirá a muy alto nivel la plataforma que se quiere desarrollar. La plataforma se llamará Call Master AI y será una plataforma potenciada con inteligencia artificial que permita suplantar los analistas en un call center. 
+
+El objetivo principal es que se suplante el analista humano que se encarga de hacer la llamada y tomar la respuesta que da el cliente. La plataforma está pensada para ser multitennant. Será una plataforma web, aunque no se descarta un componente móvil, más que todo para monitorización a nivel gerencial de los tenants. 
+
+
+La plataforma tendrá como funcionalidades básicas 
+
+
+La creación de campañas. Una campaña es básicamente un listado de clientes del tenant, los cuales serán contactados vía telefónica para ofrecer un producto o un servicio.
+
+Las llamadas que se pueden hacer pueden ser de varios tipos, el producto está pensado para ser ofrecido a varios tipos de empresas. Pueden ser ofrecidos a empresas de telecomunicaciones, por ejemplo, cuando quieren ofrecer productos y servicios a sus clientes. También pueden ser ofrecidos a empresas de tipo compre ahora y pague después para participar a sus clientes las deudas que tienen. 
+
+
+Eso es básicamente lo que es una campaña. Las campañas serán controladas única y exclusivamente por los tenants, los cuales tendrán que suministrar el listado de clientes, el listado de sus clientes a los cuales serán contactados y el guion, es decir, lo que se le va a decir a ese cliente. 
+
+
+La plataforma bajo ningún concepto tiene que hacer negociaciones o hacer ningún tipo de acuerdo con el cliente en nombre del tenant. Siempre la plataforma solamente se encarga de ejecutar la llamada, seguir el guion y tomar la interacción que se tenga con cada uno de los clientes. 
+
+Las campañas serán creadas, iniciadas y/o canceladas por cada uno de los tenants, los tennats serán creados en la plataforma por el platform owner, el dueño de la plataforma. En este sentido, y para esta primera versión, lo que se pretende es que el platform owner cree los tenants. Básicamente, será el nombre de la compañía, el correo, el nombre de la persona contacto, el usuario, el teléfono de esa persona y se creará un user password para que el tenant pueda ingresar a la plataforma para crear las campañas. 
+
+En la vista del platform owner, debe tener una vista de todos los tenants que tienen activos, todas las campañas que ese tenant ha desarrollado, en qué estatus y en qué porcentaje de eficiencia. Aparte del gasto, ya que hasta los momentos a esta plataforma será ofrecida como un software como servicio y se cobrará hasta los momentos, por llamadas completadas. 
+
+Dado que el proveedor de agente de inteligencia artificial, el que realiza la llamada, también le cobrará al platform owner por llamadas realizadas, aparte de otros gastos a nivel de vista, el platform owner podrá crear tenant, suspender tenant, cancelar tenant. En dado caso, puede suspender campañas si es que por alguna razón el tenant no puede crear, pero esto es en casos extremos que el platform owner pueda cancelar la ejecución de una campaña de un tenant. Eso va a ser en casos demasiado extremos. Aparte de que también podrá tener una vista de lo que son las deudas acaecidas por ese por ese tenant.
+
+
+Los cobros que se le han realizado, las deudas que tenga ese tenant y decidirá si el tenant puede o no puede crear más campañas si tiene deuda o no.   por otro lado, el tenant cuando ingresa a la plataforma, su vista le permitirá crear campaña. Para crear una campaña solamente tiene que definir el nombre de la campaña. Tiene que suministrar un archivo principal,   primeramente será un archivo CSV, en el cual debe proveer el listado de los nombres de sus clientes con su número telefónico. Por otro lado, por cada campaña debe el tenant debe proveer un guion que el agente hablará con cada uno de sus clientes. entre otras cosas, entre otras opciones el tenant podrá crear una campaña, iniciar una campaña, que es cuando se inician las llamadas, cancelar si es que se están haciendo las llamadas o simplemente cancelar la campaña. Cuando se decide cancelar una campaña, si hay llamadas en ejecución, se cuelgan, no se hacen, se completan, no se hacen más llamadas y ya esa campaña se marca como cancelada. también el tenant, a nivel de tenant podrá tener una vista resumen de cuáles son sus campañas que ha realizado,   a cuántos clientes se llamó en cada una de las campañas, cuántos contestaron, cuántos no contestaron,   cuál fue la tasa de éxito y todo lo demás. 
+
+
+
+
+
+Estoy pensando en varios dominios funcionales para la aplicación. 
+
+Uno de los dominios funcionales tendrá que ver con la seguridad, con autorización y autenticación. Esto ya sea para el platform owner o para el tenant.   indudablemente, el tenant tendrá una vista aparte, un landing aparte al que vaya a ver  el platform owner.   entre las funcionalidades que podrán tener este dominio funcional será lo que es el login como tal, verificar si un usuario está activo y si tiene credenciales válidas y la recuperación de contraseña, en dado caso de que alguno de los usuarios, ya sea tenant o el mismo platform owner,   pierda la contraseña. Aparte de que también puede hacer recuperación de contraseña y puede hacer cambio de contraseña una vez que está dentro. Esto dentro del dominio funcional.   entre otras características, estoy pensando ya a nivel técnico que se utilice JSON Web Token, que se utilice bastante tecnología del lado de seguridad, ya que no quiero ningún tipo de filtración de, de key, no quiero ningún tipo de ataques de fuerza bruta. la plataforma tiene que ser segura en, en toda su extensión..
+
+
+
+
+
+La plataforma tendrá dos formas  de uso a nivel de tenant. El tenant podrá ingresar a la plataforma con sus datos de usuario y contraseña, podrá subir, crear la nueva campaña, subir el listado de clientes y subir el guion e iniciar la campaña, es decir, iniciar las llamadas. También la plataforma debe proveer una API que puede ser integrada por el tenant directamente en sus aplicaciones. La forma como se crea una campaña, tanto en la web como en la API, debe ser exactamente igual. Estoy pensando que sea como un ciclo. Primero se crea la campaña,   se sube el listado, se sube el guion y después se inicia, se le da el a la campaña como tal. Estoy pensando de que sean cuatro servicios, cuatro endpoint que se llamen, ya sea por la aplicación, por la plataforma o que sean llamadas vía integración.
+
+Otro de los dominios funcionales que estoy pensando es el del tenant management. Esto es para que el platform owner pueda crear y pueda administrar sus tenants, pueda crearlos, pueda,   activarlos, desactivarlos, modificar datos, incluso crear más de un usuario para un tenant, ya que un tenant puede tener más de un usuario, en dado caso de que tengan varias personas que sean las encargadas de ejecutar las campañas. También hay que evaluar, lo que se refiere a la API key, porque cuando el tenant ingresa a la plataforma para crear y ejecutar una campaña,   no es lo mismo que hacerlo por vía integración. Entonces, estoy pensando de que el tenant pueda crear algo así como un API key, como usan los cloud providers y que después, cuando el tenant quiera integrar la plataforma de CallMaster AI, lo haga invocando unas APIs que van a estar expuestas por medio de un API key. Eso es lo que estoy pensando.
+
+
+Otro de los dominios funcionales que estoy pensando es el de administración de las campañas. Esto será solamente a nivel de tenant. Un tenant podrá crear una campaña, iniciar una campaña, cancelar una campaña si es que está en ejecución, pero no podrá borrar una campaña ya completada, ya que esto, esto forma parte de su analítica entre los datos para la campaña será el nombre para la campaña, la fecha en la que se está creando, el listado de clientes a los cuales se le va a hacer la llamada y lo que es el guion, es decir, lo que el agente va a decir.
+
+
+Por otro lado,   de alguna forma hay que,   almacenar de forma temporal, o por ahora será de forma permanente, en la plataforma el resultado de todas esas llamadas. De tal forma de que si el tenant quiere ver o auditar una llamada en específico, pueda buscar la campaña en la que se hizo, el cliente al que se llamó y pueda ver la interacción que tuvo el agente con el cliente a nivel de auditoría. Entonces, también se tiene que poder almacenar el resultado de la llamada.     indudablemente, las campañas, como lo había estado conversando, las campañas se pueden hacer ya sea por la plataforma web o vía integración. Para los dos casos tiene que funcionar de la misma forma y se van a solicitar los mismos datos. Hay que evaluar,   cómo sería el flujo, cómo sería el proceso de crear e iniciar una campaña cuando se está haciendo vía integración. Entonces, este, hay que evaluar técnicamente cómo, cómo se puede hacer eso. 
+
+Hay un tercer dominio funcional que sería la sección de analítica, la cual es transversal para el platform owner como para el, el tenant. Lo único es que no verán las mismas cosas, pero sí, sí gozarán de una, de una, de una sección de analítica. Para el platform owner,   podrá ver cuáles son las campañas que se han hecho, los clientes más activos,   los clientes que tienen campañas en ejecución, los clientes que han creado campañas o que hayan cancelado campañas. Aparte de que se tiene que evaluar con el proveedor de inteligencia artificial que se va a usar para hacer las llamadas, si hay alguna forma de yo poder tener estadísticas de cuántas, cuántas llamadas se hicieron, cuánto tardó la llamada,   cómo fue la llamada, cómo fue la interacción de la llamada, este, el porcentaje de recepción, si la llamada fue contestada, si no fue contestada, si fue colgada  cosas por el estilo. 
+
+Y de, de la misma forma, el tenant podrá tener unas analíticas, pero solamente de las campañas que él posee.  y algunos otros KPI, relevantes para él que, que maneje la industria, como velocidad a la que se responde o cuánto la duración de la campaña. No sé si habrá alguna forma de determinar el sentimiento del cliente cuando estuvo hablando con inteligencia artificial. No sé si habrá alguna forma de, de, de poder determinar si cliente,   mostró un poco de incomodidad cuando hablaba con el agente de inteligencia artificial.   
+
+
