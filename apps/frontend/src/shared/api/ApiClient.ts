@@ -25,7 +25,10 @@ export class ApiClient {
         : "/api";
 
     // Force proxy usage in local development even if Vite cached the old .env var
-    if (defaultUrl === "http://localhost:3000") {
+    if (
+      defaultUrl.includes("localhost:3000") ||
+      defaultUrl.includes("127.0.0.1:3000")
+    ) {
       defaultUrl = "/api";
     }
 
@@ -97,7 +100,12 @@ export class ApiClient {
         return {} as T;
       }
 
-      return (await response.json()) as T;
+      const text = await response.text();
+      if (!text) {
+        return {} as T;
+      }
+
+      return JSON.parse(text) as T;
     } catch (error) {
       if (error instanceof ApiError) {
         throw error;

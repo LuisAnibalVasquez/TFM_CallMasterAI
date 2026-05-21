@@ -16,6 +16,7 @@ export interface Tenant {
   contactPerson?: string;
   logoUrl?: string;
   status: TenantStatus;
+  campaignCount: number;
   sandboxConfig: AIProviderConfig;
   productionConfig: AIProviderConfig;
 }

@@ -49,6 +49,7 @@ export class CreateTenantUseCase {
       contactPerson: dto.contactPerson,
       logoUrl: dto.logoUrl,
       status: TenantStatus.ACTIVE,
+      campaignCount: 0,
       sandboxConfig: {
         apiUrl: dto.sandboxConfig.apiUrl,
         encryptedKey: encryptedSandboxKey,
