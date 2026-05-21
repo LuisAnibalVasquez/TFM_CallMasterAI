@@ -30,8 +30,8 @@ export function LoginPage() {
       localStorage.setItem("user", JSON.stringify(data.user));
 
       toast({
-        title: "¡Bienvenido de nuevo!",
-        description: "Autenticación exitosa. Redirigiendo...",
+        title: "Welcome back!",
+        description: "Authentication successful. Redirecting...",
       });
 
       // Redirect based on role
@@ -46,10 +46,10 @@ export function LoginPage() {
       }
     } catch (error: unknown) {
       const message =
-        error instanceof ApiError ? error.message : "Error desconocido";
+        error instanceof ApiError ? error.message : "Unknown error";
       toast({
         variant: "destructive",
-        title: "Error de autenticación",
+        title: "Authentication Error",
         description: message,
       });
     } finally {
@@ -69,7 +69,7 @@ export function LoginPage() {
           </span>
         </Link>
         <h2 className="mt-6 text-center text-3xl font-semibold tracking-tight text-foreground">
-          Ingresa a tu cuenta
+          Sign in to your account
         </h2>
       </div>
 
@@ -78,7 +78,7 @@ export function LoginPage() {
           <CardContent className="pt-6">
             <form className="space-y-6" onSubmit={handleLogin}>
               <div className="space-y-2">
-                <Label htmlFor="email">Correo electrónico</Label>
+                <Label htmlFor="email">Email address</Label>
                 <div className="mt-1">
                   <Input
                     id="email"
@@ -96,13 +96,13 @@ export function LoginPage() {
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Contraseña</Label>
+                  <Label htmlFor="password">Password</Label>
                   <div className="text-sm">
                     <a
                       href="#"
                       className="font-medium text-primary hover:text-primary/90 hover:underline"
                     >
-                      ¿Olvidaste tu contraseña?
+                      Forgot your password?
                     </a>
                   </div>
                 </div>
@@ -126,10 +126,10 @@ export function LoginPage() {
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Iniciando sesión...
+                      Signing in...
                     </>
                   ) : (
-                    "Iniciar sesión"
+                    "Sign in"
                   )}
                 </Button>
               </div>

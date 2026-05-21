@@ -34,8 +34,8 @@ export function DashboardLayout() {
       localStorage.removeItem("user");
 
       toast({
-        title: "Sesión finalizada",
-        description: "Has cerrado sesión correctamente.",
+        title: "Session ended",
+        description: "You have successfully logged out.",
       });
 
       navigate("/login");
@@ -59,7 +59,7 @@ export function DashboardLayout() {
 
         <div className="p-4 flex-1">
           <p className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-            Menú Principal
+            Main Menu
           </p>
           <nav className="space-y-1">
             <Link
@@ -101,7 +101,7 @@ export function DashboardLayout() {
             onClick={handleLogout}
           >
             <LogOut className="mr-2 h-4 w-4" />
-            Cerrar sesión
+            Sign out
           </Button>
         </div>
       </aside>
@@ -111,8 +111,8 @@ export function DashboardLayout() {
         <header className="h-16 border-b border-border bg-background flex items-center px-8 justify-between shrink-0">
           <h1 className="text-xl font-semibold">
             {user.role === UserRole.PlatformOwner
-              ? "Administración Global"
-              : "Dashboard de Tenant"}
+              ? "Global Administration"
+              : "Tenant Dashboard"}
           </h1>
         </header>
         <div className="flex-1 overflow-auto p-8">
