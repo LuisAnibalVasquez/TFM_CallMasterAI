@@ -16,30 +16,30 @@ type Feature = {
 const FEATURES: Feature[] = [
   {
     icon: Network,
-    title: "Orquestación masiva",
+    title: "Massive orchestration",
     description:
-      "Lanza miles de llamadas simultáneas con balanceo automático, reintentos inteligentes y colas priorizadas por campaña.",
+      "Launch thousands of simultaneous calls with automatic load balancing, smart retries, and prioritized campaign queues.",
     tag: "scale.engine",
   },
   {
     icon: ShieldCheck,
-    title: "Seguridad de grado bancario",
+    title: "Bank-grade security",
     description:
-      "Encriptación AES-256 en reposo, TLS 1.3 en tránsito y aislamiento de datos sensibles. Cumplimiento SOC 2 e ISO 27001.",
+      "AES-256 encryption at rest, TLS 1.3 in transit, and sensitive data isolation. SOC 2 and ISO 27001 compliance.",
     tag: "security.core",
   },
   {
     icon: Building2,
-    title: "Multi-tenant nativo",
+    title: "Native multi-tenant",
     description:
-      "Arquitectura aislada por organización con roles granulares, white-label y facturación independiente por cliente.",
+      "Isolated architecture per organization with granular roles, white-label, and independent billing per client.",
     tag: "tenants.isolated",
   },
   {
     icon: BarChart3,
-    title: "Analítica en tiempo real",
+    title: "Real-time analytics",
     description:
-      "Dashboards con KPIs vivos: tasa de conexión, conversión, sentimiento y costo por llamada. Exporta a tu BI favorito.",
+      "Dashboards with live KPIs: connection rate, conversion, sentiment, and cost per call. Export to your favorite BI.",
     tag: "analytics.live",
   },
 ];
@@ -53,17 +53,17 @@ export function Features() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <span className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-            // Características
+            // Features
           </span>
           <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-            Una sola plataforma.{" "}
+            One single platform.{" "}
             <span className="text-muted-foreground">
-              Toda la operación de tu Call Center.
+              Your entire Call Center operation.
             </span>
           </h2>
           <p className="mt-5 text-pretty text-base leading-relaxed text-muted-foreground">
-            Diseñada para agencias y operadores que necesitan escalar sin
-            sacrificar control, seguridad ni visibilidad.
+            Designed for agencies and operators that need to scale without
+            sacrificing control, security, or visibility.
           </p>
         </div>
 

@@ -18,10 +18,11 @@ export function SocialProof() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
           <span className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-            // Confianza
+            // Trust
           </span>
           <p className="mt-3 text-base text-muted-foreground sm:text-lg">
-            Operadores y agencias en LATAM ya escalan sus campañas con
+            Operators and agencies in LATAM are already scaling their campaigns
+            with
             <span className="text-foreground font-medium"> Call Master AI</span>
             .
           </p>
@@ -29,7 +30,7 @@ export function SocialProof() {
 
         {/* Logos */}
         <ul
-          aria-label="Empresas que confían en Call Master AI"
+          aria-label="Companies that trust Call Master AI"
           className="mt-10 grid grid-cols-2 items-center gap-3 sm:grid-cols-3 lg:grid-cols-6"
         >
           {LOGOS.map((name) => (
@@ -65,9 +66,9 @@ export function SocialProof() {
           <figure className="rounded-2xl bg-background p-6 shadow-soft lg:col-span-3">
             <Quote className="h-5 w-5 text-muted-foreground/50" />
             <blockquote className="mt-3 text-pretty text-sm leading-relaxed text-foreground sm:text-base">
-              &ldquo;Pasamos de 200 a 14.000 llamadas diarias sin contratar más
-              agentes. La orquestación y la analítica de Call Master AI son
-              decisivas para nuestra operación.&rdquo;
+              &ldquo;We went from 200 to 14,000 daily calls without hiring more
+              agents. Call Master AI's orchestration and analytics are decisive
+              for our operation.&rdquo;
             </blockquote>
             <figcaption className="mt-4 flex items-center gap-3 border-t border-border pt-4">
               <div className="h-9 w-9 rounded-full bg-secondary" />
