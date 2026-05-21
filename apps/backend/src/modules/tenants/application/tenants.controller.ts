@@ -8,6 +8,8 @@ import {
   Param,
   Query,
   UseGuards,
+  HttpCode,
+  HttpStatus,
 } from "@nestjs/common";
 import {
   ApiTags,
@@ -77,6 +79,7 @@ export class TenantsController {
   }
 
   @Delete(":id")
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Roles(UserRole.PlatformOwner)
   @ApiOperation({
     summary: "Delete a Tenant (PlatformOwner only)",

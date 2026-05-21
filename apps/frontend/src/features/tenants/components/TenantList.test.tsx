@@ -159,7 +159,7 @@ describe("TenantList", () => {
         "Cannot delete tenant with existing campaigns",
       );
       expect(deleteButton).toBeDefined();
-      expect(deleteButton).toBeDisabled();
+      expect((deleteButton as HTMLButtonElement).disabled).toBe(true);
     });
   });
 
@@ -188,7 +188,7 @@ describe("TenantList", () => {
     await waitFor(() => {
       const deleteButton = screen.getByTitle("Delete tenant");
       expect(deleteButton).toBeDefined();
-      expect(deleteButton).not.toBeDisabled();
+      expect((deleteButton as HTMLButtonElement).disabled).toBe(false);
     });
   });
 
@@ -218,13 +218,13 @@ describe("TenantList", () => {
       const deleteButton = screen.getByTitle(
         "Cannot delete tenant with existing campaigns",
       );
-      expect(deleteButton).toBeDisabled();
+      expect((deleteButton as HTMLButtonElement).disabled).toBe(true);
     });
 
     // Click the disabled button — should not trigger the confirmation dialog
     screen.getByTitle("Cannot delete tenant with existing campaigns");
     // A disabled button's onClick is blocked by the browser.
     // Verify the confirmation dialog text is NOT present.
-    expect(screen.queryByText("Confirm Deletion")).not.toBeInTheDocument();
+    expect(screen.queryByText("Confirm Deletion")).toBeNull();
   });
 });
