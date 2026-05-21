@@ -100,7 +100,12 @@ export class ApiClient {
         return {} as T;
       }
 
-      return (await response.json()) as T;
+      const text = await response.text();
+      if (!text) {
+        return {} as T;
+      }
+
+      return JSON.parse(text) as T;
     } catch (error) {
       if (error instanceof ApiError) {
         throw error;
