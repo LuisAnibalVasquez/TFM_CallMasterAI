@@ -12,4 +12,6 @@ export interface ITenantRepository {
   countCampaigns(tenantId: string): Promise<number>;
   createAdminUser(email: string, password: string): Promise<{ userId: string }>;
   linkUserToTenant(userId: string, tenantId: string): Promise<void>;
+  listUsersByTenant(tenantId: string): Promise<string[]>;
+  deleteAuthUser(userId: string): Promise<void>;
 }

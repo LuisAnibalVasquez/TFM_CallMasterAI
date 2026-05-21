@@ -19,6 +19,8 @@ describe("DeleteTenantUseCase", () => {
       countCampaigns: jest.fn(),
       createAdminUser: jest.fn(),
       linkUserToTenant: jest.fn(),
+      listUsersByTenant: jest.fn(),
+      deleteAuthUser: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -57,11 +59,13 @@ describe("DeleteTenantUseCase", () => {
       status: "active",
     } as any);
     tenantRepository.countCampaigns.mockResolvedValue(0);
+    tenantRepository.listUsersByTenant.mockResolvedValue([]);
     tenantRepository.delete.mockResolvedValue(undefined);
 
     await useCase.execute(tenantId);
 
     expect(tenantRepository.countCampaigns).toHaveBeenCalledWith(tenantId);
+    expect(tenantRepository.listUsersByTenant).toHaveBeenCalledWith(tenantId);
     expect(tenantRepository.delete).toHaveBeenCalledWith(tenantId);
   });
 
@@ -118,6 +122,7 @@ describe("DeleteTenantUseCase", () => {
       status: "active",
     } as any);
     tenantRepository.countCampaigns.mockResolvedValue(0);
+    tenantRepository.listUsersByTenant.mockResolvedValue([]);
     tenantRepository.delete.mockRejectedValue(
       new Error("FK constraint violation"),
     );
@@ -125,5 +130,100 @@ describe("DeleteTenantUseCase", () => {
     await expect(useCase.execute(tenantId)).rejects.toThrow(
       "FK constraint violation",
     );
+  });
+
+  describe("Auth user cascade on delete", () => {
+    it("should delete all Auth users before deleting the tenant", async () => {
+      tenantRepository.findById.mockResolvedValue({
+        id: tenantId,
+        name: "Test",
+        status: "active",
+      } as any);
+      tenantRepository.countCampaigns.mockResolvedValue(0);
+      tenantRepository.listUsersByTenant.mockResolvedValue([
+        "user-1",
+        "user-2",
+        "user-3",
+      ]);
+      tenantRepository.deleteAuthUser.mockResolvedValue(undefined);
+      tenantRepository.delete.mockResolvedValue(undefined);
+
+      await useCase.execute(tenantId);
+
+      expect(tenantRepository.listUsersByTenant).toHaveBeenCalledWith(tenantId);
+      expect(tenantRepository.deleteAuthUser).toHaveBeenCalledTimes(3);
+      expect(tenantRepository.deleteAuthUser).toHaveBeenCalledWith("user-1");
+      expect(tenantRepository.deleteAuthUser).toHaveBeenCalledWith("user-2");
+      expect(tenantRepository.deleteAuthUser).toHaveBeenCalledWith("user-3");
+      expect(tenantRepository.delete).toHaveBeenCalledWith(tenantId);
+    });
+
+    it("should still delete tenant when tenant has no associated users", async () => {
+      tenantRepository.findById.mockResolvedValue({
+        id: tenantId,
+        name: "Test",
+        status: "active",
+      } as any);
+      tenantRepository.countCampaigns.mockResolvedValue(0);
+      tenantRepository.listUsersByTenant.mockResolvedValue([]);
+      tenantRepository.delete.mockResolvedValue(undefined);
+
+      await useCase.execute(tenantId);
+
+      expect(tenantRepository.listUsersByTenant).toHaveBeenCalledWith(tenantId);
+      expect(tenantRepository.deleteAuthUser).not.toHaveBeenCalled();
+      expect(tenantRepository.delete).toHaveBeenCalledWith(tenantId);
+    });
+
+    it("should abort deletion and NOT delete tenant when Auth user deletion fails", async () => {
+      tenantRepository.findById.mockResolvedValue({
+        id: tenantId,
+        name: "Test",
+        status: "active",
+      } as any);
+      tenantRepository.countCampaigns.mockResolvedValue(0);
+      tenantRepository.listUsersByTenant.mockResolvedValue([
+        "user-1",
+        "user-2",
+      ]);
+      tenantRepository.deleteAuthUser.mockResolvedValueOnce(undefined);
+      tenantRepository.deleteAuthUser.mockRejectedValueOnce(
+        new Error("Network failure"),
+      );
+
+      await expect(useCase.execute(tenantId)).rejects.toThrow(
+        "Network failure",
+      );
+
+      expect(tenantRepository.delete).not.toHaveBeenCalled();
+      expect(tenantRepository.deleteAuthUser).toHaveBeenCalledTimes(2);
+    });
+
+    it("should abort and NOT delete remaining users when one Auth deletion fails", async () => {
+      tenantRepository.findById.mockResolvedValue({
+        id: tenantId,
+        name: "Test",
+        status: "active",
+      } as any);
+      tenantRepository.countCampaigns.mockResolvedValue(0);
+      tenantRepository.listUsersByTenant.mockResolvedValue([
+        "user-1",
+        "user-2",
+        "user-3",
+      ]);
+      // First user deleted OK, second fails
+      tenantRepository.deleteAuthUser.mockResolvedValueOnce(undefined);
+      tenantRepository.deleteAuthUser.mockRejectedValueOnce(
+        new Error("Auth service unavailable"),
+      );
+
+      await expect(useCase.execute(tenantId)).rejects.toThrow(
+        "Auth service unavailable",
+      );
+
+      // Third user should NOT be attempted
+      expect(tenantRepository.deleteAuthUser).toHaveBeenCalledTimes(2);
+      expect(tenantRepository.delete).not.toHaveBeenCalled();
+    });
   });
 });

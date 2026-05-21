@@ -44,6 +44,8 @@ describe("UpdateTenantUseCase", () => {
       countCampaigns: jest.fn(),
       createAdminUser: jest.fn(),
       linkUserToTenant: jest.fn(),
+      listUsersByTenant: jest.fn(),
+      deleteAuthUser: jest.fn(),
     };
 
     encryptionService = {
