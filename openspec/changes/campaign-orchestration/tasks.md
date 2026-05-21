@@ -12,7 +12,7 @@
 
 Decision needed before apply: Yes
 Chained PRs recommended: Yes
-Chain strategy: pending
+Chain strategy: feature-branch-chain (Work Unit 2 applied)
 400-line budget risk: High
 
 ### Suggested Work Units
@@ -33,17 +33,17 @@ Chain strategy: pending
 ## Phase 2: Backend API Layer
 
 - [x] 2.1 Create `campaigns.repository.ts` in `campaigns/infrastructure/providers/` with CRUD for campaigns and calls
-- [x] 2.2 Create use cases: `create-campaign.use-case.ts`, ~~`start-campaign.use-case.ts`~~, ~~`cancel-campaign.use-case.ts`~~, `list-campaigns.use-case.ts` (start/cancel deferred to next work unit)
-- [x] 2.3 Create `campaigns.controller.ts` with REST endpoints: GET /campaigns, POST /campaigns (start/cancel/template deferred to next work unit)
+- [x] 2.2 Create use cases: `create-campaign.use-case.ts`, `start-campaign.use-case.ts`, `cancel-campaign.use-case.ts`, `list-campaigns.use-case.ts`
+- [x] 2.3 Create `campaigns.controller.ts` with REST endpoints: GET /campaigns, POST /campaigns, POST /campaigns/:id/start, POST /campaigns/:id/cancel, GET /campaigns/template
 - [x] 2.4 Update `campaigns.module.ts` to register controller, repository, use cases
 - [x] 2.5 Add `CampaignsModule` to `AppModule`
 
 ## Phase 3: Inngest Orchestration
 
-- [ ] 3.1 Create `campaigns-inngest.module.ts` with Inngest client configured for dev server (port 8288) and cloud production endpoint
-- [ ] 3.2 Create `campaign-processing.function.ts`: fetch calls → sequential loop (concurrency 1) → invoke VoiceflowProvider → update call records → compute snapshot → update campaign status → emit `campaign.completed`
-- [ ] 3.3 Create `campaign-purge.function.ts`: redact `customer_name`, `phone_encrypted`, `phone_hash` for all calls in the completed campaign
-- [ ] 3.4 Add npm script `inngest:dev` to backend `package.json`
+- [x] 3.1 Create `campaigns-inngest.module.ts` with Inngest client configured for dev server (port 8288) and cloud production endpoint
+- [x] 3.2 Create `campaign-processing.function.ts`: fetch calls → sequential loop (concurrency 1) → invoke VoiceflowProvider → update call records → compute snapshot → update campaign status → emit `campaign.completed`
+- [x] 3.3 Create `campaign-purge.function.ts`: redact `customer_name`, `phone_encrypted`, `phone_hash` for all calls in the completed campaign
+- [x] 3.4 Add npm script `inngest:dev` to backend `package.json`
 
 ## Phase 4: Frontend
 
@@ -56,8 +56,8 @@ Chain strategy: pending
 ## Phase 5: Testing
 
 - [ ] 5.1 Unit tests for `create-campaign.use-case` (valid CSV rows stored, invalid phone rejected)
-- [ ] 5.2 Unit tests for `start-campaign.use-case` (status transition, Inngest event emitted)
-- [ ] 5.3 Unit tests for `cancel-campaign.use-case` (status transition, no purge)
-- [ ] 5.4 Unit tests for `campaign-processing.function` (sequential processing, snapshot computation)
-- [ ] 5.5 Unit tests for `campaign-purge.function` (redaction of Name, Phone fields)
+- [x] 5.2 Unit tests for `start-campaign.use-case` (status transition, Inngest event emitted)
+- [x] 5.3 Unit tests for `cancel-campaign.use-case` (status transition, no purge)
+- [x] 5.4 Unit tests for `campaign-processing.function` (sequential processing, snapshot computation)
+- [x] 5.5 Unit tests for `campaign-purge.function` (redaction of Name, Phone fields)
 - [ ] 5.6 Integration test: full lifecycle (create → start → process → complete → purge → verify redacted)

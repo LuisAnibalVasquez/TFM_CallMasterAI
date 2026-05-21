@@ -265,4 +265,100 @@ describe("CampaignsService", () => {
       expect(result).toHaveLength(0);
     });
   });
+
+  describe("updateCall", () => {
+    it("should update a call record and return the updated call", async () => {
+      const updatedCallRow = {
+        ...mockCallRow,
+        status: "completed",
+        duration: 180,
+        cost: "3.50",
+        voiceflow_transcript_id: "vf-abc123",
+      };
+
+      supabaseAdminMock.single.mockResolvedValue({
+        data: updatedCallRow,
+        error: null,
+      });
+
+      const result = await service.updateCall("call-1", {
+        status: "completed",
+        duration: 180,
+        cost: 3.5,
+        voiceflowTranscriptId: "vf-abc123",
+      });
+
+      expect(result.status).toBe("completed");
+      expect(result.duration).toBe(180);
+      expect(result.cost).toBe(3.5);
+      expect(result.voiceflowTranscriptId).toBe("vf-abc123");
+      expect(supabaseAdminMock.from).toHaveBeenCalledWith("calls");
+      expect(supabaseAdminMock.update).toHaveBeenCalled();
+    });
+
+    it("should throw InternalServerErrorException when update fails", async () => {
+      supabaseAdminMock.single.mockResolvedValue({
+        data: null,
+        error: { message: "Call not found" },
+      });
+
+      await expect(
+        service.updateCall("nonexistent", { status: "completed" }),
+      ).rejects.toThrow(InternalServerErrorException);
+    });
+  });
+
+  describe("redactCalls", () => {
+    it("should redact sensitive fields for all calls in a campaign", async () => {
+      supabaseAdminMock.update.mockReturnThis();
+      supabaseAdminMock.eq.mockResolvedValue({
+        data: null,
+        error: null,
+        count: 5,
+      });
+
+      const result = await service.redactCalls("campaign-1");
+
+      expect(result).toBe(5);
+      expect(supabaseAdminMock.from).toHaveBeenCalledWith("calls");
+      expect(supabaseAdminMock.update).toHaveBeenCalledWith(
+        {
+          customer_name: "[redacted]",
+          phone_encrypted: "[redacted]",
+          phone_hash: "[redacted]",
+        },
+        { count: "exact" },
+      );
+      expect(supabaseAdminMock.eq).toHaveBeenCalledWith(
+        "campaign_id",
+        "campaign-1",
+      );
+    });
+
+    it("should return 0 when no calls exist for the campaign", async () => {
+      supabaseAdminMock.update.mockReturnThis();
+      supabaseAdminMock.eq.mockResolvedValue({
+        data: null,
+        error: null,
+        count: 0,
+      });
+
+      const result = await service.redactCalls("campaign-empty");
+
+      expect(result).toBe(0);
+    });
+
+    it("should throw InternalServerErrorException when redact fails", async () => {
+      supabaseAdminMock.update.mockReturnThis();
+      supabaseAdminMock.eq.mockResolvedValue({
+        data: null,
+        error: { message: "DB error" },
+        count: null,
+      });
+
+      await expect(service.redactCalls("campaign-1")).rejects.toThrow(
+        InternalServerErrorException,
+      );
+    });
+  });
 });
