@@ -18,13 +18,18 @@ export class ApiClient {
 
   constructor(baseUrl?: string) {
     // VITE_API_URL should be defined in .env files
-    // Fallback to empty string for relative paths if neither is provided
     // Using typeof check to prevent ReferenceError in non-vite test environments
-    const defaultUrl =
+    let defaultUrl =
       typeof import.meta !== "undefined" && import.meta.env
         ? import.meta.env.VITE_API_URL
-        : "";
-    this.baseUrl = baseUrl || defaultUrl || "";
+        : "/api";
+
+    // Force proxy usage in local development even if Vite cached the old .env var
+    if (defaultUrl === "http://localhost:3000") {
+      defaultUrl = "/api";
+    }
+
+    this.baseUrl = baseUrl || defaultUrl || "/api";
   }
 
   private buildUrl(
