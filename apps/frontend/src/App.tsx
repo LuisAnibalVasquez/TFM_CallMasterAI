@@ -3,6 +3,8 @@ import { LandingPage } from "./features/landing/pages/LandingPage";
 import { LoginPage } from "./features/auth/pages/LoginPage";
 import { DashboardLayout } from "./features/dashboard/layouts/DashboardLayout";
 import { PlatformOwnerDashboard } from "./features/dashboard/pages/PlatformOwnerDashboard";
+import { TenantAdminDashboard } from "./features/dashboard/pages/TenantAdminDashboard";
+import { TenantsPage } from "./features/tenants/pages/TenantsPage";
 import { Toaster } from "./shared/components/ui/toaster";
 
 function App() {
@@ -31,14 +33,8 @@ function App() {
               path="/admin/dashboard"
               element={<PlatformOwnerDashboard />}
             />
-            <Route
-              path="/dashboard"
-              element={
-                <div className="glass-panel p-8 rounded-2xl">
-                  Tenant Admin Dashboard - Coming Soon
-                </div>
-              }
-            />
+            <Route path="/admin/tenants" element={<TenantsPage />} />
+            <Route path="/dashboard" element={<TenantAdminDashboard />} />
           </Route>
         </Routes>
       </BrowserRouter>
