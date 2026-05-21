@@ -366,13 +366,18 @@ export function TenantList() {
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8"
+                            disabled={tenant.campaignCount > 0}
                             onClick={() =>
                               setDeleteConfirm({
                                 tenantId: tenant.id,
                                 tenantName: tenant.name,
                               })
                             }
-                            title="Delete tenant"
+                            title={
+                              tenant.campaignCount > 0
+                                ? "Cannot delete tenant with existing campaigns"
+                                : "Delete tenant"
+                            }
                           >
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>

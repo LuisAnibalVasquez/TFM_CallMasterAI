@@ -71,7 +71,7 @@ export class TenantsService implements ITenantRepository {
 
     const { data, error, count } = await this.supabaseAdmin
       .from("tenants")
-      .select("*", { count: "exact" })
+      .select("*, campaigns(count)", { count: "exact" })
       .order("created_at", { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -194,6 +194,7 @@ export class TenantsService implements ITenantRepository {
       contactPerson: row.contact_person,
       logoUrl: row.logo_url,
       status: row.status,
+      campaignCount: row.campaigns?.[0]?.count ?? 0,
       sandboxConfig: row.sandbox_config as any,
       productionConfig: row.production_config as any,
     });

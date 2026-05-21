@@ -24,6 +24,7 @@ describe("UpdateTenantUseCase", () => {
     contactPerson: "John Doe",
     logoUrl: "https://acme.com/logo.png",
     status: TenantStatus.ACTIVE,
+    campaignCount: 0,
     sandboxConfig: {
       apiUrl: "https://sandbox.voiceflow.com",
       encryptedKey: "old-encrypted-sandbox",
