@@ -7,7 +7,7 @@ import {
   Req,
   Res,
 } from "@nestjs/common";
-import { Response } from "express";
+import { Request, Response } from "express";
 import {
   ApiTags,
   ApiOperation,
@@ -42,6 +42,9 @@ export class AuthController {
       credentials.password,
     );
 
+    // Fetch custom profile to get the role
+    const profile = await this.authService.getUserProfile(session.user.id);
+
     // Set HttpOnly cookies
     const isProduction = process.env.NODE_ENV === "production";
     response.cookie("access_token", session.access_token, {
@@ -58,7 +61,10 @@ export class AuthController {
     });
 
     return {
-      user: session.user,
+      user: {
+        ...session.user,
+        role: profile.role,
+      },
     };
   }
 
@@ -106,7 +112,7 @@ export class AuthController {
   @ApiOperation({ summary: "Log out user and invalidate session" })
   @ApiResponse({ status: 200, description: "Successfully logged out" })
   async logout(
-    @Req() request: any,
+    @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ) {
     // Check both cookie and header

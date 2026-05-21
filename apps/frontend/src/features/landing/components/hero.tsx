@@ -24,19 +24,18 @@ export function Hero() {
             </div>
 
             <h1 className="mt-6 text-balance text-4xl font-semibold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-              Escala tus llamadas.{" "}
-              <span className="text-muted-foreground">Automatiza con</span>{" "}
+              Scale your calls.{" "}
+              <span className="text-muted-foreground">Automate with</span>{" "}
               <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                Inteligencia Artificial
+                Artificial Intelligence
               </span>
               .
             </h1>
 
             <p className="mt-6 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Orquesta, ejecuta y monitorea campañas masivas de llamadas con
-              Agentes de IA. La plataforma todo-en-uno para Call Centers y
-              agencias que necesitan escala, seguridad y analítica en tiempo
-              real.
+              Orchestrate, execute, and monitor massive call campaigns with AI
+              Agents. The all-in-one platform for Call Centers and agencies that
+              need scale, security, and real-time analytics.
             </p>
 
             <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
@@ -46,7 +45,7 @@ export function Hero() {
                 className="h-12 bg-foreground text-background shadow-soft hover:bg-foreground/90"
               >
                 <Link to="/signup" className="inline-flex items-center gap-2">
-                  Empezar ahora
+                  Get Started
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
@@ -62,9 +61,9 @@ export function Hero() {
 
             {/* Trust strip */}
             <dl className="mt-10 grid max-w-md grid-cols-3 gap-6 border-t border-border pt-6">
-              <Stat value="10M+" label="Llamadas / mes" />
+              <Stat value="10M+" label="Calls / month" />
               <Stat value="99.9%" label="Uptime SLA" />
-              <Stat value="AES-256" label="Encriptación" mono />
+              <Stat value="AES-256" label="Encryption" mono />
             </dl>
           </div>
 

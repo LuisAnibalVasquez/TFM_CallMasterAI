@@ -28,20 +28,20 @@ export function DashboardMockup() {
       <div className="mt-4 grid grid-cols-3 gap-3">
         <KpiCard
           icon={<PhoneCall className="h-3.5 w-3.5" />}
-          label="Llamadas"
+          label="Calls"
           value="12,847"
           delta="+18.2%"
         />
         <KpiCard
           icon={<Users className="h-3.5 w-3.5" />}
-          label="Conversión"
+          label="Conversion"
           value="34.6%"
           delta="+4.1%"
           highlight
         />
         <KpiCard
           icon={<Activity className="h-3.5 w-3.5" />}
-          label="Agentes"
+          label="Agents"
           value="48"
           delta="online"
         />
@@ -51,11 +51,9 @@ export function DashboardMockup() {
       <div className="mt-4 rounded-xl border border-border bg-background p-4">
         <div className="mb-3 flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-foreground">
-              Llamadas / hora
-            </p>
+            <p className="text-xs font-medium text-foreground">Calls / hour</p>
             <p className="font-mono text-[10px] text-muted-foreground">
-              últimas 24 h
+              last 24 h
             </p>
           </div>
           <span className="inline-flex items-center gap-1 text-xs font-medium text-accent">
@@ -69,7 +67,7 @@ export function DashboardMockup() {
           className="h-20 w-full"
           preserveAspectRatio="none"
           role="img"
-          aria-label="Gráfico de llamadas por hora"
+          aria-label="Calls per hour chart"
         >
           <defs>
             <linearGradient id="cmai-area" x1="0" x2="0" y1="0" y2="1">
@@ -100,10 +98,10 @@ export function DashboardMockup() {
           </div>
           <div>
             <p className="text-xs font-medium text-foreground">
-              Agente IA · Sofía
+              AI Agent · Sofia
             </p>
             <p className="font-mono text-[10px] text-muted-foreground">
-              en llamada · 00:42
+              on call · 00:42
             </p>
           </div>
         </div>

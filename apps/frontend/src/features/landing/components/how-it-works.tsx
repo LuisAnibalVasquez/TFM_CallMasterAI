@@ -4,23 +4,23 @@ const STEPS = [
   {
     n: "01",
     icon: FileSpreadsheet,
-    title: "Sube tu CSV",
+    title: "Upload your CSV",
     description:
-      "Importa contactos y variables dinámicas. Validación automática, deduplicación y enriquecimiento por número.",
+      "Import contacts and dynamic variables. Automatic validation, deduplication, and number enrichment.",
   },
   {
     n: "02",
     icon: BotMessageSquare,
-    title: "Conecta tu IA",
+    title: "Connect your AI",
     description:
-      "Vincula tu agente de Voiceflow en segundos. Define guion, lógica condicional y handoff a humano cuando lo necesites.",
+      "Link your Voiceflow agent in seconds. Define script, conditional logic, and human handoff when needed.",
   },
   {
     n: "03",
     icon: LineChart,
-    title: "Monitorea resultados",
+    title: "Monitor results",
     description:
-      "Sigue cada llamada en vivo, escucha grabaciones y analiza KPIs por campaña, agente y segmento de cliente.",
+      "Track every live call, listen to recordings, and analyze KPIs by campaign, agent, and customer segment.",
   },
 ];
 
@@ -33,11 +33,11 @@ export function HowItWorks() {
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <span className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-            // Cómo funciona
+            // How it works
           </span>
           <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-            De cero a llamadas en producción en{" "}
-            <span className="text-muted-foreground">tres pasos</span>.
+            From zero to production calls in{" "}
+            <span className="text-muted-foreground">three steps</span>.
           </h2>
         </div>
 
@@ -58,7 +58,7 @@ export function HowItWorks() {
                   />
                 </div>
                 <span className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                  Paso {step.n}
+                  Step {step.n}
                 </span>
               </div>
 

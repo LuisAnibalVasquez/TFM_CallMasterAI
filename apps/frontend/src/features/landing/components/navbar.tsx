@@ -3,10 +3,10 @@ import { PhoneCall } from "lucide-react";
 import { Button } from "../../../shared/components/ui/button";
 
 const NAV_LINKS = [
-  { href: "#features", label: "Características" },
-  { href: "#how-it-works", label: "Cómo funciona" },
-  { href: "#trust", label: "Confianza" },
-  { href: "#pricing", label: "Precios" },
+  { href: "#features", label: "Features" },
+  { href: "#how-it-works", label: "How it works" },
+  { href: "#trust", label: "Trust" },
+  { href: "#pricing", label: "Pricing" },
 ];
 
 export function Navbar() {
@@ -16,7 +16,7 @@ export function Navbar() {
         <Link
           to="/"
           className="flex items-center gap-2.5"
-          aria-label="Call Master AI — Inicio"
+          aria-label="Call Master AI — Home"
         >
           <span
             className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-foreground"
@@ -36,7 +36,7 @@ export function Navbar() {
         </Link>
 
         <nav
-          aria-label="Navegación principal"
+          aria-label="Main navigation"
           className="hidden items-center gap-1 md:flex"
         >
           {NAV_LINKS.map((link) => (
@@ -64,7 +64,7 @@ export function Navbar() {
             size="sm"
             className="bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
           >
-            <Link to="/signup">Empezar ahora</Link>
+            <Link to="/signup">Get Started</Link>
           </Button>
         </div>
       </div>

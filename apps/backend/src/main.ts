@@ -8,9 +8,13 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
-  // Habilitar CORS para que el frontend pueda hacer peticiones
+  // Configurar orígenes permitidos usando variables de entorno para Producción
+  const allowedOrigins = process.env.FRONTEND_URL
+    ? process.env.FRONTEND_URL.split(",")
+    : ["http://localhost:5173", "http://127.0.0.1:5173"];
+
   app.enableCors({
-    origin: true, // En desarrollo permite todos, en produccion lo limitaremos al dominio de vercel
+    origin: allowedOrigins,
     credentials: true,
   });
 
@@ -31,7 +35,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup("docs", app, document);
 
-  await app.listen(3000);
+  await app.listen(3000, "0.0.0.0");
   console.log(`Application is running on: http://localhost:3000`);
   console.log(`Swagger documentation: http://localhost:3000/docs`);
 }

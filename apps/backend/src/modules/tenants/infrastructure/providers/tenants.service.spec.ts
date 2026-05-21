@@ -1,6 +1,10 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { ConfigService } from "@nestjs/config";
 import { TenantsService } from "./tenants.service";
+import { CreateTenantUseCase } from "../../application/use-cases/create-tenant.use-case";
+import { DeleteTenantUseCase } from "../../application/use-cases/delete-tenant.use-case";
+import { UpdateTenantUseCase } from "../../application/use-cases/update-tenant.use-case";
+import { ListTenantsUseCase } from "../../application/use-cases/list-tenants.use-case";
 import { InternalServerErrorException } from "@nestjs/common";
 import * as supabaseJs from "@supabase/supabase-js";
 
@@ -12,12 +16,17 @@ describe("TenantsService", () => {
   let service: TenantsService;
   let configService: jest.Mocked<ConfigService>;
   let supabaseAdminMock: any;
+  let createUseCase: jest.Mocked<CreateTenantUseCase>;
+  let deleteUseCase: jest.Mocked<DeleteTenantUseCase>;
+  let updateUseCase: jest.Mocked<UpdateTenantUseCase>;
+  let listUseCase: jest.Mocked<ListTenantsUseCase>;
 
   beforeEach(async () => {
     configService = {
       get: jest.fn((key: string) => {
         if (key === "SUPABASE_URL") return "https://mock-url.supabase.co";
         if (key === "SERVICE_ROLE_KEY") return "mock-service-key";
+        if (key === "ENCRYPTION_MASTER_KEY") return "mock-master-key";
         return null;
       }),
     } as unknown as jest.Mocked<ConfigService>;
@@ -31,6 +40,8 @@ describe("TenantsService", () => {
       eq: jest.fn().mockReturnThis(),
       update: jest.fn().mockReturnThis(),
       order: jest.fn().mockReturnThis(),
+      range: jest.fn().mockReturnThis(),
+      rpc: jest.fn(),
       auth: {
         admin: {
           createUser: jest.fn(),
@@ -40,10 +51,19 @@ describe("TenantsService", () => {
 
     (supabaseJs.createClient as jest.Mock).mockReturnValue(supabaseAdminMock);
 
+    createUseCase = { execute: jest.fn() } as any;
+    deleteUseCase = { execute: jest.fn() } as any;
+    updateUseCase = { execute: jest.fn() } as any;
+    listUseCase = { execute: jest.fn() } as any;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TenantsService,
         { provide: ConfigService, useValue: configService },
+        { provide: CreateTenantUseCase, useValue: createUseCase },
+        { provide: DeleteTenantUseCase, useValue: deleteUseCase },
+        { provide: UpdateTenantUseCase, useValue: updateUseCase },
+        { provide: ListTenantsUseCase, useValue: listUseCase },
       ],
     }).compile();
 
@@ -54,88 +74,167 @@ describe("TenantsService", () => {
     jest.clearAllMocks();
   });
 
-  describe("getAllTenants", () => {
-    it("should return a list of tenants", async () => {
-      const mockData = [{ id: "1", name: "Tenant 1" }];
-      supabaseAdminMock.order.mockResolvedValue({
-        data: mockData,
-        error: null,
-      });
+  describe("createTenant (delegates to CreateTenantUseCase)", () => {
+    it("should delegate to CreateTenantUseCase.execute", async () => {
+      const dto = {
+        name: "Acme",
+        contactEmail: "test@acme.com",
+        sandboxConfig: {
+          apiUrl: "https://sandbox.api.com",
+          apiKey: "sk-sandbox",
+        },
+        productionConfig: { apiUrl: "https://api.com", apiKey: "sk-prod" },
+      } as any;
 
-      const result = await service.getAllTenants();
+      const expected = {
+        tenant: {
+          id: "tenant-1",
+          name: "Acme",
+          phone: "",
+          contactEmail: "test@acme.com",
+          status: "active",
+          sandboxConfig: {
+            apiUrl: "https://sandbox.api.com",
+            encryptedKey: "enc",
+          },
+          productionConfig: { apiUrl: "https://api.com", encryptedKey: "enc" },
+        },
+        adminCredentials: {
+          email: "test@acme.com",
+          temporaryPassword: "abc123",
+        },
+      };
+      createUseCase.execute.mockResolvedValue(expected as any);
 
-      expect(supabaseAdminMock.from).toHaveBeenCalledWith("tenants");
-      expect(supabaseAdminMock.select).toHaveBeenCalledWith("*");
-      expect(supabaseAdminMock.order).toHaveBeenCalledWith("created_at", {
-        ascending: false,
+      const result = await service.createTenant(dto);
+      expect(createUseCase.execute).toHaveBeenCalledWith(dto);
+      expect(result).toEqual(expected as any);
+    });
+  });
+
+  describe("getAllTenants (delegates to ListTenantsUseCase)", () => {
+    it("should delegate to ListTenantsUseCase.execute with pagination", async () => {
+      const expected = { data: [], total: 0, page: 1, limit: 20 };
+      listUseCase.execute.mockResolvedValue(expected);
+
+      const result = await service.getAllTenants(1, 20);
+      expect(listUseCase.execute).toHaveBeenCalledWith(1, 20);
+      expect(result).toEqual(expected);
+    });
+  });
+
+  describe("updateTenant (delegates to UpdateTenantUseCase)", () => {
+    it("should delegate to UpdateTenantUseCase.execute", async () => {
+      const dto = { name: "Updated" };
+      const expected = { id: "tenant-1", name: "Updated" };
+      updateUseCase.execute.mockResolvedValue(expected as any);
+
+      const result = await service.updateTenant("tenant-1", dto);
+      expect(updateUseCase.execute).toHaveBeenCalledWith("tenant-1", dto);
+      expect(result).toEqual(expected);
+    });
+  });
+
+  describe("deleteTenant (delegates to DeleteTenantUseCase)", () => {
+    it("should delegate to DeleteTenantUseCase.execute", async () => {
+      deleteUseCase.execute.mockResolvedValue(undefined);
+
+      const result = await service.deleteTenant("tenant-1");
+      expect(deleteUseCase.execute).toHaveBeenCalledWith("tenant-1");
+      expect(result).toBeUndefined();
+    });
+  });
+
+  // ─── ITenantRepository methods (direct Supabase calls) ───────────────
+
+  describe("countCampaigns", () => {
+    it("should return the campaign count for a tenant", async () => {
+      supabaseAdminMock.select.mockReturnThis();
+      supabaseAdminMock.eq.mockResolvedValue({ count: 3, error: null });
+
+      const result = await service.countCampaigns("tenant-1");
+      expect(result).toBe(3);
+      expect(supabaseAdminMock.from).toHaveBeenCalledWith("campaigns");
+      expect(supabaseAdminMock.select).toHaveBeenCalledWith("*", {
+        count: "exact",
+        head: true,
       });
-      expect(result).toEqual(mockData);
     });
 
-    it("should throw an error if supabase fails", async () => {
-      supabaseAdminMock.order.mockResolvedValue({
-        data: null,
-        error: { message: "DB Error" },
+    it("should throw if supabase fails", async () => {
+      supabaseAdminMock.select.mockReturnThis();
+      supabaseAdminMock.eq.mockResolvedValue({
+        count: null,
+        error: { message: "DB error" },
       });
 
-      await expect(service.getAllTenants()).rejects.toThrow(
+      await expect(service.countCampaigns("tenant-1")).rejects.toThrow(
         InternalServerErrorException,
       );
     });
   });
 
-  describe("createTenant", () => {
-    const dto = { name: "Acme", contactEmail: "test@acme.com", phone: "123" };
-
-    it("should successfully create a tenant and admin user", async () => {
-      // 1. Mock insert tenant
-      supabaseAdminMock.single.mockResolvedValue({
-        data: { id: "tenant-1", name: "Acme" },
+  describe("findAll", () => {
+    it("should return paginated tenants", async () => {
+      supabaseAdminMock.range.mockResolvedValue({
+        data: [
+          {
+            id: "1",
+            name: "Tenant 1",
+            contact_email: "a@b.com",
+            contact_person: "John Doe",
+            status: "active",
+            sandbox_config: {},
+            production_config: {},
+          },
+        ],
+        count: 1,
         error: null,
       });
-      // 2. Mock create user
-      supabaseAdminMock.auth.admin.createUser.mockResolvedValue({
-        data: { user: { id: "user-1" } },
-        error: null,
-      });
-      // 3. Mock update profile
-      supabaseAdminMock.eq.mockResolvedValue({ error: null }); // update().eq()
 
-      const result = await service.createTenant(dto);
-
-      expect(supabaseAdminMock.from).toHaveBeenCalledWith("tenants");
-      expect(supabaseAdminMock.insert).toHaveBeenCalledWith({
-        name: dto.name,
-        contact_email: dto.contactEmail,
-        phone: dto.phone,
-      });
-      expect(supabaseAdminMock.auth.admin.createUser).toHaveBeenCalled();
-      expect(result.tenant.id).toEqual("tenant-1");
-      expect(result.adminCredentials.email).toEqual(dto.contactEmail);
-      expect(result.adminCredentials.temporaryPassword).toBeDefined();
+      const result = await service.findAll({ page: 1, limit: 20 });
+      expect(result.data).toHaveLength(1);
+      expect(result.total).toBe(1);
+      expect(result.data[0].contactPerson).toBe("John Doe");
     });
 
-    it("should rollback tenant if user creation fails", async () => {
-      // 1. Mock insert tenant success
-      supabaseAdminMock.single.mockResolvedValue({
-        data: { id: "tenant-1" },
+    it("should map row without contact_person to undefined", async () => {
+      supabaseAdminMock.range.mockResolvedValue({
+        data: [
+          {
+            id: "2",
+            name: "Tenant 2",
+            contact_email: "b@c.com",
+            status: "active",
+            sandbox_config: {},
+            production_config: {},
+          },
+        ],
+        count: 1,
         error: null,
       });
-      // 2. Mock create user failure
-      supabaseAdminMock.auth.admin.createUser.mockResolvedValue({
-        data: null,
-        error: { message: "Auth error" },
+
+      const result = await service.findAll({ page: 1, limit: 20 });
+      expect(result.data[0].contactPerson).toBeUndefined();
+    });
+  });
+
+  describe("update (repository method)", () => {
+    it("should update tenant fields", async () => {
+      supabaseAdminMock.single.mockResolvedValue({
+        data: {
+          id: "t1",
+          name: "Updated",
+          contact_email: "a@b.com",
+          status: "active",
+          sandbox_config: {},
+          production_config: {},
+        },
+        error: null,
       });
-      // Setup mock for rollback delete
-      supabaseAdminMock.delete.mockReturnThis();
-      supabaseAdminMock.eq.mockResolvedValue({ error: null });
 
-      await expect(service.createTenant(dto)).rejects.toThrow(
-        InternalServerErrorException,
-      );
-
-      expect(supabaseAdminMock.from).toHaveBeenCalledWith("tenants");
-      expect(supabaseAdminMock.delete).toHaveBeenCalled();
+      const result = await service.update("t1", { name: "Updated" });
+      expect(result).toBeDefined();
     });
   });
 });

@@ -2,23 +2,23 @@ import { Link } from "react-router-dom";
 import { PhoneCall, Code, MessageCircle, Share2 } from "lucide-react";
 
 const PRODUCT_LINKS = [
-  { href: "#features", label: "Características" },
-  { href: "#how-it-works", label: "Cómo funciona" },
-  { href: "#pricing", label: "Precios" },
+  { href: "#features", label: "Features" },
+  { href: "#how-it-works", label: "How it works" },
+  { href: "#pricing", label: "Pricing" },
   { href: "/changelog", label: "Changelog" },
 ];
 
 const COMPANY_LINKS = [
-  { href: "/about", label: "Sobre nosotros" },
-  { href: "/contact", label: "Contacto" },
+  { href: "/about", label: "About us" },
+  { href: "/contact", label: "Contact" },
   { href: "/blog", label: "Blog" },
-  { href: "/careers", label: "Trabaja con nosotros" },
+  { href: "/careers", label: "Careers" },
 ];
 
 const LEGAL_LINKS = [
-  { href: "/legal/terms", label: "Términos" },
-  { href: "/legal/privacy", label: "Privacidad" },
-  { href: "/legal/security", label: "Seguridad" },
+  { href: "/legal/terms", label: "Terms" },
+  { href: "/legal/privacy", label: "Privacy" },
+  { href: "/legal/security", label: "Security" },
   { href: "/legal/dpa", label: "DPA" },
 ];
 
@@ -51,8 +51,8 @@ export function Footer() {
               </div>
             </Link>
             <p className="mt-5 max-w-sm text-sm leading-relaxed text-muted-foreground">
-              La plataforma SaaS multi-tenant para orquestar campañas masivas de
-              llamadas con Agentes de IA.
+              The multi-tenant SaaS platform to orchestrate massive call
+              campaigns with AI Agents.
             </p>
 
             <ul className="mt-6 flex items-center gap-2">
@@ -82,15 +82,14 @@ export function Footer() {
             </ul>
           </div>
 
-          <FooterColumn title="Producto" links={PRODUCT_LINKS} />
-          <FooterColumn title="Empresa" links={COMPANY_LINKS} />
+          <FooterColumn title="Product" links={PRODUCT_LINKS} />
+          <FooterColumn title="Company" links={COMPANY_LINKS} />
           <FooterColumn title="Legal" links={LEGAL_LINKS} />
         </div>
 
         <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-border pt-6 sm:flex-row sm:items-center">
           <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-            © {new Date().getFullYear()} Call Master AI · Todos los derechos
-            reservados
+            © {new Date().getFullYear()} Call Master AI · All rights reserved
           </p>
           <div className="flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse-soft" />
