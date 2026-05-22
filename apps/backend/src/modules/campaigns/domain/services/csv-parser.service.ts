@@ -110,27 +110,28 @@ export function parseCsvToRows(csvText: string): CsvParseResult {
   // Parse each data row
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i];
-    // Simple CSV splitter that respects quoted values containing commas would be better,
-    // but since we control the generation and don't expect complex CSVs for now,
-    // we just handle stripping quotes from each field.
+    // Improved field extraction: split by comma but handle potential quoted values
+    // and strip surrounding quotes/spaces from the result
     const fields = line.split(",").map((f) => {
       return f
         .trim()
-        .replace(/^"(.*)"$/, "$1")
+        .replace(/^["'](.*)["']$/, "$1") // Remove both double and single quotes
         .trim();
     });
     const rowNumber = i; // 1-indexed for user-facing messages
 
     const customerName = fields[colIndex["customer name"]] || "";
-    const phone = fields[colIndex["phone number"]] || "";
+    const phone = (fields[colIndex["phone number"]] || "").replace(/\s+/g, ""); // Remove ALL internal spaces
     const ageStr = fields[colIndex["age"]] || "0";
-    const language = fields[colIndex["preferred language"]] || "";
+    const language = (fields[colIndex["preferred language"]] || "")
+      .toLowerCase()
+      .trim();
 
     // Validate E.164 phone
     if (!isValidE164(phone)) {
       errors.push({
         row: rowNumber,
-        message: `Row ${rowNumber}: invalid phone number format. Phone must be in E.164 format (+<country><number>)`,
+        message: `Row ${rowNumber}: invalid phone number format (${phone}). Phone must be in E.164 format (+<country><number>)`,
       });
     }
 
@@ -138,7 +139,7 @@ export function parseCsvToRows(csvText: string): CsvParseResult {
     if (!isValidLanguageCode(language)) {
       errors.push({
         row: rowNumber,
-        message: `Row ${rowNumber}: invalid language format. Language must be a 2-letter code (e.g., 'en', 'es')`,
+        message: `Row ${rowNumber}: invalid language format (${language}). Language must be a 2-letter code (e.g., 'en', 'es')`,
       });
     }
 

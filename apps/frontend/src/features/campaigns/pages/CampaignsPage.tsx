@@ -3,9 +3,11 @@ import { CampaignList } from "../components/CampaignList";
 import { CreateCampaignDialog } from "../components/CreateCampaignDialog";
 import { campaignService } from "../services/campaignService";
 import { useToast } from "../../../shared/hooks/use-toast";
+import { useCampaigns } from "../hooks/useCampaigns";
 
 export function CampaignsPage() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const { campaigns, total, isLoading, refetch } = useCampaigns();
   const { toast } = useToast();
 
   const handleTemplateDownload = useCallback(async () => {
@@ -23,7 +25,8 @@ export function CampaignsPage() {
 
   const handleCreateSuccess = useCallback(() => {
     setShowCreateDialog(false);
-  }, []);
+    refetch();
+  }, [refetch]);
 
   const handleCreateCancel = useCallback(() => {
     setShowCreateDialog(false);
@@ -32,6 +35,10 @@ export function CampaignsPage() {
   return (
     <div className="space-y-6">
       <CampaignList
+        campaigns={campaigns}
+        total={total}
+        isLoading={isLoading}
+        refetch={refetch}
         onCreateClick={() => setShowCreateDialog(true)}
         onTemplateDownload={handleTemplateDownload}
       />
