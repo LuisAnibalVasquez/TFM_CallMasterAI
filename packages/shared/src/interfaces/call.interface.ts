@@ -9,4 +9,5 @@ export interface Call {
   status: string;
   cost: number;
   voiceflowTranscriptId?: string;
+  createdAt: Date;
 }

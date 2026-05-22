@@ -5,6 +5,7 @@ import { DashboardLayout } from "./features/dashboard/layouts/DashboardLayout";
 import { PlatformOwnerDashboard } from "./features/dashboard/pages/PlatformOwnerDashboard";
 import { TenantAdminDashboard } from "./features/dashboard/pages/TenantAdminDashboard";
 import { TenantsPage } from "./features/tenants/pages/TenantsPage";
+import { CampaignsPage } from "./features/campaigns/pages/CampaignsPage";
 import { Toaster } from "./shared/components/ui/toaster";
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
             />
             <Route path="/admin/tenants" element={<TenantsPage />} />
             <Route path="/dashboard" element={<TenantAdminDashboard />} />
+            <Route path="/dashboard/campaigns" element={<CampaignsPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
