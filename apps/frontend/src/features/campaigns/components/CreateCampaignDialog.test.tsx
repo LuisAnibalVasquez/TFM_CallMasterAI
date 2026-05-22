@@ -129,7 +129,7 @@ describe("normalizeCsvRow", () => {
       "customer name": "Alice",
       "phone number": "+15551234567",
       age: "30",
-      "preferred language": "English",
+      "preferred language": "en",
     };
 
     const result = normalizeCsvRow(raw);
@@ -137,7 +137,7 @@ describe("normalizeCsvRow", () => {
     expect(result["Customer Name"]).toBe("Alice");
     expect(result["Phone Number"]).toBe("+15551234567");
     expect(result["Age"]).toBe("30");
-    expect(result["Preferred Language"]).toBe("English");
+    expect(result["Preferred Language"]).toBe("en");
   });
 
   it("should map Spanish headers to canonical keys", () => {
@@ -145,7 +145,7 @@ describe("normalizeCsvRow", () => {
       nombre: "Bob",
       teléfono: "+15559876543",
       edad: "25",
-      "idioma de preferencia": "Spanish",
+      "idioma de preferencia": "es",
     };
 
     const result = normalizeCsvRow(raw);
@@ -153,7 +153,7 @@ describe("normalizeCsvRow", () => {
     expect(result["Customer Name"]).toBe("Bob");
     expect(result["Phone Number"]).toBe("+15559876543");
     expect(result["Age"]).toBe("25");
-    expect(result["Preferred Language"]).toBe("Spanish");
+    expect(result["Preferred Language"]).toBe("es");
   });
 
   it("should handle headers with extra spaces and mixed case", () => {
@@ -274,9 +274,9 @@ describe("CreateCampaignDialog CSV parsing", () => {
             "customer name": "Alice",
             "phone number": "+15551234567",
             age: "30",
-            "preferred language": "English",
+            "preferred language": "en",
           },
-          { name: "Bob", phone: "+15559876543", edad: "25", idioma: "Spanish" },
+          { name: "Bob", phone: "+15559876543", edad: "25", idioma: "es" },
         ],
       });
     });
@@ -313,7 +313,7 @@ describe("CreateCampaignDialog CSV parsing", () => {
             nombre: "Carlos",
             teléfono: "+15551112222",
             edad: "28",
-            idioma: "Spanish",
+            idioma: "es",
           },
         ],
       });

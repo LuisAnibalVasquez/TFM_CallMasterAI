@@ -35,7 +35,7 @@ describe("CampaignsService", () => {
     customer_name: "John Doe",
     phone_encrypted: "encrypted-phone",
     phone_hash: "hashed-phone",
-    language: "English",
+    language: "en",
     age: 30,
     duration: 120,
     status: "completed",
@@ -189,13 +189,13 @@ describe("CampaignsService", () => {
         {
           customerName: "John Doe",
           phone: "+14155552671",
-          language: "English",
+          language: "en",
           age: 30,
         },
         {
           customerName: "Jane Smith",
           phone: "+34666111222",
-          language: "Spanish",
+          language: "es",
           age: 25,
         },
       ];
@@ -219,7 +219,7 @@ describe("CampaignsService", () => {
         {
           customerName: "Test",
           phone: "+14155552671",
-          language: "English",
+          language: "en",
           age: 30,
         },
       ];

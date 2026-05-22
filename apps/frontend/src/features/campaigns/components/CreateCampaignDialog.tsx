@@ -47,6 +47,7 @@ const HEADER_MAP: Record<string, keyof CsvRow> = {
   edad: "Age",
   idioma: "Preferred Language",
   "idioma de preferencia": "Preferred Language",
+  languaje: "Preferred Language",
 };
 
 export function normalizeCsvRow(rawRow: Record<string, string>): CsvRow {
@@ -113,6 +114,10 @@ export function CreateCampaignDialog({
     }
   }, []);
 
+  const validateLanguage = useCallback((lang: string): boolean => {
+    return /^[a-zA-Z]{2}$/.test(lang.trim());
+  }, []);
+
   const handleFileChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
@@ -127,37 +132,58 @@ export function CreateCampaignDialog({
 
         Papa.parse<Record<string, string>>(text, {
           header: true,
-          skipEmptyLines: true,
+          skipEmptyLines: "greedy", // Better at skipping lines with just whitespace
           complete: (result) => {
-            const normalizedRows = result.data.map(normalizeCsvRow);
+            // 1. Normalize all rows first
+            const allNormalized = result.data.map((raw, index) => ({
+              data: normalizeCsvRow(raw),
+              originalIndex: index + 2, // +2 because 0-based index and header is row 1
+            }));
 
-            const columnsMissing = findMissingColumns(normalizedRows);
-            if (columnsMissing.length > 0) {
-              setCsvRows([]);
-              setMissingColumns(columnsMissing);
-              setRowErrors([]);
-              return;
-            }
-
-            const rows = normalizedRows.filter(
-              (row) =>
-                row["Customer Name"] || row["Phone Number"] || row["Age"],
-            );
+            // 2. Filter out rows that don't have any significant data
+            const validRows = allNormalized.filter((item) => {
+              const { data } = item;
+              return (
+                (data["Customer Name"]?.trim() || "") !== "" ||
+                (data["Phone Number"]?.trim() || "") !== "" ||
+                (data["Age"]?.trim() || "") !== ""
+              );
+            });
 
             const errors: RowError[] = [];
-            rows.forEach((row, index) => {
-              const phone = row["Phone Number"];
-              if (!phone || !validatePhone(String(phone))) {
+            const finalData: CsvRow[] = [];
+
+            validRows.forEach((item) => {
+              const { data, originalIndex } = item;
+              const phone = (data["Phone Number"] || "").trim();
+              const lang = (data["Preferred Language"] || "").trim();
+
+              let hasError = false;
+
+              if (!phone || !validatePhone(phone)) {
                 errors.push({
-                  row: index + 2, // +2 because header is row 1
-                  message: `Row ${index + 2}: invalid phone number format (must be E.164 like +14155552671)`,
+                  row: originalIndex,
+                  message: `Row ${originalIndex}: invalid phone number format (must be E.164 like +14155552671)`,
                 });
+                hasError = true;
+              }
+
+              if (!lang || !validateLanguage(lang)) {
+                errors.push({
+                  row: originalIndex,
+                  message: `Row ${originalIndex}: invalid language format (must be a 2-letter code like 'en' or 'es')`,
+                });
+                hasError = true;
+              }
+
+              if (!hasError) {
+                finalData.push(data);
               }
             });
 
-            setCsvRows(rows);
+            setCsvRows(finalData);
             setRowErrors(errors);
-            setMissingColumns([]);
+            setMissingColumns(findMissingColumns(finalData));
           },
           error: (err) => {
             toast({
@@ -171,7 +197,7 @@ export function CreateCampaignDialog({
 
       reader.readAsText(file);
     },
-    [validatePhone, toast],
+    [validatePhone, validateLanguage, toast],
   );
 
   const handleSubmit = async (e: React.FormEvent) => {

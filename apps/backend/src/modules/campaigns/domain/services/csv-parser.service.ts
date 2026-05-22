@@ -26,6 +26,13 @@ export function isValidE164(phone: string): boolean {
 }
 
 /**
+ * Validates that a language code is exactly 2 alphabetic characters.
+ */
+export function isValidLanguageCode(lang: string): boolean {
+  return /^[a-zA-Z]{2}$/.test(lang.trim());
+}
+
+/**
  * Parses a CSV string into an array of validated CsvRow objects.
  * The CSV MUST have the expected header row.
  * All phone numbers MUST be valid E.164 format — the entire upload
@@ -63,7 +70,13 @@ export function parseCsvToRows(csvText: string): CsvParseResult {
   }
 
   const headerLine = lines[0];
-  const headers = headerLine.split(",").map((h) => h.trim());
+  const headers = headerLine.split(",").map((h) => {
+    // Strip optional quotes and trim
+    return h
+      .trim()
+      .replace(/^"(.*)"$/, "$1")
+      .trim();
+  });
 
   // Validate expected headers (case-insensitive)
   const expectedHeaders = [
@@ -97,7 +110,15 @@ export function parseCsvToRows(csvText: string): CsvParseResult {
   // Parse each data row
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i];
-    const fields = line.split(",").map((f) => f.trim());
+    // Simple CSV splitter that respects quoted values containing commas would be better,
+    // but since we control the generation and don't expect complex CSVs for now,
+    // we just handle stripping quotes from each field.
+    const fields = line.split(",").map((f) => {
+      return f
+        .trim()
+        .replace(/^"(.*)"$/, "$1")
+        .trim();
+    });
     const rowNumber = i; // 1-indexed for user-facing messages
 
     const customerName = fields[colIndex["customer name"]] || "";
@@ -110,6 +131,14 @@ export function parseCsvToRows(csvText: string): CsvParseResult {
       errors.push({
         row: rowNumber,
         message: `Row ${rowNumber}: invalid phone number format. Phone must be in E.164 format (+<country><number>)`,
+      });
+    }
+
+    // Validate 2-letter language code
+    if (!isValidLanguageCode(language)) {
+      errors.push({
+        row: rowNumber,
+        message: `Row ${rowNumber}: invalid language format. Language must be a 2-letter code (e.g., 'en', 'es')`,
       });
     }
 
