@@ -10,23 +10,26 @@ import {
   Zap,
   PhoneCall,
 } from "lucide-react";
-import {
-  useCampaigns,
-  useStartCampaign,
-  useCancelCampaign,
-} from "../hooks/useCampaigns";
+import { useStartCampaign, useCancelCampaign } from "../hooks/useCampaigns";
 import type { CampaignData } from "../services/campaignService";
 
 interface CampaignListProps {
+  campaigns: CampaignData[];
+  total: number;
+  isLoading: boolean;
+  refetch: () => void;
   onCreateClick?: () => void;
   onTemplateDownload?: () => void;
 }
 
 export function CampaignList({
+  campaigns,
+  total,
+  isLoading,
+  refetch,
   onCreateClick,
   onTemplateDownload,
 }: CampaignListProps) {
-  const { campaigns, total, isLoading, refetch } = useCampaigns();
   const { startCampaign, isStarting } = useStartCampaign();
   const { cancelCampaign, isCanceling } = useCancelCampaign();
   const { toast } = useToast();
@@ -195,20 +198,36 @@ export function CampaignList({
                         <EnvironmentBadge environment={campaign.environment} />
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-3 text-xs">
-                          <span title="Total calls">{campaign.totalCalls}</span>
-                          <span
-                            className="text-green-600"
-                            title="Successful calls"
+                        <div className="flex flex-col gap-1 text-[10px] uppercase tracking-tighter">
+                          <div
+                            className="flex items-center gap-1.5"
+                            title="Total calls to be made"
                           >
-                            {campaign.successfulCalls}
-                          </span>
-                          <span
-                            className="text-destructive"
-                            title="Failed calls"
+                            <span className="w-10 text-muted-foreground">
+                              Total:
+                            </span>
+                            <span className="font-semibold">
+                              {campaign.totalCalls}
+                            </span>
+                          </div>
+                          <div
+                            className="flex items-center gap-1.5 text-green-600"
+                            title="Successfully connected calls"
                           >
-                            {campaign.failedCalls}
-                          </span>
+                            <span className="w-10">Success:</span>
+                            <span className="font-semibold">
+                              {campaign.successfulCalls}
+                            </span>
+                          </div>
+                          <div
+                            className="flex items-center gap-1.5 text-destructive"
+                            title="Failed or rejected calls"
+                          >
+                            <span className="w-10">Failed:</span>
+                            <span className="font-semibold">
+                              {campaign.failedCalls}
+                            </span>
+                          </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-right">

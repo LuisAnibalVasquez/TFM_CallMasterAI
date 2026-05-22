@@ -9,11 +9,7 @@ vi.mock("../hooks/useCampaigns", () => ({
   useCancelCampaign: vi.fn(),
 }));
 
-import {
-  useCampaigns,
-  useStartCampaign,
-  useCancelCampaign,
-} from "../hooks/useCampaigns";
+import { useStartCampaign, useCancelCampaign } from "../hooks/useCampaigns";
 
 const mockCampaign = (overrides: Record<string, unknown> = {}) => ({
   id: "camp-1",
@@ -30,15 +26,10 @@ const mockCampaign = (overrides: Record<string, unknown> = {}) => ({
 });
 
 describe("CampaignList", () => {
+  const mockRefetch = vi.fn();
+
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useCampaigns).mockReturnValue({
-      campaigns: [],
-      total: 0,
-      isLoading: true,
-      error: null,
-      refetch: vi.fn(),
-    });
     vi.mocked(useStartCampaign).mockReturnValue({
       startCampaign: vi.fn(),
       isStarting: false,
@@ -54,7 +45,14 @@ describe("CampaignList", () => {
   });
 
   it("should show loading spinner when loading", () => {
-    render(<CampaignList />);
+    render(
+      <CampaignList
+        campaigns={[]}
+        total={0}
+        isLoading={true}
+        refetch={mockRefetch}
+      />,
+    );
     expect(screen.getByText("Campaigns")).toBeDefined();
     expect(
       screen.getByText("Manage your call campaigns and track their progress."),
@@ -62,15 +60,14 @@ describe("CampaignList", () => {
   });
 
   it("should show empty state when no campaigns", async () => {
-    vi.mocked(useCampaigns).mockReturnValue({
-      campaigns: [],
-      total: 0,
-      isLoading: false,
-      error: null,
-      refetch: vi.fn(),
-    });
-
-    render(<CampaignList />);
+    render(
+      <CampaignList
+        campaigns={[]}
+        total={0}
+        isLoading={false}
+        refetch={mockRefetch}
+      />,
+    );
 
     await waitFor(() => {
       expect(screen.getByText("No campaigns created yet")).toBeDefined();
@@ -78,34 +75,35 @@ describe("CampaignList", () => {
   });
 
   it("should render campaign rows with status badges", async () => {
-    vi.mocked(useCampaigns).mockReturnValue({
-      campaigns: [
-        mockCampaign({
-          id: "1",
-          name: "Q1 Outreach",
-          status: "Created",
-          totalCalls: 50,
-          successfulCalls: 0,
-          failedCalls: 0,
-          totalCost: 0,
-        }),
-        mockCampaign({
-          id: "2",
-          name: "Q2 Outreach",
-          status: "In-Progress",
-          totalCalls: 100,
-          successfulCalls: 45,
-          failedCalls: 5,
-          totalCost: 12.5,
-        }),
-      ],
-      total: 2,
-      isLoading: false,
-      error: null,
-      refetch: vi.fn(),
-    });
+    const campaigns = [
+      mockCampaign({
+        id: "1",
+        name: "Q1 Outreach",
+        status: "Created",
+        totalCalls: 50,
+        successfulCalls: 0,
+        failedCalls: 0,
+        totalCost: 0,
+      }),
+      mockCampaign({
+        id: "2",
+        name: "Q2 Outreach",
+        status: "In-Progress",
+        totalCalls: 100,
+        successfulCalls: 45,
+        failedCalls: 5,
+        totalCost: 12.5,
+      }),
+    ];
 
-    render(<CampaignList />);
+    render(
+      <CampaignList
+        campaigns={campaigns}
+        total={2}
+        isLoading={false}
+        refetch={mockRefetch}
+      />,
+    );
 
     await waitFor(() => {
       expect(screen.getByText("Q1 Outreach")).toBeDefined();
@@ -116,45 +114,50 @@ describe("CampaignList", () => {
   });
 
   it("should display analytics snapshot for each campaign", async () => {
-    vi.mocked(useCampaigns).mockReturnValue({
-      campaigns: [
-        mockCampaign({
-          id: "1",
-          name: "Analytics Campaign",
-          status: "Completed",
-          totalCalls: 200,
-          successfulCalls: 180,
-          failedCalls: 20,
-          totalCost: 45.75,
-        }),
-      ],
-      total: 1,
-      isLoading: false,
-      error: null,
-      refetch: vi.fn(),
-    });
+    const campaigns = [
+      mockCampaign({
+        id: "1",
+        name: "Analytics Campaign",
+        status: "Completed",
+        totalCalls: 200,
+        successfulCalls: 180,
+        failedCalls: 20,
+        totalCost: 45.75,
+      }),
+    ];
 
-    render(<CampaignList />);
+    render(
+      <CampaignList
+        campaigns={campaigns}
+        total={1}
+        isLoading={false}
+        refetch={mockRefetch}
+      />,
+    );
 
     await waitFor(() => {
       expect(screen.getByText("200")).toBeDefined();
       expect(screen.getByText("180")).toBeDefined();
       expect(screen.getByText("20")).toBeDefined();
+      expect(screen.getByText("Total:")).toBeDefined();
+      expect(screen.getByText("Success:")).toBeDefined();
+      expect(screen.getByText("Failed:")).toBeDefined();
     });
   });
 
   it("should show Start button for Created campaigns", async () => {
-    vi.mocked(useCampaigns).mockReturnValue({
-      campaigns: [
-        mockCampaign({ id: "1", name: "To Start", status: "Created" }),
-      ],
-      total: 1,
-      isLoading: false,
-      error: null,
-      refetch: vi.fn(),
-    });
+    const campaigns = [
+      mockCampaign({ id: "1", name: "To Start", status: "Created" }),
+    ];
 
-    render(<CampaignList />);
+    render(
+      <CampaignList
+        campaigns={campaigns}
+        total={1}
+        isLoading={false}
+        refetch={mockRefetch}
+      />,
+    );
 
     await waitFor(() => {
       expect(screen.getByTitle("Start campaign")).toBeDefined();
@@ -162,17 +165,18 @@ describe("CampaignList", () => {
   });
 
   it("should show Cancel button for In-Progress campaigns", async () => {
-    vi.mocked(useCampaigns).mockReturnValue({
-      campaigns: [
-        mockCampaign({ id: "1", name: "Running", status: "In-Progress" }),
-      ],
-      total: 1,
-      isLoading: false,
-      error: null,
-      refetch: vi.fn(),
-    });
+    const campaigns = [
+      mockCampaign({ id: "1", name: "Running", status: "In-Progress" }),
+    ];
 
-    render(<CampaignList />);
+    render(
+      <CampaignList
+        campaigns={campaigns}
+        total={1}
+        isLoading={false}
+        refetch={mockRefetch}
+      />,
+    );
 
     await waitFor(() => {
       expect(screen.getByTitle("Cancel campaign")).toBeDefined();
@@ -180,15 +184,18 @@ describe("CampaignList", () => {
   });
 
   it("should not show action buttons for Completed campaigns", async () => {
-    vi.mocked(useCampaigns).mockReturnValue({
-      campaigns: [mockCampaign({ id: "1", name: "Done", status: "Completed" })],
-      total: 1,
-      isLoading: false,
-      error: null,
-      refetch: vi.fn(),
-    });
+    const campaigns = [
+      mockCampaign({ id: "1", name: "Done", status: "Completed" }),
+    ];
 
-    render(<CampaignList />);
+    render(
+      <CampaignList
+        campaigns={campaigns}
+        total={1}
+        isLoading={false}
+        refetch={mockRefetch}
+      />,
+    );
 
     await waitFor(() => {
       expect(screen.getByText("Done")).toBeDefined();
@@ -198,26 +205,27 @@ describe("CampaignList", () => {
   });
 
   it("should display environment badge", async () => {
-    vi.mocked(useCampaigns).mockReturnValue({
-      campaigns: [
-        mockCampaign({
-          id: "1",
-          name: "Sandbox Campaign",
-          environment: "Sandbox",
-        }),
-        mockCampaign({
-          id: "2",
-          name: "Prod Campaign",
-          environment: "Production",
-        }),
-      ],
-      total: 2,
-      isLoading: false,
-      error: null,
-      refetch: vi.fn(),
-    });
+    const campaigns = [
+      mockCampaign({
+        id: "1",
+        name: "Sandbox Campaign",
+        environment: "Sandbox",
+      }),
+      mockCampaign({
+        id: "2",
+        name: "Prod Campaign",
+        environment: "Production",
+      }),
+    ];
 
-    render(<CampaignList />);
+    render(
+      <CampaignList
+        campaigns={campaigns}
+        total={2}
+        isLoading={false}
+        refetch={mockRefetch}
+      />,
+    );
 
     await waitFor(() => {
       expect(screen.getByText("Sandbox")).toBeDefined();
