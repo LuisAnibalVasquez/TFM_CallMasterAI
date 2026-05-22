@@ -29,6 +29,51 @@ interface CsvRow {
   "Preferred Language"?: string;
 }
 
+const HEADER_MAP: Record<string, keyof CsvRow> = {
+  // English canonical (for self-mapping)
+  "customer name": "Customer Name",
+  "phone number": "Phone Number",
+  age: "Age",
+  "preferred language": "Preferred Language",
+  // English alternates
+  name: "Customer Name",
+  phone: "Phone Number",
+  language: "Preferred Language",
+  // Spanish
+  nombre: "Customer Name",
+  "nombre del cliente": "Customer Name",
+  telefono: "Phone Number",
+  teléfono: "Phone Number",
+  edad: "Age",
+  idioma: "Preferred Language",
+  "idioma de preferencia": "Preferred Language",
+  languaje: "Preferred Language",
+};
+
+export function normalizeCsvRow(rawRow: Record<string, string>): CsvRow {
+  const normalized: CsvRow = {};
+  for (const [key, value] of Object.entries(rawRow)) {
+    const trimmed = key.trim().toLowerCase();
+    const canonicalKey = HEADER_MAP[trimmed];
+    if (canonicalKey) {
+      normalized[canonicalKey] = value;
+    }
+  }
+  return normalized;
+}
+
+const REQUIRED_COLUMNS: Array<keyof CsvRow> = ["Customer Name", "Phone Number"];
+
+export function findMissingColumns(rows: CsvRow[]): string[] {
+  const present = new Set<string>();
+  for (const row of rows) {
+    for (const key of Object.keys(row)) {
+      present.add(key);
+    }
+  }
+  return REQUIRED_COLUMNS.filter((col) => !present.has(col));
+}
+
 interface RowError {
   row: number;
   message: string;
@@ -49,6 +94,7 @@ export function CreateCampaignDialog({
   const [csvRows, setCsvRows] = useState<CsvRow[]>([]);
   const [fileName, setFileName] = useState("");
   const [rowErrors, setRowErrors] = useState<RowError[]>([]);
+  const [missingColumns, setMissingColumns] = useState<string[]>([]);
 
   const resetForm = useCallback(() => {
     setName("");
@@ -56,6 +102,7 @@ export function CreateCampaignDialog({
     setCsvRows([]);
     setFileName("");
     setRowErrors([]);
+    setMissingColumns([]);
   }, []);
 
   const validatePhone = useCallback((phone: string): boolean => {
@@ -65,6 +112,10 @@ export function CreateCampaignDialog({
     } catch {
       return false;
     }
+  }, []);
+
+  const validateLanguage = useCallback((lang: string): boolean => {
+    return /^[a-zA-Z]{2}$/.test(lang.trim());
   }, []);
 
   const handleFileChange = useCallback(
@@ -79,28 +130,60 @@ export function CreateCampaignDialog({
         const text = event.target?.result as string;
         if (!text) return;
 
-        Papa.parse<CsvRow>(text, {
+        Papa.parse<Record<string, string>>(text, {
           header: true,
-          skipEmptyLines: true,
+          skipEmptyLines: "greedy", // Better at skipping lines with just whitespace
           complete: (result) => {
-            const rows = result.data.filter(
-              (row) =>
-                row["Customer Name"] || row["Phone Number"] || row["Age"],
-            );
+            // 1. Normalize all rows first
+            const allNormalized = result.data.map((raw, index) => ({
+              data: normalizeCsvRow(raw),
+              originalIndex: index + 2, // +2 because 0-based index and header is row 1
+            }));
+
+            // 2. Filter out rows that don't have any significant data
+            const validRows = allNormalized.filter((item) => {
+              const { data } = item;
+              return (
+                (data["Customer Name"]?.trim() || "") !== "" ||
+                (data["Phone Number"]?.trim() || "") !== "" ||
+                (data["Age"]?.trim() || "") !== ""
+              );
+            });
 
             const errors: RowError[] = [];
-            rows.forEach((row, index) => {
-              const phone = row["Phone Number"];
-              if (!phone || !validatePhone(String(phone))) {
+            const finalData: CsvRow[] = [];
+
+            validRows.forEach((item) => {
+              const { data, originalIndex } = item;
+              const phone = (data["Phone Number"] || "").trim();
+              const lang = (data["Preferred Language"] || "").trim();
+
+              let hasError = false;
+
+              if (!phone || !validatePhone(phone)) {
                 errors.push({
-                  row: index + 2, // +2 because header is row 1
-                  message: `Row ${index + 2}: invalid phone number format (must be E.164 like +14155552671)`,
+                  row: originalIndex,
+                  message: `Row ${originalIndex}: invalid phone number format (must be E.164 like +14155552671)`,
                 });
+                hasError = true;
+              }
+
+              if (!lang || !validateLanguage(lang)) {
+                errors.push({
+                  row: originalIndex,
+                  message: `Row ${originalIndex}: invalid language format (must be a 2-letter code like 'en' or 'es')`,
+                });
+                hasError = true;
+              }
+
+              if (!hasError) {
+                finalData.push(data);
               }
             });
 
-            setCsvRows(rows);
+            setCsvRows(finalData);
             setRowErrors(errors);
+            setMissingColumns(findMissingColumns(finalData));
           },
           error: (err) => {
             toast({
@@ -114,7 +197,7 @@ export function CreateCampaignDialog({
 
       reader.readAsText(file);
     },
-    [validatePhone, toast],
+    [validatePhone, validateLanguage, toast],
   );
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -276,6 +359,7 @@ export function CreateCampaignDialog({
                   type="file"
                   accept=".csv"
                   className="hidden"
+                  data-testid="csv-file-input"
                   onChange={handleFileChange}
                 />
               </div>
@@ -300,6 +384,20 @@ export function CreateCampaignDialog({
                     </li>
                   ))}
                 </ul>
+              </div>
+            )}
+
+            {/* Missing Columns Error */}
+            {missingColumns.length > 0 && (
+              <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 text-destructive" />
+                  <span className="text-sm font-medium text-destructive">
+                    Missing required column
+                    {missingColumns.length > 1 ? "s" : ""}:{" "}
+                    {missingColumns.join(", ")}
+                  </span>
+                </div>
               </div>
             )}
 

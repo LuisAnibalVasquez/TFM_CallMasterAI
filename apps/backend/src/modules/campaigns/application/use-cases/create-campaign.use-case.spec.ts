@@ -9,14 +9,14 @@ describe("CreateCampaignUseCase", () => {
 
   const validCsvContent = [
     "Customer Name,Phone Number,Age,Preferred Language",
-    "John Doe,+14155552671,30,English",
-    "Jane Smith,+34666111222,25,Spanish",
+    "John Doe,+14155552671,30,en",
+    "Jane Smith,+34666111222,25,es",
   ].join("\n");
 
   const csvWithInvalidPhone = [
     "Customer Name,Phone Number,Age,Preferred Language",
-    "John Doe,+14155552671,30,English",
-    "Bad User,555-bad,20,English",
+    "John Doe,+14155552671,30,en",
+    "Bad User,555-bad,20,en",
   ].join("\n");
 
   beforeEach(async () => {
