@@ -47,11 +47,11 @@ Chain strategy: feature-branch-chain (Work Unit 2 applied)
 
 ## Phase 4: Frontend
 
-- [ ] 4.1 Create `useCampaigns.ts` hook with React Query for campaign list, create, start, cancel, template download
-- [ ] 4.2 Create `CreateCampaignDialog.tsx`: CSV upload with `papaparse` in-memory parsing and `libphonenumber-js` E.164 validation
-- [ ] 4.3 Create `CampaignList.tsx`: table with status badges, Start/Cancel action buttons
-- [ ] 4.4 Create `CampaignsPage.tsx`: composition of list + dialog + template download button
-- [ ] 4.5 Add `/dashboard/campaigns` route to `App.tsx`
+- [x] 4.1 Create `useCampaigns.ts` hook with React Query for campaign list, create, start, cancel, template download
+- [x] 4.2 Create `CreateCampaignDialog.tsx`: CSV upload with `papaparse` in-memory parsing and `libphonenumber-js` E.164 validation
+- [x] 4.3 Create `CampaignList.tsx`: table with status badges, Start/Cancel action buttons
+- [x] 4.4 Create `CampaignsPage.tsx`: composition of list + dialog + template download button
+- [x] 4.5 Add `/dashboard/campaigns` route to `App.tsx`
 
 ## Phase 5: Testing
 

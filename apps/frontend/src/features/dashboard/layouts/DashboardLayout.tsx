@@ -7,7 +7,13 @@ import {
 } from "react-router-dom";
 import { useToast } from "../../../shared/hooks/use-toast";
 import { Button } from "../../../shared/components/ui/button";
-import { PhoneCall, LogOut, LayoutDashboard, Building2 } from "lucide-react";
+import {
+  PhoneCall,
+  LogOut,
+  LayoutDashboard,
+  Building2,
+  Megaphone,
+} from "lucide-react";
 import { apiClient } from "../../../shared/api/ApiClient";
 import { UserRole } from "@callmaster/shared";
 
@@ -101,6 +107,19 @@ export function DashboardLayout() {
               >
                 <Building2 className="h-4 w-4" />
                 Tenants
+              </Link>
+            )}
+            {user.role === UserRole.TenantAdmin && (
+              <Link
+                to="/dashboard/campaigns"
+                className={`flex items-center gap-3 px-3 py-2 rounded-md font-medium text-sm transition-colors ${
+                  isActive("/dashboard/campaigns")
+                    ? "bg-secondary text-secondary-foreground"
+                    : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+                }`}
+              >
+                <Megaphone className="h-4 w-4" />
+                Campaigns
               </Link>
             )}
           </nav>
