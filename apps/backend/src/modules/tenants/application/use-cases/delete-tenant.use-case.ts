@@ -30,7 +30,13 @@ export class DeleteTenantUseCase {
       );
     }
 
-    // 4. Proceed with deletion (DB-level RESTRICT FK also enforces this)
+    // 4. Delete all Auth users belonging to this tenant
+    const userIds = await this.tenantRepository.listUsersByTenant(tenantId);
+    for (const userId of userIds) {
+      await this.tenantRepository.deleteAuthUser(userId);
+    }
+
+    // 5. Finally, delete the tenant record
     await this.tenantRepository.delete(tenantId);
   }
 }

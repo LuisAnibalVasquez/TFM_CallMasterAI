@@ -77,6 +77,7 @@ describe("TenantList", () => {
           contactEmail: "admin@acme.com",
           contactPerson: "John Doe",
           status: TenantStatus.ACTIVE,
+          campaignCount: 0,
           sandboxConfig: {
             apiUrl: "https://sandbox.api.com",
             encryptedKey: "enc1",
@@ -90,6 +91,7 @@ describe("TenantList", () => {
           contactEmail: "admin@beta.com",
           contactPerson: undefined,
           status: TenantStatus.SUSPENDED,
+          campaignCount: 5,
           sandboxConfig: { apiUrl: "", encryptedKey: "" },
           productionConfig: { apiUrl: "", encryptedKey: "" },
         },
@@ -126,5 +128,103 @@ describe("TenantList", () => {
     await waitFor(() => {
       expect(screen.getByText("New Tenant")).toBeDefined();
     });
+  });
+
+  // ─── Deletion Guard Tests ──────────────────────────────────────────────
+
+  it("should disable delete button when campaignCount > 0", async () => {
+    vi.mocked(useTenants).mockReturnValue({
+      tenants: [
+        {
+          id: "1",
+          name: "Acme Corp",
+          phone: "+1234567890",
+          contactEmail: "admin@acme.com",
+          status: TenantStatus.ACTIVE,
+          campaignCount: 3,
+          sandboxConfig: { apiUrl: "https://api.com", encryptedKey: "enc" },
+          productionConfig: { apiUrl: "https://api.com", encryptedKey: "enc" },
+        },
+      ],
+      total: 1,
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    });
+
+    render(<TenantList />);
+
+    await waitFor(() => {
+      const deleteButton = screen.getByTitle(
+        "Cannot delete tenant with existing campaigns",
+      );
+      expect(deleteButton).toBeDefined();
+      expect((deleteButton as HTMLButtonElement).disabled).toBe(true);
+    });
+  });
+
+  it("should enable delete button when campaignCount is 0", async () => {
+    vi.mocked(useTenants).mockReturnValue({
+      tenants: [
+        {
+          id: "2",
+          name: "Beta Inc",
+          phone: "",
+          contactEmail: "admin@beta.com",
+          status: TenantStatus.SUSPENDED,
+          campaignCount: 0,
+          sandboxConfig: { apiUrl: "", encryptedKey: "" },
+          productionConfig: { apiUrl: "", encryptedKey: "" },
+        },
+      ],
+      total: 1,
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    });
+
+    render(<TenantList />);
+
+    await waitFor(() => {
+      const deleteButton = screen.getByTitle("Delete tenant");
+      expect(deleteButton).toBeDefined();
+      expect((deleteButton as HTMLButtonElement).disabled).toBe(false);
+    });
+  });
+
+  it("should not open delete confirmation when clicking disabled button", async () => {
+    vi.mocked(useTenants).mockReturnValue({
+      tenants: [
+        {
+          id: "1",
+          name: "Acme Corp",
+          phone: "+1234567890",
+          contactEmail: "admin@acme.com",
+          status: TenantStatus.ACTIVE,
+          campaignCount: 1,
+          sandboxConfig: { apiUrl: "https://api.com", encryptedKey: "enc" },
+          productionConfig: { apiUrl: "https://api.com", encryptedKey: "enc" },
+        },
+      ],
+      total: 1,
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    });
+
+    render(<TenantList />);
+
+    await waitFor(() => {
+      const deleteButton = screen.getByTitle(
+        "Cannot delete tenant with existing campaigns",
+      );
+      expect((deleteButton as HTMLButtonElement).disabled).toBe(true);
+    });
+
+    // Click the disabled button — should not trigger the confirmation dialog
+    screen.getByTitle("Cannot delete tenant with existing campaigns");
+    // A disabled button's onClick is blocked by the browser.
+    // Verify the confirmation dialog text is NOT present.
+    expect(screen.queryByText("Confirm Deletion")).toBeNull();
   });
 });

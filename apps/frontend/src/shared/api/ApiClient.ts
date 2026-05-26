@@ -18,27 +18,37 @@ export class ApiClient {
 
   constructor(baseUrl?: string) {
     // VITE_API_URL should be defined in .env files
-    // Fallback to empty string for relative paths if neither is provided
     // Using typeof check to prevent ReferenceError in non-vite test environments
-    const defaultUrl =
+    let defaultUrl =
       typeof import.meta !== "undefined" && import.meta.env
         ? import.meta.env.VITE_API_URL
-        : "";
-    this.baseUrl = baseUrl || defaultUrl || "";
+        : "/api";
+
+    // Force proxy usage in local development even if Vite cached the old .env var
+    if (
+      defaultUrl.includes("localhost:3000") ||
+      defaultUrl.includes("127.0.0.1:3000")
+    ) {
+      defaultUrl = "/api";
+    }
+
+    this.baseUrl = baseUrl || defaultUrl || "/api";
   }
 
   private buildUrl(
     endpoint: string,
     params?: Record<string, string | number | boolean>,
   ): string {
-    const fullUrl = this.baseUrl
-      ? new URL(`${this.baseUrl}${endpoint}`)
-      : new URL(
-          endpoint,
-          typeof window !== "undefined"
-            ? window.location.origin
-            : "http://localhost",
-        );
+    const basePath = this.baseUrl ? `${this.baseUrl}${endpoint}` : endpoint;
+    const baseOrigin =
+      typeof window !== "undefined"
+        ? window.location.origin
+        : "http://localhost";
+
+    // Si basePath ya es una URL absoluta (ej. http://localhost:3000/api),
+    // new URL(basePath, baseOrigin) la va a tomar bien ignorando el baseOrigin.
+    // Si es relativa (ej. /api), usará baseOrigin.
+    const fullUrl = new URL(basePath, baseOrigin);
 
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
@@ -90,7 +100,12 @@ export class ApiClient {
         return {} as T;
       }
 
-      return (await response.json()) as T;
+      const text = await response.text();
+      if (!text) {
+        return {} as T;
+      }
+
+      return JSON.parse(text) as T;
     } catch (error) {
       if (error instanceof ApiError) {
         throw error;

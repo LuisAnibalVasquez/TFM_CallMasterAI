@@ -34,12 +34,13 @@ describe("useTenants", () => {
       data: [
         {
           id: "1",
-          name: "Acme",
-          phone: "",
-          contactEmail: "a@b.com",
+          name: "Tenant 1",
+          phone: "123456789",
+          contactEmail: "tenant1@test.com",
           status: TenantStatus.ACTIVE,
-          sandboxConfig: { apiUrl: "", encryptedKey: "" },
-          productionConfig: { apiUrl: "", encryptedKey: "" },
+          campaignCount: 0,
+          sandboxConfig: { apiUrl: "http://sandbox", encryptedKey: "key1" },
+          productionConfig: { apiUrl: "http://prod", encryptedKey: "key2" },
         },
       ],
       total: 1,
@@ -96,9 +97,10 @@ describe("useTenants", () => {
         {
           id: "2",
           name: "Beta",
-          phone: "",
+          phone: "000",
           contactEmail: "b@b.com",
           status: TenantStatus.ACTIVE,
+          campaignCount: 0,
           sandboxConfig: { apiUrl: "", encryptedKey: "" },
           productionConfig: { apiUrl: "", encryptedKey: "" },
         },
@@ -123,11 +125,12 @@ describe("useCreateTenant", () => {
   it("should create a tenant and return result", async () => {
     const mockResult = {
       tenant: {
-        id: "1",
+        id: "new-id",
         name: "Acme",
         phone: "",
         contactEmail: "a@b.com",
         status: TenantStatus.ACTIVE,
+        campaignCount: 0,
         sandboxConfig: { apiUrl: "", encryptedKey: "" },
         productionConfig: { apiUrl: "", encryptedKey: "" },
       },
@@ -215,6 +218,7 @@ describe("useUpdateTenant", () => {
       id: "1",
       name: "Updated",
       status: TenantStatus.SUSPENDED,
+      campaignCount: 0,
     };
     vi.mocked(tenantService.update).mockResolvedValue(mockUpdated as any);
 

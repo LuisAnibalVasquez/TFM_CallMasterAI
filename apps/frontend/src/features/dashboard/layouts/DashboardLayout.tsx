@@ -1,13 +1,28 @@
-import { Outlet, Link, useNavigate, Navigate } from "react-router-dom";
+import {
+  Outlet,
+  Link,
+  useNavigate,
+  useLocation,
+  Navigate,
+} from "react-router-dom";
 import { useToast } from "../../../shared/hooks/use-toast";
 import { Button } from "../../../shared/components/ui/button";
-import { PhoneCall, LogOut, LayoutDashboard, Building2 } from "lucide-react";
+import {
+  PhoneCall,
+  LogOut,
+  LayoutDashboard,
+  Building2,
+  Megaphone,
+} from "lucide-react";
 import { apiClient } from "../../../shared/api/ApiClient";
 import { UserRole } from "@callmaster/shared";
 
 export function DashboardLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+
+  const isActive = (path: string) => location.pathname === path;
 
   // Basic auth check
   let user: { email?: string; role?: UserRole } | null;
@@ -68,18 +83,43 @@ export function DashboardLayout() {
                   ? "/admin/dashboard"
                   : "/dashboard"
               }
-              className="flex items-center gap-3 px-3 py-2 rounded-md bg-secondary text-secondary-foreground font-medium text-sm"
+              className={`flex items-center gap-3 px-3 py-2 rounded-md font-medium text-sm transition-colors ${
+                isActive(
+                  user.role === UserRole.PlatformOwner
+                    ? "/admin/dashboard"
+                    : "/dashboard",
+                )
+                  ? "bg-secondary text-secondary-foreground"
+                  : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+              }`}
             >
               <LayoutDashboard className="h-4 w-4" />
               Dashboard
             </Link>
             {user.role === UserRole.PlatformOwner && (
               <Link
-                to="/admin/dashboard"
-                className="flex items-center gap-3 px-3 py-2 rounded-md text-muted-foreground hover:bg-secondary/50 hover:text-foreground font-medium text-sm transition-colors"
+                to="/admin/tenants"
+                className={`flex items-center gap-3 px-3 py-2 rounded-md font-medium text-sm transition-colors ${
+                  isActive("/admin/tenants")
+                    ? "bg-secondary text-secondary-foreground"
+                    : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+                }`}
               >
                 <Building2 className="h-4 w-4" />
                 Tenants
+              </Link>
+            )}
+            {user.role === UserRole.TenantAdmin && (
+              <Link
+                to="/dashboard/campaigns"
+                className={`flex items-center gap-3 px-3 py-2 rounded-md font-medium text-sm transition-colors ${
+                  isActive("/dashboard/campaigns")
+                    ? "bg-secondary text-secondary-foreground"
+                    : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+                }`}
+              >
+                <Megaphone className="h-4 w-4" />
+                Campaigns
               </Link>
             )}
           </nav>

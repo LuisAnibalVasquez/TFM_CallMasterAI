@@ -45,6 +45,7 @@ describe("TenantsService", () => {
       auth: {
         admin: {
           createUser: jest.fn(),
+          deleteUser: jest.fn(),
         },
       },
     };
@@ -235,6 +236,88 @@ describe("TenantsService", () => {
 
       const result = await service.update("t1", { name: "Updated" });
       expect(result).toBeDefined();
+    });
+  });
+
+  // ─── listUsersByTenant ─────────────────────────────────────────────
+
+  describe("listUsersByTenant", () => {
+    it("should return user IDs for a given tenant", async () => {
+      supabaseAdminMock.select.mockReturnThis();
+      supabaseAdminMock.eq.mockResolvedValue({
+        data: [{ id: "user-1" }, { id: "user-2" }, { id: "user-3" }],
+        error: null,
+      });
+
+      const result = await service.listUsersByTenant("tenant-1");
+
+      expect(result).toEqual(["user-1", "user-2", "user-3"]);
+      expect(supabaseAdminMock.from).toHaveBeenCalledWith("profiles");
+      expect(supabaseAdminMock.select).toHaveBeenCalledWith("id");
+      expect(supabaseAdminMock.eq).toHaveBeenCalledWith(
+        "tenant_id",
+        "tenant-1",
+      );
+    });
+
+    it("should return empty array when no users belong to tenant", async () => {
+      supabaseAdminMock.select.mockReturnThis();
+      supabaseAdminMock.eq.mockResolvedValue({ data: [], error: null });
+
+      const result = await service.listUsersByTenant("tenant-empty");
+
+      expect(result).toEqual([]);
+    });
+
+    it("should throw if supabase query fails", async () => {
+      supabaseAdminMock.select.mockReturnThis();
+      supabaseAdminMock.eq.mockResolvedValue({
+        data: null,
+        error: { message: "DB error" },
+      });
+
+      await expect(service.listUsersByTenant("tenant-1")).rejects.toThrow(
+        InternalServerErrorException,
+      );
+    });
+  });
+
+  // ─── deleteAuthUser ────────────────────────────────────────────────
+
+  describe("deleteAuthUser", () => {
+    it("should call supabase admin deleteUser for the given user ID", async () => {
+      supabaseAdminMock.auth.admin.deleteUser.mockResolvedValue({
+        data: {},
+        error: null,
+      });
+
+      await service.deleteAuthUser("user-1");
+
+      expect(supabaseAdminMock.auth.admin.deleteUser).toHaveBeenCalledWith(
+        "user-1",
+      );
+    });
+
+    it("should not throw when the user is not found (idempotent)", async () => {
+      supabaseAdminMock.auth.admin.deleteUser.mockResolvedValue({
+        data: null,
+        error: { message: "User not found" },
+      });
+
+      await expect(
+        service.deleteAuthUser("user-missing"),
+      ).resolves.toBeUndefined();
+    });
+
+    it("should throw when a non-404 error occurs", async () => {
+      supabaseAdminMock.auth.admin.deleteUser.mockResolvedValue({
+        data: null,
+        error: { message: "Network failure" },
+      });
+
+      await expect(service.deleteAuthUser("user-1")).rejects.toThrow(
+        InternalServerErrorException,
+      );
     });
   });
 });

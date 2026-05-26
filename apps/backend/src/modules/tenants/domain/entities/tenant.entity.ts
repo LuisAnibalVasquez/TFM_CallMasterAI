@@ -12,6 +12,7 @@ export class Tenant implements ITenant {
   contactPerson?: string;
   logoUrl?: string;
   status: TenantStatus;
+  campaignCount: number;
   sandboxConfig: AIProviderConfig;
   productionConfig: AIProviderConfig;
 
@@ -23,6 +24,7 @@ export class Tenant implements ITenant {
     this.contactPerson = props.contactPerson;
     this.logoUrl = props.logoUrl;
     this.status = props.status;
+    this.campaignCount = props.campaignCount ?? 0;
     this.sandboxConfig = props.sandboxConfig;
     this.productionConfig = props.productionConfig;
   }

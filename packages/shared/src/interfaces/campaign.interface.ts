@@ -17,5 +17,9 @@ export interface Campaign {
   status: CampaignStatus;
   environment: CampaignEnvironment;
   csvUrl: string;
+  totalCalls: number;
+  successfulCalls: number;
+  failedCalls: number;
+  totalCost: number;
   createdAt: Date;
 }
