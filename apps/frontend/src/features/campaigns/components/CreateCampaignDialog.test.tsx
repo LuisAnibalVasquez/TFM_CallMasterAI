@@ -16,7 +16,32 @@ vi.mock("papaparse", () => ({
 
 // Mock libphonenumber-js
 vi.mock("libphonenumber-js", () => ({
-  parsePhoneNumber: vi.fn(),
+  parsePhoneNumber: vi.fn(() => ({
+    isValid: () => true,
+  })),
+}));
+
+const { mockCreateCampaign, capturedToastRef } = vi.hoisted(() => {
+  const ref: { current: Record<string, unknown> | null } = { current: null };
+  return {
+    mockCreateCampaign: vi.fn(),
+    capturedToastRef: ref,
+  };
+});
+
+vi.mock("../hooks/useCampaigns", () => ({
+  useCreateCampaign: () => ({
+    createCampaign: mockCreateCampaign,
+    isCreating: false,
+  }),
+}));
+
+vi.mock("../../../shared/hooks/use-toast", () => ({
+  useToast: () => ({
+    toast: (props: Record<string, unknown>) => {
+      capturedToastRef.current = props;
+    },
+  }),
 }));
 
 describe("CreateCampaignDialog", () => {
@@ -367,5 +392,82 @@ describe("CreateCampaignDialog CSV parsing", () => {
       expect(screen.getByText(/0 row\(s\) parsed/)).toBeDefined();
       expect(screen.getByText(/Missing required column/)).toBeDefined();
     });
+  });
+});
+
+// ──────────────────────────────────────────────
+// RHF + Zod validation tests
+// ──────────────────────────────────────────────
+describe("CreateCampaignDialog — RHF validation", () => {
+  const mockOnSuccess = vi.fn();
+  const mockOnCancel = vi.fn();
+  const mockOnTemplateDownload = vi.fn();
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    capturedToastRef.current = null;
+    mockCreateCampaign.mockReset();
+  });
+
+  const getCapturedToast = () => capturedToastRef.current;
+
+  // ── Blocks empty name ──
+  it("should block submission when campaign name is empty", async () => {
+    const user = userEvent.setup();
+    render(
+      <CreateCampaignDialog
+        open={true}
+        onSuccess={mockOnSuccess}
+        onCancel={mockOnCancel}
+        onTemplateDownload={mockOnTemplateDownload}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /create campaign/i }));
+
+    await waitFor(() => {
+      expect(mockCreateCampaign).not.toHaveBeenCalled();
+      const toast = getCapturedToast();
+      expect(toast).toBeTruthy();
+      expect(toast?.variant).toBe("destructive");
+    });
+  });
+
+  // ── Blocks whitespace-only name ──
+  it("should block submission when campaign name is only whitespace", async () => {
+    const user = userEvent.setup();
+    render(
+      <CreateCampaignDialog
+        open={true}
+        onSuccess={mockOnSuccess}
+        onCancel={mockOnCancel}
+        onTemplateDownload={mockOnTemplateDownload}
+      />,
+    );
+
+    await user.type(screen.getByLabelText("Campaign Name"), "   ");
+    await user.click(screen.getByRole("button", { name: /create campaign/i }));
+
+    await waitFor(() => {
+      expect(mockCreateCampaign).not.toHaveBeenCalled();
+      const toast = getCapturedToast();
+      expect(toast).toBeTruthy();
+      expect(toast?.variant).toBe("destructive");
+    });
+  });
+
+  // ── Environment defaults to Sandbox ──
+  it("should default environment to Sandbox and allow Production", async () => {
+    render(
+      <CreateCampaignDialog
+        open={true}
+        onSuccess={mockOnSuccess}
+        onCancel={mockOnCancel}
+        onTemplateDownload={mockOnTemplateDownload}
+      />,
+    );
+
+    const select = screen.getByLabelText("Environment") as HTMLSelectElement;
+    expect(select.value).toBe("Sandbox");
   });
 });

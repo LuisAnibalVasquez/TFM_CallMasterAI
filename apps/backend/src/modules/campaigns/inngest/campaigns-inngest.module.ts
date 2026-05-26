@@ -1,11 +1,14 @@
+// Modified by Gentle AI in branch feat/sec-audit-rbac-rls-pt2 on Tue May 26 2026
 import { Module } from "@nestjs/common";
 import { Inngest } from "inngest";
+import { CampaignsAdminService } from "../infrastructure/providers/campaigns-admin.service";
 
 /**
- * Provides the Inngest client singleton.
+ * Provides the Inngest client singleton and the admin-scoped
+ * ICampaignRepository implementation used by background jobs.
  *
- * Functions using this client are created in the parent CampaignsModule
- * where all dependencies (repository, agent provider) are available.
+ * CampaignsAdminService uses SERVICE_ROLE_KEY to bypass RLS,
+ * allowing Inngest functions to access all tenant data.
  */
 @Module({
   providers: [
@@ -19,7 +22,8 @@ import { Inngest } from "inngest";
         });
       },
     },
+    CampaignsAdminService,
   ],
-  exports: ["InngestClient"],
+  exports: ["InngestClient", CampaignsAdminService],
 })
 export class CampaignsInngestModule {}

@@ -1,19 +1,14 @@
-import { Test, TestingModule } from "@nestjs/testing";
-import { ConfigService } from "@nestjs/config";
+// Modified by Gentle AI in branch feat/sec-audit-rbac-rls-pt2 on Tue May 26 2026
 import { InternalServerErrorException } from "@nestjs/common";
 import { CampaignsService } from "./campaigns.service";
 import { Campaign } from "../../domain/entities/campaign.entity";
 import { CampaignStatus, CampaignEnvironment } from "@callmaster/shared";
-import * as supabaseJs from "@supabase/supabase-js";
-
-jest.mock("@supabase/supabase-js", () => ({
-  createClient: jest.fn(),
-}));
+import { TenantSupabaseService } from "../../../auth/infrastructure/providers/tenant-supabase.service";
 
 describe("CampaignsService", () => {
   let service: CampaignsService;
-  let configService: jest.Mocked<ConfigService>;
-  let supabaseAdminMock: any;
+  let tenantSupabaseService: jest.Mocked<TenantSupabaseService>;
+  let supabaseClientMock: any;
 
   const mockCampaignRow = {
     id: "campaign-1",
@@ -44,16 +39,8 @@ describe("CampaignsService", () => {
     created_at: "2026-01-01T00:00:00.000Z",
   };
 
-  beforeEach(async () => {
-    configService = {
-      get: jest.fn((key: string) => {
-        if (key === "SUPABASE_URL") return "https://mock-url.supabase.co";
-        if (key === "SERVICE_ROLE_KEY") return "mock-service-key";
-        return null;
-      }),
-    } as unknown as jest.Mocked<ConfigService>;
-
-    supabaseAdminMock = {
+  beforeEach(() => {
+    supabaseClientMock = {
       from: jest.fn().mockReturnThis(),
       insert: jest.fn().mockReturnThis(),
       select: jest.fn().mockReturnThis(),
@@ -64,18 +51,17 @@ describe("CampaignsService", () => {
       order: jest.fn().mockReturnThis(),
       range: jest.fn().mockReturnThis(),
       rpc: jest.fn(),
+      storage: {
+        from: jest.fn().mockReturnThis(),
+        createSignedUrl: jest.fn(),
+      },
     };
 
-    (supabaseJs.createClient as jest.Mock).mockReturnValue(supabaseAdminMock);
+    tenantSupabaseService = {
+      getClient: jest.fn().mockReturnValue(supabaseClientMock),
+    } as unknown as jest.Mocked<TenantSupabaseService>;
 
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        CampaignsService,
-        { provide: ConfigService, useValue: configService },
-      ],
-    }).compile();
-
-    service = module.get<CampaignsService>(CampaignsService);
+    service = new CampaignsService(tenantSupabaseService);
   });
 
   afterEach(() => {
@@ -84,7 +70,7 @@ describe("CampaignsService", () => {
 
   describe("create", () => {
     it("should insert a campaign and return the mapped entity", async () => {
-      supabaseAdminMock.single.mockResolvedValue({
+      supabaseClientMock.single.mockResolvedValue({
         data: mockCampaignRow,
         error: null,
       });
@@ -111,12 +97,12 @@ describe("CampaignsService", () => {
       expect(result.successfulCalls).toBe(85);
       expect(result.failedCalls).toBe(15);
       expect(result.totalCost).toBe(42.5);
-      expect(supabaseAdminMock.from).toHaveBeenCalledWith("campaigns");
-      expect(supabaseAdminMock.insert).toHaveBeenCalled();
+      expect(supabaseClientMock.from).toHaveBeenCalledWith("campaigns");
+      expect(supabaseClientMock.insert).toHaveBeenCalled();
     });
 
     it("should throw InternalServerErrorException when Supabase fails", async () => {
-      supabaseAdminMock.single.mockResolvedValue({
+      supabaseClientMock.single.mockResolvedValue({
         data: null,
         error: { message: "DB error" },
       });
@@ -143,7 +129,7 @@ describe("CampaignsService", () => {
 
   describe("findByTenant", () => {
     it("should return paginated campaigns for a tenant", async () => {
-      supabaseAdminMock.range.mockResolvedValue({
+      supabaseClientMock.range.mockResolvedValue({
         data: [mockCampaignRow],
         count: 1,
         error: null,
@@ -158,11 +144,11 @@ describe("CampaignsService", () => {
       expect(result.total).toBe(1);
       expect(result.data[0]).toBeInstanceOf(Campaign);
       expect(result.data[0].id).toBe("campaign-1");
-      expect(supabaseAdminMock.from).toHaveBeenCalledWith("campaigns");
+      expect(supabaseClientMock.from).toHaveBeenCalledWith("campaigns");
     });
 
     it("should return empty list when tenant has no campaigns", async () => {
-      supabaseAdminMock.range.mockResolvedValue({
+      supabaseClientMock.range.mockResolvedValue({
         data: [],
         count: 0,
         error: null,
@@ -180,7 +166,7 @@ describe("CampaignsService", () => {
 
   describe("bulkInsertCalls", () => {
     it("should insert multiple call records at once", async () => {
-      supabaseAdminMock.select.mockResolvedValue({
+      supabaseClientMock.select.mockResolvedValue({
         data: [mockCallRow, { ...mockCallRow, id: "call-2" }],
         error: null,
       });
@@ -205,12 +191,12 @@ describe("CampaignsService", () => {
       expect(result).toHaveLength(2);
       expect(result[0].customerName).toBe("John Doe");
       expect(result[1].customerName).toBe("John Doe");
-      expect(supabaseAdminMock.from).toHaveBeenCalledWith("calls");
-      expect(supabaseAdminMock.insert).toHaveBeenCalled();
+      expect(supabaseClientMock.from).toHaveBeenCalledWith("calls");
+      expect(supabaseClientMock.insert).toHaveBeenCalled();
     });
 
     it("should hash each phone number before inserting", async () => {
-      supabaseAdminMock.select.mockResolvedValue({
+      supabaseClientMock.select.mockResolvedValue({
         data: [mockCallRow],
         error: null,
       });
@@ -226,7 +212,7 @@ describe("CampaignsService", () => {
 
       await service.bulkInsertCalls("campaign-1", calls);
 
-      const insertArg = supabaseAdminMock.insert.mock.calls[0][0];
+      const insertArg = supabaseClientMock.insert.mock.calls[0][0];
       expect(insertArg).toBeDefined();
       // phone_encrypted should contain the plaintext (for now)
       // phone_hash should be a SHA256-like hash
@@ -238,9 +224,9 @@ describe("CampaignsService", () => {
 
   describe("findCallsByCampaign", () => {
     it("should return all calls for a given campaign", async () => {
-      supabaseAdminMock.select.mockReturnThis();
-      supabaseAdminMock.eq.mockReturnThis();
-      supabaseAdminMock.order.mockResolvedValue({
+      supabaseClientMock.select.mockReturnThis();
+      supabaseClientMock.eq.mockReturnThis();
+      supabaseClientMock.order.mockResolvedValue({
         data: [mockCallRow],
         error: null,
       });
@@ -253,9 +239,9 @@ describe("CampaignsService", () => {
     });
 
     it("should return empty array when no calls exist", async () => {
-      supabaseAdminMock.select.mockReturnThis();
-      supabaseAdminMock.eq.mockReturnThis();
-      supabaseAdminMock.order.mockResolvedValue({
+      supabaseClientMock.select.mockReturnThis();
+      supabaseClientMock.eq.mockReturnThis();
+      supabaseClientMock.order.mockResolvedValue({
         data: [],
         error: null,
       });
@@ -276,7 +262,7 @@ describe("CampaignsService", () => {
         voiceflow_transcript_id: "vf-abc123",
       };
 
-      supabaseAdminMock.single.mockResolvedValue({
+      supabaseClientMock.single.mockResolvedValue({
         data: updatedCallRow,
         error: null,
       });
@@ -292,12 +278,12 @@ describe("CampaignsService", () => {
       expect(result.duration).toBe(180);
       expect(result.cost).toBe(3.5);
       expect(result.voiceflowTranscriptId).toBe("vf-abc123");
-      expect(supabaseAdminMock.from).toHaveBeenCalledWith("calls");
-      expect(supabaseAdminMock.update).toHaveBeenCalled();
+      expect(supabaseClientMock.from).toHaveBeenCalledWith("calls");
+      expect(supabaseClientMock.update).toHaveBeenCalled();
     });
 
     it("should throw InternalServerErrorException when update fails", async () => {
-      supabaseAdminMock.single.mockResolvedValue({
+      supabaseClientMock.single.mockResolvedValue({
         data: null,
         error: { message: "Call not found" },
       });
@@ -310,8 +296,8 @@ describe("CampaignsService", () => {
 
   describe("redactCalls", () => {
     it("should redact sensitive fields for all calls in a campaign", async () => {
-      supabaseAdminMock.update.mockReturnThis();
-      supabaseAdminMock.eq.mockResolvedValue({
+      supabaseClientMock.update.mockReturnThis();
+      supabaseClientMock.eq.mockResolvedValue({
         data: null,
         error: null,
         count: 5,
@@ -320,8 +306,8 @@ describe("CampaignsService", () => {
       const result = await service.redactCalls("campaign-1");
 
       expect(result).toBe(5);
-      expect(supabaseAdminMock.from).toHaveBeenCalledWith("calls");
-      expect(supabaseAdminMock.update).toHaveBeenCalledWith(
+      expect(supabaseClientMock.from).toHaveBeenCalledWith("calls");
+      expect(supabaseClientMock.update).toHaveBeenCalledWith(
         {
           customer_name: "[redacted]",
           phone_encrypted: "[redacted]",
@@ -329,15 +315,15 @@ describe("CampaignsService", () => {
         },
         { count: "exact" },
       );
-      expect(supabaseAdminMock.eq).toHaveBeenCalledWith(
+      expect(supabaseClientMock.eq).toHaveBeenCalledWith(
         "campaign_id",
         "campaign-1",
       );
     });
 
     it("should return 0 when no calls exist for the campaign", async () => {
-      supabaseAdminMock.update.mockReturnThis();
-      supabaseAdminMock.eq.mockResolvedValue({
+      supabaseClientMock.update.mockReturnThis();
+      supabaseClientMock.eq.mockResolvedValue({
         data: null,
         error: null,
         count: 0,
@@ -349,8 +335,8 @@ describe("CampaignsService", () => {
     });
 
     it("should throw InternalServerErrorException when redact fails", async () => {
-      supabaseAdminMock.update.mockReturnThis();
-      supabaseAdminMock.eq.mockResolvedValue({
+      supabaseClientMock.update.mockReturnThis();
+      supabaseClientMock.eq.mockResolvedValue({
         data: null,
         error: { message: "DB error" },
         count: null,

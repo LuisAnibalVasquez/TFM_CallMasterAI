@@ -1,4 +1,6 @@
+// Modified by Gentle AI in branch feat/sec-audit-rbac-rls-pt2 on Tue May 26 2026
 import { Test, TestingModule } from "@nestjs/testing";
+import { ConfigModule } from "@nestjs/config";
 import { CampaignsInngestModule } from "./campaigns-inngest.module";
 
 describe("CampaignsInngestModule", () => {
@@ -6,7 +8,10 @@ describe("CampaignsInngestModule", () => {
 
   beforeEach(async () => {
     moduleRef = await Test.createTestingModule({
-      imports: [CampaignsInngestModule],
+      imports: [
+        ConfigModule.forRoot({ isGlobal: true }),
+        CampaignsInngestModule,
+      ],
     }).compile();
   });
 
