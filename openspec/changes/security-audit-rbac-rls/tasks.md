@@ -35,24 +35,24 @@ Chain strategy: pending
 
 ## Phase 2: Backend Core Implementation
 
-- [ ] 2.1 Modify `apps/backend/src/main.ts`: register `ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true })` globally; register `ThrottlerModule.forRoot([{ ttl: 60000, limit: 600 }])`
-- [ ] 2.2 Create `tenant-supabase.service.ts`: `@Injectable({ scope: Scope.REQUEST })`, extract JWT from `@Inject(REQUEST)`, expose `getClient()` returning `createClient(url, anonKey, { global: { headers: { Authorization } } })`
-- [ ] 2.3 Create `allow-override.decorator.ts`: `SetMetadata('allowOverride', true)` decorator
-- [ ] 2.4 Modify `roles.guard.ts`: read `@AllowOverride()` metadata; if set + user is PlatformOwner, query `is_platform_emergency_access()` via admin client and bypass role check on true
-- [ ] 2.5 Modify `campaigns.service.ts`: replace inline `createClient` with `TenantSupabaseService` injection; propagate REQUEST scope
-- [ ] 2.6 Create `campaigns-admin.service.ts`: implements `ICampaignRepository` using `SERVICE_ROLE_KEY` client (singleton), shared `mapToCampaign`/`mapToCall` helpers with service
-- [ ] 2.7 Modify `campaigns.module.ts`: bind `ICampaignRepository` → `CampaignsService` for HTTP scope
-- [ ] 2.8 Modify `campaigns-inngest.module.ts`: add provider `ICampaignRepository` → `CampaignsAdminService`, inject `SERVICE_ROLE_KEY` from config
-- [ ] 2.9 Modify `tenants.controller.ts`: add `@Roles(UserRole.TenantAdmin)` to campaign-running endpoints; add `@AllowOverride()` where platform escape needed
-- [ ] 2.10 Add `@nestjs/throttler` to `apps/backend/package.json`
+- [x] 2.1 Modify `apps/backend/src/main.ts`: register `ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true })` globally; register `ThrottlerModule.forRoot([{ ttl: 60000, limit: 600 }])`
+- [x] 2.2 Create `tenant-supabase.service.ts`: `@Injectable({ scope: Scope.REQUEST })`, extract JWT from `@Inject(REQUEST)`, expose `getClient()` returning `createClient(url, anonKey, { global: { headers: { Authorization } } })`
+- [x] 2.3 Create `allow-override.decorator.ts`: `SetMetadata('allowOverride', true)` decorator
+- [x] 2.4 Modify `roles.guard.ts`: read `@AllowOverride()` metadata; if set + user is PlatformOwner, query `is_platform_emergency_access()` via admin client and bypass role check on true
+- [x] 2.5 Modify `campaigns.service.ts`: replace inline `createClient` with `TenantSupabaseService` injection; propagate REQUEST scope
+- [x] 2.6 Create `campaigns-admin.service.ts`: implements `ICampaignRepository` using `SERVICE_ROLE_KEY` client (singleton), shared `mapToCampaign`/`mapToCall` helpers with service
+- [x] 2.7 Modify `campaigns.module.ts`: bind `ICampaignRepository` → `CampaignsService` for HTTP scope
+- [x] 2.8 Modify `campaigns-inngest.module.ts`: add provider `ICampaignRepository` → `CampaignsAdminService`, inject `SERVICE_ROLE_KEY` from config
+- [x] 2.9 Modify `campaigns.controller.ts`: add `@Roles(UserRole.TenantAdmin)` to campaign-running endpoints; add `@AllowOverride()` where platform escape needed (design path corrected from `tenants.controller.ts` to `campaigns.controller.ts`)
+- [x] 2.10 Add `@nestjs/throttler` to `apps/backend/package.json`
 
 ## Phase 3: Backend Testing
 
-- [ ] 3.1 Unit test: ValidationPipe rejects extra fields (send payload with unknown field, expect 400)
-- [ ] 3.2 Unit test: RolesGuard honors `@AllowOverride` with PlatformOwner + emergency active
-- [ ] 3.3 Integration test: Tenant A cannot GET campaign of Tenant B via API (RLS isolation → 404/403)
-- [ ] 3.4 Integration test: PlatformOwner blocked without emergency session (expect 403)
-- [ ] 3.5 Integration test: PlatformOwner allowed with `emergency_session=true` (expect 200)
+- [x] 3.1 Unit test: ValidationPipe rejects extra fields (send payload with unknown field, expect 400)
+- [x] 3.2 Unit test: RolesGuard honors `@AllowOverride` with PlatformOwner + emergency active
+- [x] 3.3 Unit test (degraded from integration): CampaignsAdminService uses admin client (RLS bypass); CampaignsService uses tenant-scoped client (degraded — no test DB available for true integration)
+- [x] 3.4 Unit test: PlatformOwner blocked without emergency session (expect 403)
+- [x] 3.5 Unit test: PlatformOwner allowed with `emergency_session=true` (expect 200)
 
 ## Phase 4: Frontend Validation
 

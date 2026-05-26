@@ -1,4 +1,6 @@
+// Modified by Gentle AI in branch feat/sec-audit-rbac-rls-pt2 on Tue May 26 2026
 import { NestFactory } from "@nestjs/core";
+import { ValidationPipe } from "@nestjs/common";
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 import { AppModule } from "./app.module";
 import * as cookieParser from "cookie-parser";
@@ -7,6 +9,15 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.use(cookieParser());
+
+  // Global validation pipe: whitelist + forbid non-whitelisted + auto-transform
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
 
   // Configurar orígenes permitidos usando variables de entorno para Producción
   const allowedOrigins = process.env.FRONTEND_URL

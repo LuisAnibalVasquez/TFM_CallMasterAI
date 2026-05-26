@@ -1,7 +1,9 @@
+// Modified by Gentle AI in branch feat/sec-audit-rbac-rls-pt2 on Tue May 26 2026
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { Inngest } from "inngest";
 import { CampaignsService } from "./infrastructure/providers/campaigns.service";
+import { CampaignsAdminService } from "./infrastructure/providers/campaigns-admin.service";
 import { VoiceflowProvider } from "./infrastructure/providers/voiceflow.provider";
 import { CampaignsController } from "./infrastructure/controllers/campaigns.controller";
 import { CreateCampaignUseCase } from "./application/use-cases/create-campaign.use-case";
@@ -20,14 +22,21 @@ import { createCampaignPurgeFunction } from "./inngest/campaign-purge.function";
   controllers: [CampaignsController],
   providers: [
     CampaignsService,
+    CampaignsAdminService,
     VoiceflowProvider,
     CreateCampaignUseCase,
     ListCampaignsUseCase,
     StartCampaignUseCase,
     CancelCampaignUseCase,
+    // HTTP path: tenant-scoped client via TenantSupabaseService (RLS enforced)
     {
       provide: "ICampaignRepository",
       useExisting: CampaignsService,
+    },
+    // Admin path: service_role key client (bypasses RLS) for Inngest jobs
+    {
+      provide: "IAdminCampaignRepository",
+      useExisting: CampaignsAdminService,
     },
     {
       provide: "IAgentProvider",
@@ -50,7 +59,7 @@ import { createCampaignPurgeFunction } from "./inngest/campaign-purge.function";
         });
         return [processingFn, purgeFn];
       },
-      inject: ["InngestClient", "ICampaignRepository", "IAgentProvider"],
+      inject: ["InngestClient", "IAdminCampaignRepository", "IAgentProvider"],
     },
   ],
   exports: [CampaignsService],
