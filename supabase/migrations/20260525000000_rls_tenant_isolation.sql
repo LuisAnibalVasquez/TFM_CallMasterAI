@@ -26,6 +26,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- 3. Replace campaigns RLS policy with JWT-based tenant isolation + emergency override
 DROP POLICY IF EXISTS "Tenants can view their own data" ON public.campaigns;
+DROP POLICY IF EXISTS "tenant_isolation_campaigns" ON public.campaigns;
 
 CREATE POLICY "tenant_isolation_campaigns"
 ON public.campaigns FOR ALL
