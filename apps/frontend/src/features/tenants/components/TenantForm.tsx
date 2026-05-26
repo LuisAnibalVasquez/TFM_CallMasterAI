@@ -1,4 +1,7 @@
+// Modified by Gentle AI in branch feat/sec-audit-rbac-rls-pt3 on Tue May 26 2026
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "../../../shared/components/ui/button";
 import { Input } from "../../../shared/components/ui/input";
 import { Label } from "../../../shared/components/ui/label";
@@ -19,7 +22,14 @@ import {
   Zap,
 } from "lucide-react";
 import { useCreateTenant, useUpdateTenant } from "../hooks/useTenants";
-import type { Tenant, CreateTenantInput } from "@callmaster/shared";
+import {
+  createTenantSchema,
+  updateTenantSchema,
+  type CreateTenantFormInput,
+  type CreateTenantInput,
+  type UpdateTenantInput,
+} from "@callmaster/shared";
+import type { Tenant } from "@callmaster/shared";
 
 interface TenantFormProps {
   tenant?: Tenant | null;
@@ -37,81 +47,77 @@ export function TenantForm({ tenant, onSuccess, onCancel }: TenantFormProps) {
   const [showProduction, setShowProduction] = useState(false);
   const [showTempPassword, setShowTempPassword] = useState(false);
 
-  const [formData, setFormData] = useState({
-    name: tenant?.name || "",
-    contactEmail: tenant?.contactEmail || "",
-    phone: tenant?.phone || "",
-    contactPerson: tenant?.contactPerson || "",
-    logoUrl: tenant?.logoUrl || "",
-    sandboxApiUrl: tenant?.sandboxConfig?.apiUrl || "",
-    sandboxApiKey: "",
-    productionApiUrl: tenant?.productionConfig?.apiUrl || "",
-    productionApiKey: "",
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<CreateTenantFormInput>({
+    resolver: zodResolver(isEditing ? updateTenantSchema : createTenantSchema),
+    defaultValues: {
+      name: tenant?.name || "",
+      contactEmail: tenant?.contactEmail || "",
+      phone: tenant?.phone || undefined,
+      contactPerson: tenant?.contactPerson || undefined,
+      logoUrl: tenant?.logoUrl || undefined,
+      sandboxConfig: {
+        apiUrl: tenant?.sandboxConfig?.apiUrl || "",
+        apiKey: "",
+      },
+      productionConfig: {
+        apiUrl: tenant?.productionConfig?.apiUrl || "",
+        apiKey: "",
+      },
+    },
   });
 
-  const handleChange =
-    (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFormData((prev) => ({ ...prev, [field]: e.target.value }));
-    };
+  const rhfSubmitting = isCreating || isUpdating;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const onValidSubmit = async (data: CreateTenantFormInput) => {
     try {
       if (isEditing && tenant) {
         const updateInput: Record<string, unknown> = {};
 
-        if (formData.name !== tenant.name) updateInput.name = formData.name;
-        if (formData.contactEmail !== tenant.contactEmail)
-          updateInput.contactEmail = formData.contactEmail;
-        if (formData.phone !== tenant.phone) updateInput.phone = formData.phone;
-        if (formData.contactPerson !== (tenant.contactPerson || ""))
-          updateInput.contactPerson = formData.contactPerson || undefined;
-        if (formData.logoUrl !== (tenant.logoUrl || ""))
-          updateInput.logoUrl = formData.logoUrl || undefined;
+        if (data.name !== tenant.name) updateInput.name = data.name;
+        if (data.contactEmail !== tenant.contactEmail)
+          updateInput.contactEmail = data.contactEmail;
+        if (data.phone !== tenant.phone) updateInput.phone = data.phone;
+        if (data.contactPerson !== (tenant.contactPerson || ""))
+          updateInput.contactPerson = data.contactPerson || undefined;
+        if (data.logoUrl !== (tenant.logoUrl || ""))
+          updateInput.logoUrl = data.logoUrl || undefined;
+
+        // Only include sandbox config if API URL changed or key provided
         if (
-          formData.sandboxApiUrl !== tenant.sandboxConfig.apiUrl ||
-          formData.sandboxApiKey
+          data.sandboxConfig.apiUrl !== tenant.sandboxConfig.apiUrl ||
+          data.sandboxConfig.apiKey
         ) {
           updateInput.sandboxConfig = {
-            apiUrl: formData.sandboxApiUrl,
-            apiKey: formData.sandboxApiKey,
+            apiUrl: data.sandboxConfig.apiUrl,
+            apiKey: data.sandboxConfig.apiKey,
           };
         }
+        // Only include production config if API URL changed or key provided
         if (
-          formData.productionApiUrl !== tenant.productionConfig.apiUrl ||
-          formData.productionApiKey
+          data.productionConfig.apiUrl !== tenant.productionConfig.apiUrl ||
+          data.productionConfig.apiKey
         ) {
           updateInput.productionConfig = {
-            apiUrl: formData.productionApiUrl,
-            apiKey: formData.productionApiKey,
+            apiUrl: data.productionConfig.apiUrl,
+            apiKey: data.productionConfig.apiKey,
           };
         }
 
-        await updateTenant(tenant.id, updateInput as any);
+        await updateTenant(
+          tenant.id,
+          updateInput as unknown as UpdateTenantInput,
+        );
         toast({
           title: "Tenant updated",
           description: "Tenant configuration has been updated successfully.",
         });
         onSuccess();
       } else {
-        const createInput: CreateTenantInput = {
-          name: formData.name,
-          contactEmail: formData.contactEmail,
-          phone: formData.phone || undefined,
-          contactPerson: formData.contactPerson || undefined,
-          logoUrl: formData.logoUrl || undefined,
-          sandboxConfig: {
-            apiUrl: formData.sandboxApiUrl,
-            apiKey: formData.sandboxApiKey,
-          },
-          productionConfig: {
-            apiUrl: formData.productionApiUrl,
-            apiKey: formData.productionApiKey,
-          },
-        };
-
-        await createTenant(createInput);
+        await createTenant(data as unknown as CreateTenantInput);
         toast({
           title: "Tenant created",
           description: "Tenant and admin user have been created successfully.",
@@ -129,7 +135,13 @@ export function TenantForm({ tenant, onSuccess, onCancel }: TenantFormProps) {
     }
   };
 
-  const isSubmitting = isCreating || isUpdating;
+  const onInvalidSubmit = () => {
+    toast({
+      variant: "destructive",
+      title: "Validation Error",
+      description: "Please check your inputs and fix any errors.",
+    });
+  };
 
   return (
     <>
@@ -146,7 +158,11 @@ export function TenantForm({ tenant, onSuccess, onCancel }: TenantFormProps) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form
+            onSubmit={handleSubmit(onValidSubmit, onInvalidSubmit)}
+            className="space-y-6"
+            noValidate
+          >
             {/* Basic Information */}
             <div className="space-y-4">
               <h4 className="text-sm font-semibold text-foreground">
@@ -157,43 +173,49 @@ export function TenantForm({ tenant, onSuccess, onCancel }: TenantFormProps) {
                   <Label htmlFor="name">Company Name *</Label>
                   <Input
                     id="name"
-                    required
-                    value={formData.name}
-                    onChange={handleChange("name")}
                     placeholder="Acme Corp"
                     className="bg-background"
+                    {...register("name")}
                   />
+                  {errors.name && (
+                    <p className="mt-1 text-xs text-destructive" role="alert">
+                      {errors.name.message}
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="contactEmail">Admin Email *</Label>
                   <Input
                     id="contactEmail"
                     type="email"
-                    required
-                    value={formData.contactEmail}
-                    onChange={handleChange("contactEmail")}
                     placeholder="admin@acmecorp.com"
                     className="bg-background"
+                    {...register("contactEmail")}
                   />
+                  {errors.contactEmail && (
+                    <p className="mt-1 text-xs text-destructive" role="alert">
+                      {errors.contactEmail.message}
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="contactPerson">Contact Person</Label>
                   <Input
                     id="contactPerson"
-                    value={formData.contactPerson}
-                    onChange={handleChange("contactPerson")}
                     placeholder="John Doe"
                     className="bg-background"
+                    {...register("contactPerson")}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="phone">Phone</Label>
                   <Input
                     id="phone"
-                    value={formData.phone}
-                    onChange={handleChange("phone")}
                     placeholder="+1 234 567 890"
                     className="bg-background"
+                    {...register("phone", {
+                      setValueAs: (v: string) => (v === "" ? undefined : v),
+                    })}
                   />
                 </div>
               </div>
@@ -202,11 +224,17 @@ export function TenantForm({ tenant, onSuccess, onCancel }: TenantFormProps) {
                 <Input
                   id="logoUrl"
                   type="url"
-                  value={formData.logoUrl}
-                  onChange={handleChange("logoUrl")}
                   placeholder="https://acmecorp.com/logo.png"
                   className="bg-background"
+                  {...register("logoUrl", {
+                    setValueAs: (v: string) => (v === "" ? undefined : v),
+                  })}
                 />
+                {errors.logoUrl && (
+                  <p className="mt-1 text-xs text-destructive" role="alert">
+                    {errors.logoUrl.message}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -241,12 +269,18 @@ export function TenantForm({ tenant, onSuccess, onCancel }: TenantFormProps) {
                       <Input
                         id="sandboxApiUrl"
                         type="url"
-                        required={!isEditing}
-                        value={formData.sandboxApiUrl}
-                        onChange={handleChange("sandboxApiUrl")}
                         placeholder="https://sandbox-api.voiceflow.com"
                         className="bg-background"
+                        {...register("sandboxConfig.apiUrl")}
                       />
+                      {errors.sandboxConfig?.apiUrl && (
+                        <p
+                          className="mt-1 text-xs text-destructive"
+                          role="alert"
+                        >
+                          {errors.sandboxConfig.apiUrl.message}
+                        </p>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="sandboxApiKey">
@@ -256,12 +290,18 @@ export function TenantForm({ tenant, onSuccess, onCancel }: TenantFormProps) {
                       <Input
                         id="sandboxApiKey"
                         type="password"
-                        required={!isEditing}
-                        value={formData.sandboxApiKey}
-                        onChange={handleChange("sandboxApiKey")}
                         placeholder={isEditing ? "••••••••" : "sk-sandbox-..."}
                         className="bg-background"
+                        {...register("sandboxConfig.apiKey")}
                       />
+                      {errors.sandboxConfig?.apiKey && (
+                        <p
+                          className="mt-1 text-xs text-destructive"
+                          role="alert"
+                        >
+                          {errors.sandboxConfig.apiKey.message}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -299,12 +339,18 @@ export function TenantForm({ tenant, onSuccess, onCancel }: TenantFormProps) {
                       <Input
                         id="productionApiUrl"
                         type="url"
-                        required={!isEditing}
-                        value={formData.productionApiUrl}
-                        onChange={handleChange("productionApiUrl")}
                         placeholder="https://api.voiceflow.com"
                         className="bg-background"
+                        {...register("productionConfig.apiUrl")}
                       />
+                      {errors.productionConfig?.apiUrl && (
+                        <p
+                          className="mt-1 text-xs text-destructive"
+                          role="alert"
+                        >
+                          {errors.productionConfig.apiUrl.message}
+                        </p>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="productionApiKey">
@@ -314,14 +360,20 @@ export function TenantForm({ tenant, onSuccess, onCancel }: TenantFormProps) {
                       <Input
                         id="productionApiKey"
                         type="password"
-                        required={!isEditing}
-                        value={formData.productionApiKey}
-                        onChange={handleChange("productionApiKey")}
                         placeholder={
                           isEditing ? "••••••••" : "sk-production-..."
                         }
                         className="bg-background"
+                        {...register("productionConfig.apiKey")}
                       />
+                      {errors.productionConfig?.apiKey && (
+                        <p
+                          className="mt-1 text-xs text-destructive"
+                          role="alert"
+                        >
+                          {errors.productionConfig.apiKey.message}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -332,8 +384,8 @@ export function TenantForm({ tenant, onSuccess, onCancel }: TenantFormProps) {
               <Button type="button" variant="outline" onClick={onCancel}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? (
+              <Button type="submit" disabled={rhfSubmitting}>
+                {rhfSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     {isEditing ? "Updating..." : "Creating..."}

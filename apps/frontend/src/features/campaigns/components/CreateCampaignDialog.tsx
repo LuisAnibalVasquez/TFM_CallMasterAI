@@ -1,4 +1,7 @@
+// Modified by Gentle AI in branch feat/sec-audit-rbac-rls-pt3 on Tue May 26 2026
 import { useState, useCallback, useRef } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "../../../shared/components/ui/button";
 import { Input } from "../../../shared/components/ui/input";
 import { Label } from "../../../shared/components/ui/label";
@@ -12,6 +15,7 @@ import {
 import { useToast } from "../../../shared/hooks/use-toast";
 import { Loader2, Upload, FileText, AlertCircle, Download } from "lucide-react";
 import { useCreateCampaign } from "../hooks/useCampaigns";
+import { campaignSchema, type CampaignFormInput } from "@callmaster/shared";
 import Papa from "papaparse";
 import { parsePhoneNumber } from "libphonenumber-js";
 
@@ -89,21 +93,28 @@ export function CreateCampaignDialog({
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [name, setName] = useState("");
-  const [environment, setEnvironment] = useState("Sandbox");
+  const {
+    register,
+    handleSubmit,
+    reset: resetFormRHF,
+    formState: { errors },
+  } = useForm<CampaignFormInput>({
+    resolver: zodResolver(campaignSchema),
+    defaultValues: { name: "", environment: "Sandbox" },
+  });
+
   const [csvRows, setCsvRows] = useState<CsvRow[]>([]);
   const [fileName, setFileName] = useState("");
   const [rowErrors, setRowErrors] = useState<RowError[]>([]);
   const [missingColumns, setMissingColumns] = useState<string[]>([]);
 
   const resetForm = useCallback(() => {
-    setName("");
-    setEnvironment("Sandbox");
+    resetFormRHF({ name: "", environment: "Sandbox" });
     setCsvRows([]);
     setFileName("");
     setRowErrors([]);
     setMissingColumns([]);
-  }, []);
+  }, [resetFormRHF]);
 
   const validatePhone = useCallback((phone: string): boolean => {
     try {
@@ -200,72 +211,74 @@ export function CreateCampaignDialog({
     [validatePhone, validateLanguage, toast],
   );
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onValidSubmit = useCallback(
+    async (data: CampaignFormInput) => {
+      if (csvRows.length === 0) {
+        toast({
+          variant: "destructive",
+          title: "Validation error",
+          description: "Please upload a CSV file with at least one row.",
+        });
+        return;
+      }
 
-    if (!name.trim()) {
-      toast({
-        variant: "destructive",
-        title: "Validation error",
-        description: "Campaign name is required.",
-      });
-      return;
-    }
+      if (rowErrors.length > 0) {
+        toast({
+          variant: "destructive",
+          title: "Phone validation errors",
+          description: `Found ${rowErrors.length} invalid phone number(s). Please fix them and re-upload.`,
+        });
+        return;
+      }
 
-    if (csvRows.length === 0) {
-      toast({
-        variant: "destructive",
-        title: "Validation error",
-        description: "Please upload a CSV file with at least one row.",
-      });
-      return;
-    }
+      // Rebuild CSV content from parsed rows
+      const headers = [
+        "Customer Name",
+        "Phone Number",
+        "Age",
+        "Preferred Language",
+      ];
+      const csvContent = [
+        headers.join(","),
+        ...csvRows.map((row) =>
+          headers
+            .map(
+              (h) => `"${(row[h as keyof CsvRow] || "").replace(/"/g, '""')}"`,
+            )
+            .join(","),
+        ),
+      ].join("\n");
 
-    if (rowErrors.length > 0) {
-      toast({
-        variant: "destructive",
-        title: "Phone validation errors",
-        description: `Found ${rowErrors.length} invalid phone number(s). Please fix them and re-upload.`,
-      });
-      return;
-    }
+      try {
+        await createCampaign({
+          name: data.name,
+          environment: data.environment,
+          csvContent,
+        });
+        toast({
+          title: "Campaign created",
+          description: `"${data.name}" has been created with ${csvRows.length} call(s).`,
+        });
+        resetForm();
+        onSuccess();
+      } catch {
+        toast({
+          variant: "destructive",
+          title: "Creation failed",
+          description: "Could not create the campaign. Please try again.",
+        });
+      }
+    },
+    [csvRows, rowErrors, createCampaign, toast, resetForm, onSuccess],
+  );
 
-    // Rebuild CSV content from parsed rows
-    const headers = [
-      "Customer Name",
-      "Phone Number",
-      "Age",
-      "Preferred Language",
-    ];
-    const csvContent = [
-      headers.join(","),
-      ...csvRows.map((row) =>
-        headers
-          .map((h) => `"${(row[h as keyof CsvRow] || "").replace(/"/g, '""')}"`)
-          .join(","),
-      ),
-    ].join("\n");
-
-    try {
-      await createCampaign({
-        name: name.trim(),
-        environment,
-        csvContent,
-      });
-      toast({
-        title: "Campaign created",
-        description: `"${name.trim()}" has been created with ${csvRows.length} call(s).`,
-      });
-      resetForm();
-      onSuccess();
-    } catch {
-      toast({
-        variant: "destructive",
-        title: "Creation failed",
-        description: "Could not create the campaign. Please try again.",
-      });
-    }
-  };
+  const onInvalidSubmit = useCallback(() => {
+    toast({
+      variant: "destructive",
+      title: "Validation Error",
+      description: "Please enter a campaign name and select an environment.",
+    });
+  }, [toast]);
 
   if (!open) return null;
 
@@ -283,18 +296,25 @@ export function CreateCampaignDialog({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form
+            onSubmit={handleSubmit(onValidSubmit, onInvalidSubmit)}
+            className="space-y-6"
+            noValidate
+          >
             {/* Campaign Name */}
             <div className="space-y-2">
               <Label htmlFor="campaign-name">Campaign Name</Label>
               <Input
                 id="campaign-name"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
                 placeholder="Q1 Customer Outreach"
                 className="bg-background"
+                {...register("name")}
               />
+              {errors.name && (
+                <p className="mt-1 text-xs text-destructive" role="alert">
+                  {errors.name.message}
+                </p>
+              )}
             </div>
 
             {/* Environment */}
@@ -302,9 +322,8 @@ export function CreateCampaignDialog({
               <Label htmlFor="environment">Environment</Label>
               <select
                 id="environment"
-                value={environment}
-                onChange={(e) => setEnvironment(e.target.value)}
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                {...register("environment")}
               >
                 <option value="Sandbox">Sandbox</option>
                 <option value="Production">Production</option>
