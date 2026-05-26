@@ -16,7 +16,9 @@ vi.mock("papaparse", () => ({
 
 // Mock libphonenumber-js
 vi.mock("libphonenumber-js", () => ({
-  parsePhoneNumber: vi.fn(),
+  parsePhoneNumber: vi.fn(() => ({
+    isValid: () => true,
+  })),
 }));
 
 const { mockCreateCampaign, capturedToastRef } = vi.hoisted(() => {
