@@ -56,11 +56,11 @@ Chain strategy: pending
 
 ## Phase 4: Frontend Validation
 
-- [ ] 4.1 Add `zod`, `react-hook-form`, `@hookform/resolvers` to `apps/frontend/package.json`
-- [ ] 4.2 Modify `LoginPage.tsx`: integrate `useForm` + `zodResolver(loginSchema)`, replace manual `useState`, show toast on invalid email
-- [ ] 4.3 Modify `TenantForm.tsx`: integrate `useForm` + `zodResolver(tenantSchema)`
-- [ ] 4.4 Modify `CreateCampaignDialog.tsx`: integrate `useForm` + `zodResolver(campaignSchema)` for name/environment; keep custom CSV parser
+- [x] 4.1 Add `zod`, `react-hook-form`, `@hookform/resolvers` to `apps/frontend/package.json`
+- [x] 4.2 Modify `LoginPage.tsx`: integrate `useForm` + `zodResolver(loginSchema)`, replace manual `useState`, show toast on invalid email
+- [x] 4.3 Modify `TenantForm.tsx`: integrate `useForm` + `zodResolver(tenantSchema)`
+- [x] 4.4 Modify `CreateCampaignDialog.tsx`: integrate `useForm` + `zodResolver(campaignSchema)` for name/environment; keep custom CSV parser
 
 ## Phase 5: Frontend & E2E Testing
 
-- [ ] 5.1 E2E test: render LoginPage, type "bad-email", submit → toast error, no network call
+- [x] 5.1 E2E test: render LoginPage, type "bad-email", submit → toast error, no network call

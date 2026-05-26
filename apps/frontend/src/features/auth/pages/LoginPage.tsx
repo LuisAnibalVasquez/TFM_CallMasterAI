@@ -1,4 +1,6 @@
-import { useState } from "react";
+// Modified by Gentle AI in branch feat/sec-audit-rbac-rls-pt3 on Tue May 26 2026
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../../../shared/components/ui/button";
 import { Input } from "../../../shared/components/ui/input";
@@ -7,27 +9,31 @@ import { Card, CardContent } from "../../../shared/components/ui/card";
 import { useToast } from "../../../shared/hooks/use-toast";
 import { PhoneCall, Loader2 } from "lucide-react";
 import { apiClient, ApiError } from "../../../shared/api/ApiClient";
-import { UserRole } from "@callmaster/shared";
+import { loginSchema, type LoginInput, UserRole } from "@callmaster/shared";
 
 export function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: "", password: "" },
+  });
+
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
+  const onValidSubmit = async (data: LoginInput) => {
     try {
-      const data = await apiClient.post<any>("/auth/login", {
-        email,
-        password,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const response = await apiClient.post<any>("/auth/login", {
+        email: data.email,
+        password: data.password,
       });
 
       // Store only non-sensitive user data
-      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("user", JSON.stringify(response.user));
 
       toast({
         title: "Welcome back!",
@@ -35,7 +41,7 @@ export function LoginPage() {
       });
 
       // Redirect based on role
-      const userRole = data.user?.role;
+      const userRole = response.user?.role;
       if (userRole === UserRole.PlatformOwner) {
         navigate("/admin/dashboard");
       } else if (userRole === UserRole.TenantAdmin) {
@@ -52,9 +58,19 @@ export function LoginPage() {
         title: "Authentication Error",
         description: message,
       });
-    } finally {
-      setIsLoading(false);
     }
+  };
+
+  const onInvalidSubmit = () => {
+    const errorMessages: string[] = [];
+    if (errors.email) errorMessages.push(errors.email.message as string);
+    if (errors.password) errorMessages.push(errors.password.message as string);
+
+    toast({
+      variant: "destructive",
+      title: "Validation Error",
+      description: errorMessages.join(" ") || "Please check your inputs.",
+    });
   };
 
   return (
@@ -76,21 +92,27 @@ export function LoginPage() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <Card className="bg-card shadow-soft-lg border-border">
           <CardContent className="pt-6">
-            <form className="space-y-6" onSubmit={handleLogin}>
+            <form
+              className="space-y-6"
+              onSubmit={handleSubmit(onValidSubmit, onInvalidSubmit)}
+              noValidate
+            >
               <div className="space-y-2">
                 <Label htmlFor="email">Email address</Label>
                 <div className="mt-1">
                   <Input
                     id="email"
-                    name="email"
                     type="email"
                     autoComplete="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
                     placeholder="admin@tuempresa.com"
                     className="bg-background"
+                    {...register("email")}
                   />
+                  {errors.email && (
+                    <p className="mt-1 text-xs text-destructive" role="alert">
+                      {errors.email.message}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -109,21 +131,27 @@ export function LoginPage() {
                 <div className="mt-1">
                   <Input
                     id="password"
-                    name="password"
                     type="password"
                     autoComplete="current-password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
                     className="bg-background"
+                    {...register("password")}
                   />
+                  {errors.password && (
+                    <p className="mt-1 text-xs text-destructive" role="alert">
+                      {errors.password.message}
+                    </p>
+                  )}
                 </div>
               </div>
 
               <div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? (
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Signing in...
