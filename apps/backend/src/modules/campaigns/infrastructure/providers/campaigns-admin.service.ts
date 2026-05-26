@@ -1,5 +1,7 @@
 // Modified by Gentle AI in branch feat/sec-audit-rbac-rls-pt2 on Tue May 26 2026
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import * as crypto from "crypto";
 import { Campaign } from "../../domain/entities/campaign.entity";
 import {
@@ -7,30 +9,34 @@ import {
   CreateCallInput,
   CallRecord,
 } from "../../domain/ports/campaign-repository.port";
-import { TenantSupabaseService } from "../../../auth/infrastructure/providers/tenant-supabase.service";
 import { mapToCampaign, mapToCall } from "./campaign-mappers";
 
 /**
- * Tenant-scoped CampaignRepository implementation.
+ * Admin-scoped CampaignRepository implementation.
  *
- * Uses TenantSupabaseService (request-scoped) to forward the user's JWT
- * to Supabase, enabling RLS tenant isolation for HTTP requests.
- *
- * The REQUEST scope cascades from TenantSupabaseService — this service
- * is automatically request-scoped because it injects it.
+ * Uses SERVICE_ROLE_KEY to bypass RLS. This is intentionally a singleton
+ * — used by Inngest background jobs that need full data access.
  */
 @Injectable()
-export class CampaignsService implements ICampaignRepository {
-  constructor(private tenantSupabase: TenantSupabaseService) {}
+export class CampaignsAdminService implements ICampaignRepository {
+  private supabaseAdmin: SupabaseClient;
 
-  private getClient() {
-    return this.tenantSupabase.getClient();
+  constructor(private configService: ConfigService) {
+    const supabaseUrl = this.configService.get<string>("SUPABASE_URL");
+    const serviceRoleKey = this.configService.get<string>("SERVICE_ROLE_KEY");
+
+    this.supabaseAdmin = createClient(supabaseUrl || "", serviceRoleKey || "", {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
   }
 
   // ─── ICampaignRepository implementation ────────────────────────────
 
   async create(campaign: Campaign): Promise<Campaign> {
-    const { data, error } = await this.getClient()
+    const { data, error } = await this.supabaseAdmin
       .from("campaigns")
       .insert({
         id: campaign.id,
@@ -58,7 +64,7 @@ export class CampaignsService implements ICampaignRepository {
   }
 
   async findById(id: string): Promise<Campaign | null> {
-    const { data, error } = await this.getClient()
+    const { data, error } = await this.supabaseAdmin
       .from("campaigns")
       .select("*")
       .eq("id", id)
@@ -78,7 +84,7 @@ export class CampaignsService implements ICampaignRepository {
     const { page, limit } = options;
     const offset = (page - 1) * limit;
 
-    const { data, error, count } = await this.getClient()
+    const { data, error, count } = await this.supabaseAdmin
       .from("campaigns")
       .select("*", { count: "exact" })
       .eq("tenant_id", tenantId)
@@ -111,7 +117,7 @@ export class CampaignsService implements ICampaignRepository {
     if (delta.totalCost !== undefined)
       updatePayload.total_cost = delta.totalCost;
 
-    const { data, error } = await this.getClient()
+    const { data, error } = await this.supabaseAdmin
       .from("campaigns")
       .update(updatePayload)
       .eq("id", id)
@@ -134,7 +140,7 @@ export class CampaignsService implements ICampaignRepository {
     const rows = calls.map((call) => ({
       campaign_id: campaignId,
       customer_name: call.customerName,
-      phone_encrypted: call.phone, // plaintext for now; encryption added later
+      phone_encrypted: call.phone,
       phone_hash: this.hashPhone(call.phone),
       language: call.language,
       age: call.age,
@@ -142,7 +148,7 @@ export class CampaignsService implements ICampaignRepository {
       cost: 0,
     }));
 
-    const { data, error } = await this.getClient()
+    const { data, error } = await this.supabaseAdmin
       .from("calls")
       .insert(rows)
       .select();
@@ -157,7 +163,7 @@ export class CampaignsService implements ICampaignRepository {
   }
 
   async findCallsByCampaign(campaignId: string): Promise<CallRecord[]> {
-    const { data, error } = await this.getClient()
+    const { data, error } = await this.supabaseAdmin
       .from("calls")
       .select("*")
       .eq("campaign_id", campaignId)
@@ -184,7 +190,7 @@ export class CampaignsService implements ICampaignRepository {
     if (delta.voiceflowTranscriptId !== undefined)
       updatePayload.voiceflow_transcript_id = delta.voiceflowTranscriptId;
 
-    const { data, error } = await this.getClient()
+    const { data, error } = await this.supabaseAdmin
       .from("calls")
       .update(updatePayload)
       .eq("id", callId)
@@ -201,7 +207,7 @@ export class CampaignsService implements ICampaignRepository {
   }
 
   async redactCalls(campaignId: string): Promise<number> {
-    const { error, count } = await this.getClient()
+    const { error, count } = await this.supabaseAdmin
       .from("calls")
       .update(
         {
@@ -223,9 +229,9 @@ export class CampaignsService implements ICampaignRepository {
   }
 
   async getTemplateDownloadUrl(): Promise<string> {
-    const { data, error } = await this.getClient()
-      .storage.from("template")
-      .createSignedUrl("template.csv", 300); // 5-minute expiry
+    const { data, error } = await this.supabaseAdmin.storage
+      .from("template")
+      .createSignedUrl("template.csv", 300);
 
     if (error || !data?.signedUrl) {
       throw new InternalServerErrorException(
@@ -236,10 +242,8 @@ export class CampaignsService implements ICampaignRepository {
     return data.signedUrl;
   }
 
-  /**
-   * Generates a SHA256 hash of the phone number for indexed lookups.
-   * This is a one-way hash — the original phone cannot be recovered from it.
-   */
+  // ─── Private helpers ───────────────────────────────────────────────
+
   private hashPhone(phone: string): string {
     return crypto.createHash("sha256").update(phone).digest("hex");
   }

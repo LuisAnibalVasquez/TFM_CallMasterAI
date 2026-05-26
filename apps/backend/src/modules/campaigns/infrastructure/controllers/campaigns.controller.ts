@@ -1,3 +1,4 @@
+// Modified by Gentle AI in branch feat/sec-audit-rbac-rls-pt2 on Tue May 26 2026
 import {
   Controller,
   Post,
@@ -19,8 +20,11 @@ import {
   ApiQuery,
   ApiParam,
 } from "@nestjs/swagger";
+import { UserRole } from "@callmaster/shared";
 import { AuthGuard } from "../../../auth/infrastructure/guards/auth.guard";
 import { RolesGuard } from "../../../auth/infrastructure/guards/roles.guard";
+import { Roles } from "../../../auth/application/decorators/roles.decorator";
+import { AllowOverride } from "../../../auth/application/decorators/allow-override.decorator";
 import { CreateCampaignDto } from "../../application/dto/create-campaign.dto";
 import { CreateCampaignUseCase } from "../../application/use-cases/create-campaign.use-case";
 import { ListCampaignsUseCase } from "../../application/use-cases/list-campaigns.use-case";
@@ -43,6 +47,8 @@ export class CampaignsController {
   ) {}
 
   @Post()
+  @Roles(UserRole.TenantAdmin)
+  @AllowOverride()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: "Create a new campaign with CSV data" })
   @ApiResponse({
@@ -63,6 +69,8 @@ export class CampaignsController {
   }
 
   @Get()
+  @Roles(UserRole.TenantAdmin)
+  @AllowOverride()
   @ApiOperation({ summary: "List campaigns for the authenticated tenant" })
   @ApiQuery({ name: "page", required: false, type: Number, example: 1 })
   @ApiQuery({ name: "limit", required: false, type: Number, example: 20 })
@@ -79,6 +87,8 @@ export class CampaignsController {
   }
 
   @Post(":id/start")
+  @Roles(UserRole.TenantAdmin)
+  @AllowOverride()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Start a campaign (change status to In-Progress)" })
   @ApiParam({ name: "id", description: "Campaign ID" })
@@ -93,6 +103,8 @@ export class CampaignsController {
   }
 
   @Post(":id/cancel")
+  @Roles(UserRole.TenantAdmin)
+  @AllowOverride()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Cancel a campaign (change status to Cancelled)" })
   @ApiParam({ name: "id", description: "Campaign ID" })
@@ -107,6 +119,8 @@ export class CampaignsController {
   }
 
   @Get("template")
+  @Roles(UserRole.TenantAdmin)
+  @AllowOverride()
   @ApiOperation({
     summary: "Get a presigned URL for downloading the CSV template",
   })
