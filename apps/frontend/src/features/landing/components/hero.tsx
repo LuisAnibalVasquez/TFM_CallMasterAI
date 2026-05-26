@@ -19,7 +19,7 @@ export function Hero() {
             <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 shadow-soft">
               <Sparkles className="h-3.5 w-3.5 text-primary" strokeWidth={2} />
               <span className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-                Powered by Voiceflow
+                Powered by AI
               </span>
             </div>
 

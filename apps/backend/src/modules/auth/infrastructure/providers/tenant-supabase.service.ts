@@ -33,11 +33,13 @@ export class TenantSupabaseService {
     const supabaseUrl = this.configService.get<string>("SUPABASE_URL") || "";
     const anonKey = this.configService.get<string>("SUPABASE_ANON_KEY") || "";
 
-    // Extract the JWT from the Authorization header
+    // Extract the JWT from the Authorization header or cookies
     const authHeader = this.request.headers.authorization;
-    const token = authHeader?.startsWith("Bearer ")
-      ? authHeader.slice(7)
-      : null;
+    const cookieToken = this.request.cookies?.["access_token"];
+
+    const token =
+      cookieToken ||
+      (authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null);
 
     this.cachedClient = createClient(supabaseUrl, anonKey, {
       auth: {

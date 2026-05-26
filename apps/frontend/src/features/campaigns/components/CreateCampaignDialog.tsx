@@ -194,7 +194,9 @@ export function CreateCampaignDialog({
 
             setCsvRows(finalData);
             setRowErrors(errors);
-            setMissingColumns(findMissingColumns(finalData));
+            setMissingColumns(
+              findMissingColumns(validRows.map((item) => item.data)),
+            );
           },
           error: (err) => {
             toast({
