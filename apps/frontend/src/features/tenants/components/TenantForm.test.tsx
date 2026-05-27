@@ -175,19 +175,19 @@ describe("TenantForm — Zod + RHF validation", () => {
   it("should render edit form with existing tenant data", () => {
     render(
       <TenantForm
-        tenant={{
-          id: "1",
-          name: "Existing Corp",
-          contactEmail: "existing@corp.com",
-          phone: "+1234567890",
-          contactPerson: "Jane Doe",
-          logoUrl: "https://logo.com/img.png",
-          status: "active" as const,
-          sandboxConfig: { apiUrl: "https://sb.com", apiKey: "" },
-          productionConfig: { apiUrl: "https://prod.com", apiKey: "" },
-          createdAt: "",
-          updatedAt: "",
-        }}
+        tenant={
+          {
+            id: "1",
+            name: "Existing Corp",
+            contactEmail: "existing@corp.com",
+            phone: "+1234567890",
+            contactPerson: "Jane Doe",
+            logoUrl: "https://logo.com/img.png",
+            status: "active" as any,
+            sandboxConfig: { apiUrl: "https://sb.com", encryptedKey: "" },
+            productionConfig: { apiUrl: "https://prod.com", encryptedKey: "" },
+          } as any
+        }
         onSuccess={mockOnSuccess}
         onCancel={mockOnCancel}
       />,

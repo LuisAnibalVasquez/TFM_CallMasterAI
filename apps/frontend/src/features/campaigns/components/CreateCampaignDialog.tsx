@@ -198,7 +198,7 @@ export function CreateCampaignDialog({
               findMissingColumns(validRows.map((item) => item.data)),
             );
           },
-          error: (err) => {
+          error: (err: any) => {
             toast({
               variant: "destructive",
               title: "CSV parsing error",

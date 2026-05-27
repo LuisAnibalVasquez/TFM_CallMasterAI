@@ -50,13 +50,13 @@ export class AuthController {
     response.cookie("access_token", session.access_token, {
       httpOnly: true,
       secure: isProduction,
-      sameSite: "lax",
+      sameSite: isProduction ? "none" : "lax",
       maxAge: 3600 * 1000, // 1 hour
     });
     response.cookie("refresh_token", session.refresh_token, {
       httpOnly: true,
       secure: isProduction,
-      sameSite: "lax",
+      sameSite: isProduction ? "none" : "lax",
       maxAge: 7 * 24 * 3600 * 1000, // 7 days
     });
 
