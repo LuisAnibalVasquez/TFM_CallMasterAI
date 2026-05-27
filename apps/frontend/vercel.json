@@ -1,10 +1,6 @@
 {
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "https://TU_BACKEND_EN_PRODUCCION.com/$1"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
