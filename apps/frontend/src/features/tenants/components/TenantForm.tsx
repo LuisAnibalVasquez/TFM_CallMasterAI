@@ -52,6 +52,7 @@ export function TenantForm({ tenant, onSuccess, onCancel }: TenantFormProps) {
     handleSubmit,
     formState: { errors },
   } = useForm<CreateTenantFormInput>({
+    // @ts-expect-error - Zod types mismatch due to optional fields in update vs create
     resolver: zodResolver(isEditing ? updateTenantSchema : createTenantSchema),
     defaultValues: {
       name: tenant?.name || "",
