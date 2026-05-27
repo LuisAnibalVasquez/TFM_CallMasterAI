@@ -14,7 +14,7 @@
     "runTFM": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "build": "npm run build --workspaces",
     "lint": "npm run lint --workspaces",
-    "prepare": "husky"
+    "prepare": "is-ci || husky"
   },
   "lint-staged": {
     "**/*.{ts,tsx}": [
@@ -34,6 +34,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
     "husky": "^9.1.7",
+    "is-ci": "^4.1.0",
     "lint-staged": "^16.4.0",
     "prettier": "^3.8.3",
     "supabase": "^2.98.0",
