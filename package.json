@@ -11,7 +11,8 @@
   "scripts": {
     "dev:backend": "npm run dev -w apps/backend",
     "dev:frontend": "npm run dev -w apps/frontend",
-    "runTFM": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:inngest": "npm run inngest:dev -w apps/backend",
+    "runTFM": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\" \"npm run dev:inngest\"",
     "build": "npm run build --workspaces",
     "lint": "npm run lint --workspaces",
     "prepare": "node -e \"if (!process.env.VERCEL && process.env.CI !== '1' && process.env.CI !== 'true') { try { require('child_process').execSync('husky') } catch(e) {} }\""

@@ -5,6 +5,8 @@ import {
   CallResponse,
 } from "../domain/ports/agent-provider.port";
 import { Client } from "../domain/entities/client.entity";
+import { TenantsService } from "../../tenants/infrastructure/providers/tenants.service";
+import { EncryptionService } from "../../tenants/infrastructure/providers/encryption.service";
 
 export interface CampaignStartedEvent {
   data: {
@@ -23,6 +25,9 @@ export interface CampaignProcessingDependencies {
     name: string;
     data: Record<string, unknown>;
   }) => Promise<unknown>;
+  tenantsService: TenantsService;
+  encryptionService: EncryptionService;
+  masterKey: string;
 }
 
 /**
@@ -36,7 +41,31 @@ export async function processCampaignCalls(
   deps: CampaignProcessingDependencies,
 ): Promise<void> {
   const { campaignId, tenantId } = event.data;
-  const { repository, agentProvider, sendEvent } = deps;
+  const {
+    repository,
+    agentProvider,
+    sendEvent,
+    tenantsService,
+    encryptionService,
+    masterKey,
+  } = deps;
+
+  // Fetch tenant's Voiceflow configuration from the database
+  const tenant = await tenantsService.findById(tenantId);
+  if (!tenant) {
+    throw new Error(`Tenant ${tenantId} not found for campaign ${campaignId}`);
+  }
+
+  // Decrypt the production API key
+  const apiKey = await encryptionService.decryptSecret(
+    tenant.productionConfig.encryptedKey,
+    masterKey,
+  );
+
+  const config = {
+    apiUrl: tenant.productionConfig.apiUrl,
+    apiKey,
+  };
 
   // Fetch all pending calls for this campaign
   const calls = await repository.findCallsByCampaign(campaignId);
@@ -53,11 +82,6 @@ export async function processCampaignCalls(
       call.age,
       call.language,
     );
-
-    const config = {
-      apiUrl: process.env.VOICEFLOW_API_URL || "https://api.voiceflow.com",
-      apiKey: process.env.VOICEFLOW_API_KEY || "",
-    };
 
     let response: CallResponse;
     try {

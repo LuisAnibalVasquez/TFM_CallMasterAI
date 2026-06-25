@@ -19,7 +19,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "inngest:dev": "npx inngest-cli@latest dev --port 8288"
+    "inngest:dev": "npx --yes inngest-cli@latest dev -u http://127.0.0.1:3000/api/inngest --port 8288"
   },
   "dependencies": {
     "@callmaster/shared": "*",
@@ -52,6 +52,7 @@
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",
+    "inngest-cli": "^1.33.0",
     "jest": "^29.5.0",
     "prettier": "^3.0.0",
     "source-map-support": "^0.5.21",

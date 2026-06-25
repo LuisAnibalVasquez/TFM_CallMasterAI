@@ -12,8 +12,22 @@ export class VoiceflowProvider implements IAgentProvider {
     config: { apiUrl: string; apiKey: string },
   ): Promise<CallResponse> {
     try {
+      const payload = {
+        to: client.phone,
+        variables: {
+          customer_name: client.name,
+          customer_phone: client.phone,
+          customer_age: String(client.age),
+          customer_language: client.language,
+        },
+      };
+
       console.log(
         `[VoiceflowProvider] Triggering call for ${client.name} at ${client.phone} using ${config.apiUrl}`,
+      );
+      console.log(
+        `[VoiceflowProvider] Request Payload:`,
+        JSON.stringify(payload),
       );
 
       const response = await fetch(config.apiUrl, {
@@ -22,22 +36,33 @@ export class VoiceflowProvider implements IAgentProvider {
           Authorization: config.apiKey,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          to: client.phone,
-          variables: {
-            customer_name: client.name,
-            customer_phone: client.phone,
-            customer_age: client.age,
-            customer_language: client.language,
-          },
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
+        let errorBody = "";
+        try {
+          errorBody = await response.text();
+        } catch {
+          // ignore
+        }
+        console.error(
+          `[VoiceflowProvider] Voiceflow Error! Status: ${response.status}. Body: ${errorBody}`,
+        );
         return {
           success: false,
-          error: `Voiceflow API returned status ${response.status}`,
+          error: `Voiceflow API returned status ${response.status}: ${errorBody}`,
         };
+      }
+
+      let successBody = "";
+      try {
+        successBody = await response.text();
+        console.log(
+          `[VoiceflowProvider] Voiceflow Success! Response: ${successBody}`,
+        );
+      } catch {
+        // ignore
       }
 
       return {
