@@ -66,7 +66,8 @@ export function AnalyticOverview({
 
   const kpis = data?.kpis;
   const callsPerHour = data?.trends?.callsPerHour ?? [];
-  const isEmpty = !kpis || kpis.totalCalls === 0;
+  const topTenants = data?.topTenants ?? [];
+  const isEmpty = !kpis || (kpis.totalCalls === 0 && topTenants.length === 0);
 
   if (isEmpty) {
     return (
@@ -86,7 +87,7 @@ export function AnalyticOverview({
   const showTenants = (kpis as any).totalTenants !== undefined;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div
         className={`grid gap-3 ${showTenants ? "grid-cols-2 sm:grid-cols-5" : "grid-cols-2 sm:grid-cols-4"}`}
       >
@@ -119,6 +120,21 @@ export function AnalyticOverview({
         )}
       </div>
       <CallsChart callsPerHour={callsPerHour} />
+      {topTenants.length > 0 && (
+        <div className="rounded-xl border border-border bg-background p-4">
+          <h3 className="text-sm font-medium mb-4">Top 5 Tenants</h3>
+          <div className="space-y-2">
+            {topTenants.map((t: any) => (
+              <div key={t.tenantId} className="flex justify-between text-sm">
+                <span>Tenant ID: {t.tenantId.substring(0, 8)}...</span>
+                <span className="font-mono">
+                  {formatNumber(t.totalCalls)} calls
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
