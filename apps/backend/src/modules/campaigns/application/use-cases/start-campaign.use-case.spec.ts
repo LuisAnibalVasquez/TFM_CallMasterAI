@@ -10,6 +10,9 @@ describe("StartCampaignUseCase", () => {
     findById: jest.Mock;
     update: jest.Mock;
   };
+  let mockInngest: {
+    send: jest.Mock;
+  };
 
   const makeCampaign = (overrides: Partial<any> = {}) =>
     new Campaign({
@@ -32,6 +35,9 @@ describe("StartCampaignUseCase", () => {
       findById: jest.fn(),
       update: jest.fn(),
     };
+    mockInngest = {
+      send: jest.fn().mockResolvedValue({ ids: ["evt-1"] }),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -39,6 +45,10 @@ describe("StartCampaignUseCase", () => {
         {
           provide: "ICampaignRepository",
           useValue: mockRepository,
+        },
+        {
+          provide: "InngestClient",
+          useValue: mockInngest,
         },
       ],
     }).compile();
@@ -51,7 +61,7 @@ describe("StartCampaignUseCase", () => {
   });
 
   describe("execute", () => {
-    it("should transition a CREATED campaign to IN_PROGRESS status", async () => {
+    it("should transition a CREATED campaign to IN_PROGRESS status and emit campaign.started event", async () => {
       const campaign = makeCampaign({ status: CampaignStatus.CREATED });
       mockRepository.findById.mockResolvedValue(campaign);
 
@@ -71,6 +81,15 @@ describe("StartCampaignUseCase", () => {
       });
       expect(result.status).toBe(CampaignStatus.IN_PROGRESS);
       expect(result.id).toBe("campaign-1");
+
+      // Verify Inngest event is emitted AFTER status update
+      expect(mockInngest.send).toHaveBeenCalledWith({
+        name: "campaign.started",
+        data: {
+          campaignId: "campaign-1",
+          tenantId: "tenant-1",
+        },
+      });
     });
 
     it("should throw NotFoundException if campaign does not exist", async () => {
@@ -79,6 +98,8 @@ describe("StartCampaignUseCase", () => {
       await expect(
         useCase.execute({ campaignId: "nonexistent", tenantId: "tenant-1" }),
       ).rejects.toThrow(NotFoundException);
+
+      expect(mockInngest.send).not.toHaveBeenCalled();
     });
 
     it("should throw NotFoundException if campaign belongs to a different tenant", async () => {
@@ -91,6 +112,8 @@ describe("StartCampaignUseCase", () => {
       await expect(
         useCase.execute({ campaignId: "campaign-1", tenantId: "tenant-1" }),
       ).rejects.toThrow(NotFoundException);
+
+      expect(mockInngest.send).not.toHaveBeenCalled();
     });
 
     it("should throw BadRequestException if campaign is already IN_PROGRESS", async () => {
@@ -100,6 +123,8 @@ describe("StartCampaignUseCase", () => {
       await expect(
         useCase.execute({ campaignId: "campaign-1", tenantId: "tenant-1" }),
       ).rejects.toThrow(BadRequestException);
+
+      expect(mockInngest.send).not.toHaveBeenCalled();
     });
 
     it("should throw BadRequestException if campaign is already COMPLETED", async () => {
@@ -109,6 +134,8 @@ describe("StartCampaignUseCase", () => {
       await expect(
         useCase.execute({ campaignId: "campaign-1", tenantId: "tenant-1" }),
       ).rejects.toThrow(BadRequestException);
+
+      expect(mockInngest.send).not.toHaveBeenCalled();
     });
 
     it("should throw BadRequestException if campaign is already CANCELLED", async () => {
@@ -118,6 +145,8 @@ describe("StartCampaignUseCase", () => {
       await expect(
         useCase.execute({ campaignId: "campaign-1", tenantId: "tenant-1" }),
       ).rejects.toThrow(BadRequestException);
+
+      expect(mockInngest.send).not.toHaveBeenCalled();
     });
   });
 });
