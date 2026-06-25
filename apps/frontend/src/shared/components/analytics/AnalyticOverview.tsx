@@ -1,7 +1,10 @@
-import { PhoneCall, Clock, DollarSign, BarChart3 } from "lucide-react";
+import { PhoneCall, Clock, DollarSign, BarChart3, Users } from "lucide-react";
 import { KpiCard } from "./KpiCard";
 import { CallsChart } from "./CallsChart";
-import type { TenantSummaryResponse } from "../../api/types/analytics";
+import type {
+  TenantSummaryResponse,
+  GlobalAnalyticsResponse,
+} from "../../api/types/analytics";
 
 function formatNumber(n: number): string {
   return n.toLocaleString("en-US");
@@ -22,7 +25,7 @@ function formatMinutes(n: number): string {
 }
 
 interface AnalyticOverviewProps {
-  data?: TenantSummaryResponse | null;
+  data?: TenantSummaryResponse | GlobalAnalyticsResponse | null;
   loading?: boolean;
   error?: string | null;
 }
@@ -63,7 +66,8 @@ export function AnalyticOverview({
 
   const kpis = data?.kpis;
   const callsPerHour = data?.trends?.callsPerHour ?? [];
-  const isEmpty = !kpis || kpis.totalCalls === 0;
+  const topTenants = data?.topTenants ?? [];
+  const isEmpty = !kpis || (kpis.totalCalls === 0 && topTenants.length === 0);
 
   if (isEmpty) {
     return (
@@ -80,9 +84,13 @@ export function AnalyticOverview({
     );
   }
 
+  const showTenants = (kpis as any).totalTenants !== undefined;
+
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div className="space-y-6">
+      <div
+        className={`grid gap-3 ${showTenants ? "grid-cols-2 sm:grid-cols-5" : "grid-cols-2 sm:grid-cols-4"}`}
+      >
         <KpiCard
           icon={<PhoneCall className="h-3.5 w-3.5" />}
           label="Calls"
@@ -103,8 +111,30 @@ export function AnalyticOverview({
           label="Cost"
           value={formatCostUSD(kpis.totalCostUSD)}
         />
+        {showTenants && (
+          <KpiCard
+            icon={<Users className="h-3.5 w-3.5" />}
+            label="Tenants"
+            value={formatNumber((kpis as any).totalTenants)}
+          />
+        )}
       </div>
       <CallsChart callsPerHour={callsPerHour} />
+      {topTenants.length > 0 && (
+        <div className="rounded-xl border border-border bg-background p-4">
+          <h3 className="text-sm font-medium mb-4">Top 5 Tenants</h3>
+          <div className="space-y-2">
+            {topTenants.map((t: any) => (
+              <div key={t.tenantId} className="flex justify-between text-sm">
+                <span>{t.tenantName ?? t.tenantId}</span>
+                <span className="font-mono">
+                  {formatNumber(t.totalCalls)} calls
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

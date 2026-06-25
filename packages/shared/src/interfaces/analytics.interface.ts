@@ -1,8 +1,10 @@
+/** Hourly call count data point for trend charts */
 export interface CallsPerHourPoint {
   hour: string; // ISO 8601 truncated to hour
   count: number;
 }
 
+/** Per-tenant analytics summary (TenantAdmin scoped via RLS) */
 export interface TenantSummaryResponse {
   kpis: {
     totalCalls: number;
@@ -16,6 +18,7 @@ export interface TenantSummaryResponse {
   };
 }
 
+/** Global KPIs aggregated across all tenants (PlatformOwner) */
 export interface GlobalKpis {
   totalCalls: number;
   totalCampaigns: number;
@@ -25,6 +28,7 @@ export interface GlobalKpis {
   totalTenants: number;
 }
 
+/** Entry in the top-5 tenants ranking */
 export interface TopTenantEntry {
   tenantId: string;
   tenantName: string;
@@ -33,6 +37,7 @@ export interface TopTenantEntry {
   totalCostUSD: number;
 }
 
+/** Global analytics response for PlatformOwner */
 export interface GlobalAnalyticsResponse {
   kpis: GlobalKpis;
   topTenants: TopTenantEntry[];
