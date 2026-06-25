@@ -242,6 +242,22 @@ export class CampaignsAdminService implements ICampaignRepository {
     return data.signedUrl;
   }
 
+  async delete(id: string): Promise<void> {
+    // Delete associated calls first to respect FK constraints
+    await this.supabaseAdmin.from("calls").delete().eq("campaign_id", id);
+
+    const { error } = await this.supabaseAdmin
+      .from("campaigns")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      throw new InternalServerErrorException(
+        `Failed to delete campaign: ${error.message}`,
+      );
+    }
+  }
+
   // ─── Private helpers ───────────────────────────────────────────────
 
   private hashPhone(phone: string): string {

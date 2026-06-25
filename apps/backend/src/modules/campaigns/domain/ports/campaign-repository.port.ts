@@ -37,5 +37,6 @@ export interface ICampaignRepository {
   findCallsByCampaign(campaignId: string): Promise<CallRecord[]>;
   updateCall(callId: string, delta: Partial<CallRecord>): Promise<CallRecord>;
   redactCalls(campaignId: string): Promise<number>;
+  delete(id: string): Promise<void>;
   getTemplateDownloadUrl(): Promise<string>;
 }
