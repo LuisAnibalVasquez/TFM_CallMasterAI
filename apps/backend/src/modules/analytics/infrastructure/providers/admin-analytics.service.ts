@@ -80,14 +80,16 @@ export class AdminAnalyticsService {
         ? Math.round((totalSuccessful / totalCalls) * 10000) / 10000
         : 0;
 
-    // Count distinct tenants with campaigns
-    const tenantIds = new Set<string>();
-    for (const r of rows) {
-      if (r.tenant_id) {
-        tenantIds.add(r.tenant_id);
-      }
+    // Count total tenants
+    const { count: totalTenants, error: tenantCountError } = await client
+      .from("tenants")
+      .select("id", { count: "exact", head: true });
+
+    if (tenantCountError) {
+      throw new InternalServerErrorException(
+        `Failed to count tenants: ${tenantCountError.message}`,
+      );
     }
-    const totalTenants = tenantIds.size;
 
     // Fetch all calls for total minutes
     const { data: calls, error: callError } = await client
