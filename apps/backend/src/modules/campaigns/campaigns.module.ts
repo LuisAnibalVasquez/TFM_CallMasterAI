@@ -17,6 +17,9 @@ import { ICampaignRepository } from "./domain/ports/campaign-repository.port";
 import { IAgentProvider } from "./domain/ports/agent-provider.port";
 import { createCampaignProcessingFunction } from "./inngest/campaign-processing.function";
 import { createCampaignPurgeFunction } from "./inngest/campaign-purge.function";
+import { TenantsService } from "../tenants/infrastructure/providers/tenants.service";
+import { EncryptionService } from "../tenants/infrastructure/providers/encryption.service";
+import { ConfigService } from "@nestjs/config";
 
 @Module({
   imports: [ConfigModule, AuthModule, CampaignsInngestModule],
@@ -50,18 +53,37 @@ import { createCampaignPurgeFunction } from "./inngest/campaign-purge.function";
         inngest: Inngest,
         repository: ICampaignRepository,
         agentProvider: IAgentProvider,
+        tenantsService: TenantsService,
+        encryptionService: EncryptionService,
+        configService: ConfigService,
       ) => {
+        const masterKey = configService.get<string>("ENCRYPTION_MASTER_KEY");
+        if (!masterKey) {
+          throw new Error(
+            "ENCRYPTION_MASTER_KEY is not configured in environment",
+          );
+        }
         const processingFn = createCampaignProcessingFunction(inngest, {
           repository,
           agentProvider,
           sendEvent: (event) => inngest.send(event),
+          tenantsService,
+          encryptionService,
+          masterKey,
         });
         const purgeFn = createCampaignPurgeFunction(inngest, {
           repository,
         });
         return [processingFn, purgeFn];
       },
-      inject: ["InngestClient", "IAdminCampaignRepository", "IAgentProvider"],
+      inject: [
+        "InngestClient",
+        "IAdminCampaignRepository",
+        "IAgentProvider",
+        TenantsService,
+        EncryptionService,
+        ConfigService,
+      ],
     },
   ],
   exports: [CampaignsService],

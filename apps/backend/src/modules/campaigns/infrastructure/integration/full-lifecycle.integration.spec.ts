@@ -28,6 +28,18 @@ describe("Campaign Full Lifecycle Integration", () => {
   let agentProvider: { triggerCall: jest.Mock };
   let sendEvent: jest.Mock;
   let purgeLogger: { log: jest.Mock };
+  let tenantsService: { findById: jest.Mock };
+  let encryptionService: { decryptSecret: jest.Mock };
+
+  const mockTenant = {
+    id: "tenant-test-1",
+    productionConfig: {
+      apiUrl: "https://api.voiceflow.com",
+      encryptedKey: "encrypted-hex-test",
+    },
+  };
+
+  const masterKey = "mock-master-key";
 
   // ── Test campaign data ──────────────────────────────────────────────
   const campaignId = "campaign-lifecycle-1";
@@ -60,6 +72,12 @@ describe("Campaign Full Lifecycle Integration", () => {
     agentProvider = { triggerCall: jest.fn() };
     sendEvent = jest.fn().mockResolvedValue({ ids: ["evt-sent"] });
     purgeLogger = { log: jest.fn() };
+    tenantsService = {
+      findById: jest.fn().mockResolvedValue(mockTenant),
+    };
+    encryptionService = {
+      decryptSecret: jest.fn().mockResolvedValue("decrypted-test-api-key"),
+    };
   });
 
   afterEach(() => {
@@ -108,6 +126,9 @@ describe("Campaign Full Lifecycle Integration", () => {
         repository: repository as any,
         agentProvider: agentProvider as any,
         sendEvent,
+        tenantsService: tenantsService as any,
+        encryptionService: encryptionService as any,
+        masterKey,
       },
     );
 
@@ -183,6 +204,9 @@ describe("Campaign Full Lifecycle Integration", () => {
         repository: repository as any,
         agentProvider: agentProvider as any,
         sendEvent,
+        tenantsService: tenantsService as any,
+        encryptionService: encryptionService as any,
+        masterKey,
       },
     );
 
@@ -208,6 +232,9 @@ describe("Campaign Full Lifecycle Integration", () => {
         repository: repository as any,
         agentProvider: agentProvider as any,
         sendEvent,
+        tenantsService: tenantsService as any,
+        encryptionService: encryptionService as any,
+        masterKey,
       },
     );
 
@@ -278,6 +305,9 @@ describe("Campaign Full Lifecycle Integration", () => {
         repository: repository as any,
         agentProvider: agentProvider as any,
         sendEvent,
+        tenantsService: tenantsService as any,
+        encryptionService: encryptionService as any,
+        masterKey,
       },
     );
 
@@ -316,6 +346,9 @@ describe("Campaign Full Lifecycle Integration", () => {
         repository: repository as any,
         agentProvider: agentProvider as any,
         sendEvent,
+        tenantsService: tenantsService as any,
+        encryptionService: encryptionService as any,
+        masterKey,
       },
     );
 

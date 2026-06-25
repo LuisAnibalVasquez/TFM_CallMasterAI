@@ -2,6 +2,8 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { ConfigModule } from "@nestjs/config";
 import { CampaignsInngestModule } from "./campaigns-inngest.module";
+import { TenantsService } from "../../tenants/infrastructure/providers/tenants.service";
+import { EncryptionService } from "../../tenants/infrastructure/providers/encryption.service";
 
 describe("CampaignsInngestModule", () => {
   let moduleRef: TestingModule;
@@ -12,7 +14,15 @@ describe("CampaignsInngestModule", () => {
         ConfigModule.forRoot({ isGlobal: true }),
         CampaignsInngestModule,
       ],
-    }).compile();
+    })
+      .overrideProvider(TenantsService)
+      .useValue({ findById: jest.fn() })
+      .overrideProvider(EncryptionService)
+      .useValue({
+        decryptSecret: jest.fn(),
+        encryptSecret: jest.fn(),
+      })
+      .compile();
   });
 
   it("should be defined", () => {
