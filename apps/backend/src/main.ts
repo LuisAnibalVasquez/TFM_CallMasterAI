@@ -1,12 +1,14 @@
-// Modified by Gentle AI in branch feat/sec-audit-rbac-rls-pt2 on Tue May 26 2026
 import { NestFactory } from "@nestjs/core";
 import { ValidationPipe } from "@nestjs/common";
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
+import { serve } from "inngest/express";
 import { AppModule } from "./app.module";
 import * as cookieParser from "cookie-parser";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // rawBody: true preserves the raw request buffer on req.rawBody so
+  // Inngest can verify webhook signatures in production.
+  const app = await NestFactory.create(AppModule, { rawBody: true });
 
   app.use(cookieParser());
 
@@ -52,6 +54,18 @@ async function bootstrap() {
       "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui-standalone-preset.js",
     ],
   });
+
+  // ── Inngest serve endpoint ──────────────────────────────────────────
+  // Exposes POST /api/inngest so the Inngest dev server can discover and
+  // invoke registered background functions (Campaign Processing, Campaign
+  // Purge). The InngestClient and INNGEST_FUNCTIONS tokens are provided
+  // by CampaignsInngestModule / CampaignsModule respectively.
+  const inngestClient = app.get("InngestClient");
+  const inngestFunctions = app.get("INNGEST_FUNCTIONS");
+  app.use(
+    "/api/inngest",
+    serve({ client: inngestClient, functions: inngestFunctions }),
+  );
 
   const port = process.env.PORT || 3000;
   await app.listen(port, "0.0.0.0");
