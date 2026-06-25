@@ -21,6 +21,7 @@ describe("AdminAnalyticsService", () => {
       from: jest.fn().mockReturnThis(),
       select: jest.fn().mockReturnThis(),
       order: jest.fn().mockReturnThis(),
+      in: jest.fn().mockReturnThis(),
     };
 
     adminSupabaseService = {
@@ -44,6 +45,13 @@ describe("AdminAnalyticsService", () => {
   const givenCalls = (calls: any[] | null, error: any = null) => {
     supabaseClientMock.select.mockResolvedValueOnce({
       data: calls,
+      error,
+    });
+  };
+
+  const givenTenants = (tenants: any[] | null, error: any = null) => {
+    supabaseClientMock.select.mockResolvedValueOnce({
+      data: tenants,
       error,
     });
   };
@@ -243,18 +251,24 @@ describe("AdminAnalyticsService", () => {
           total_cost: "100.00",
         }),
       ]);
+      givenTenants([
+        { id: "tenant-a", name: "Acme Corp" },
+        { id: "tenant-b", name: "Beta Inc" },
+      ]);
 
       const result = await service.getTopTenants();
 
       expect(result).toHaveLength(2);
       // tenant-b should be first (200 total calls)
       expect(result[0].tenantId).toBe("tenant-b");
+      expect(result[0].tenantName).toBe("Beta Inc");
       expect(result[0].totalCalls).toBe(200);
       expect(result[0].totalCampaigns).toBe(1);
       expect(result[0].totalCostUSD).toBe(100.0);
 
       // tenant-a second (150 total calls)
       expect(result[1].tenantId).toBe("tenant-a");
+      expect(result[1].tenantName).toBe("Acme Corp");
       expect(result[1].totalCalls).toBe(150);
       expect(result[1].totalCampaigns).toBe(2);
       expect(result[1].totalCostUSD).toBe(75.0);
@@ -270,12 +284,19 @@ describe("AdminAnalyticsService", () => {
           }),
         ),
       );
+      givenTenants(
+        Array.from({ length: 5 }, (_, i) => ({
+          id: `tenant-${i}`,
+          name: `Tenant ${i}`,
+        })),
+      );
 
       const result = await service.getTopTenants();
 
       expect(result).toHaveLength(5);
       // tenant-0 has 1000 calls, should be first
       expect(result[0].tenantId).toBe("tenant-0");
+      expect(result[0].tenantName).toBe("Tenant 0");
       expect(result[0].totalCalls).toBe(1000);
     });
 
@@ -284,6 +305,11 @@ describe("AdminAnalyticsService", () => {
         mockCampaign({ tenant_id: "low", total_calls: 10 }),
         mockCampaign({ tenant_id: "high", total_calls: 500 }),
         mockCampaign({ tenant_id: "mid", total_calls: 100 }),
+      ]);
+      givenTenants([
+        { id: "high", name: "High Volume" },
+        { id: "mid", name: "Mid Volume" },
+        { id: "low", name: "Low Volume" },
       ]);
 
       const result = await service.getTopTenants();
@@ -305,11 +331,13 @@ describe("AdminAnalyticsService", () => {
           total_cost: "0",
         },
       ]);
+      givenTenants([{ id: "valid", name: "ValidCo" }]);
 
       const result = await service.getTopTenants();
 
       expect(result).toHaveLength(1);
       expect(result[0].tenantId).toBe("valid");
+      expect(result[0].tenantName).toBe("ValidCo");
     });
 
     it("should throw InternalServerErrorException when campaign fetch fails", async () => {
@@ -334,11 +362,42 @@ describe("AdminAnalyticsService", () => {
         "tenant_id, total_calls, total_cost",
       );
     });
+
+    it("should fall back to tenantId as tenantName when tenant not found", async () => {
+      givenCampaigns([
+        mockCampaign({ tenant_id: "missing-tenant", total_calls: 50 }),
+      ]);
+      // tenants table returns empty — no matching names
+      givenTenants([]);
+
+      const result = await service.getTopTenants();
+
+      expect(result).toHaveLength(1);
+      expect(result[0].tenantId).toBe("missing-tenant");
+      expect(result[0].tenantName).toBe("missing-tenant"); // fallback
+    });
+
+    it("should query tenants table with correct columns", async () => {
+      givenCampaigns([
+        mockCampaign({ tenant_id: "t1", total_calls: 50 }),
+        mockCampaign({ tenant_id: "t2", total_calls: 100 }),
+      ]);
+      givenTenants([
+        { id: "t1", name: "One" },
+        { id: "t2", name: "Two" },
+      ]);
+
+      await service.getTopTenants();
+
+      // Verify the tenants query
+      expect(supabaseClientMock.from).toHaveBeenCalledWith("tenants");
+      expect(supabaseClientMock.select).toHaveBeenCalledWith("id, name");
+    });
   });
 
   // ── getGlobalAnalytics (combined) ────────────────────────────────────
   describe("getGlobalAnalytics", () => {
-    it("should return both kpis and topTenants from the two sub-methods", async () => {
+    it("should return kpis, topTenants, and trends", async () => {
       // Spy on sub-methods to avoid concurrent mock interleaving with Promise.all
       const mockKpis = {
         totalCalls: 100,
@@ -351,21 +410,32 @@ describe("AdminAnalyticsService", () => {
       const mockTopTenants = [
         {
           tenantId: "t1",
+          tenantName: "Test Corp",
           totalCalls: 100,
           totalCampaigns: 1,
           totalCostUSD: 100,
         },
       ];
+      const mockTrends = [
+        { hour: "2026-06-25", count: 45 },
+        { hour: "2026-06-24", count: 30 },
+      ];
 
       jest.spyOn(service, "getGlobalKpis").mockResolvedValue(mockKpis);
       jest.spyOn(service, "getTopTenants").mockResolvedValue(mockTopTenants);
+      // getGlobalTrends is private — spy on the prototype or test through getGlobalAnalytics
+      jest
+        .spyOn(service as any, "getGlobalTrends")
+        .mockResolvedValue(mockTrends);
 
       const result = await service.getGlobalAnalytics();
 
       expect(result.kpis).toEqual(mockKpis);
       expect(result.topTenants).toEqual(mockTopTenants);
+      expect(result.trends).toEqual({ callsPerHour: mockTrends });
       expect(service.getGlobalKpis).toHaveBeenCalledTimes(1);
       expect(service.getTopTenants).toHaveBeenCalledTimes(1);
+      expect((service as any).getGlobalTrends).toHaveBeenCalledTimes(1);
     });
   });
 });

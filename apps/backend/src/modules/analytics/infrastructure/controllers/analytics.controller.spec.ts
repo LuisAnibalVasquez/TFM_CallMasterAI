@@ -42,17 +42,25 @@ describe("AnalyticsController", () => {
     topTenants: [
       {
         tenantId: "t1",
+        tenantName: "Acme Corp",
         totalCalls: 300,
         totalCampaigns: 5,
         totalCostUSD: 1500,
       },
       {
         tenantId: "t2",
+        tenantName: "Beta Inc",
         totalCalls: 200,
         totalCampaigns: 5,
         totalCostUSD: 1000,
       },
     ],
+    trends: {
+      callsPerHour: [
+        { hour: "2026-06-25", count: 45 },
+        { hour: "2026-06-24", count: 30 },
+      ],
+    },
   };
 
   beforeEach(async () => {
