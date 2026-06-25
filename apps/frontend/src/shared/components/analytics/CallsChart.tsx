@@ -1,3 +1,12 @@
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+
 interface CallsPerHourPoint {
   hour: string;
   count: number;
@@ -8,79 +17,67 @@ interface CallsChartProps {
   callsPerHour?: CallsPerHourPoint[];
 }
 
-function buildPath(
-  points: CallsPerHourPoint[],
-  width: number,
-  height: number,
-  paddingY: number,
-): string {
-  const maxCount = Math.max(...points.map((p) => p.count), 1);
-  const slotWidth = width / (points.length - 1 || 1);
-  const yRange = height - paddingY * 2;
-
-  return points
-    .map((p, i) => {
-      const x = Math.round(i * slotWidth);
-      const ratio = p.count / maxCount;
-      const y = Math.round(height - paddingY - ratio * yRange);
-      return `${i === 0 ? "M" : "L"}${x},${y}`;
-    })
-    .join(" ");
-}
-
 export function CallsChart({ className, callsPerHour = [] }: CallsChartProps) {
-  const hasData = callsPerHour.length > 0;
-  const width = 320;
-  const height = 90;
-  const paddingY = 12;
-  const linePath = hasData
-    ? buildPath(callsPerHour, width, height, paddingY)
-    : "M0,70 L320,70";
-  const areaPath = hasData
-    ? `${linePath} L${width},90 L0,90 Z`
-    : `${linePath} L320,90 L0,90 Z`;
+  const data = callsPerHour.map((p) => ({
+    ...p,
+    date: new Date(p.hour).toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+    }),
+  }));
 
   return (
     <div
-      className={`rounded-xl border border-border bg-background p-4 ${className ?? ""}`}
+      className={`rounded-xl border border-border bg-background p-4 ${
+        className ?? ""
+      }`}
     >
       <div className="mb-3 flex items-center justify-between">
         <div>
-          <p className="text-xs font-medium text-foreground">Calls / hour</p>
-          <p className="font-mono text-[10px] text-muted-foreground">
-            last 24 h
-          </p>
+          <p className="text-xs font-medium text-foreground">Calls / day</p>
         </div>
-        {!hasData && (
-          <span className="font-mono text-[10px] text-muted-foreground">
-            no data
-          </span>
-        )}
       </div>
 
-      <svg
-        viewBox={`0 0 ${width} ${height}`}
-        className="h-20 w-full"
-        preserveAspectRatio="none"
-        role="img"
-        aria-label="Calls per hour chart"
-      >
-        <defs>
-          <linearGradient id="cmai-area" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="#3366FF" stopOpacity="0.12" />
-            <stop offset="100%" stopColor="#3366FF" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        <path d={areaPath} fill="url(#cmai-area)" />
-        <path
-          d={linePath}
-          fill="none"
-          stroke="#3366FF"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+      <div className="h-40 w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={data}>
+            <defs>
+              <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#3366FF" stopOpacity={0.1} />
+                <stop offset="95%" stopColor="#3366FF" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <XAxis
+              dataKey="date"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 10 }}
+              minTickGap={20}
+            />
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 10 }}
+              allowDecimals={false}
+            />
+            <Tooltip
+              contentStyle={{
+                fontSize: "12px",
+                borderRadius: "8px",
+                border: "none",
+                boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+              }}
+            />
+            <Area
+              type="monotone"
+              dataKey="count"
+              stroke="#3366FF"
+              fillOpacity={1}
+              fill="url(#colorCount)"
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 }

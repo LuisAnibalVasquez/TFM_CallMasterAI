@@ -61,15 +61,10 @@ export class AnalyticsService {
         ? Math.round((totalSuccessful / totalCalls) * 10000) / 10000
         : 0;
 
-    // Fetch calls from the last 24 hours for hourly trend
-    const twentyFourHoursAgo = new Date(
-      Date.now() - 24 * 60 * 60 * 1000,
-    ).toISOString();
-
+    // Fetch all calls for hourly trend (no date filter for debugging)
     const { data: recentCalls, error: callError } = await client
       .from("calls")
       .select("duration, created_at")
-      .gte("created_at", twentyFourHoursAgo)
       .order("created_at", { ascending: true });
 
     if (callError) {
@@ -80,34 +75,33 @@ export class AnalyticsService {
 
     const callRows = recentCalls ?? [];
 
+    // DEBUG: Ver qué fechas llegan de la DB
+    console.log(
+      "[AnalyticsService] Fechas encontradas:",
+      callRows.map((c) => c.created_at),
+    );
+
     // Compute total minutes from call durations
     const totalMinutes =
       Math.round(
         (callRows.reduce((sum, c) => sum + (c.duration ?? 0), 0) / 60) * 100,
       ) / 100;
 
-    // Group calls by hour
-    const hourBuckets = new Map<string, number>();
+    // Group calls by date (YYYY-MM-DD)
+    const dayBuckets = new Map<string, number>();
     for (const call of callRows) {
-      // Standardize to YYYY-MM-DDTHH:00:00.000Z
-      const hour = new Date(call.created_at)
-        .toISOString()
-        .replace(/:[0-9]{2}\.[0-9]{3}Z$/, ":00:00.000Z");
-      hourBuckets.set(hour, (hourBuckets.get(hour) ?? 0) + 1);
+      const date = new Date(call.created_at).toISOString().split("T")[0]; // YYYY-MM-DD
+      dayBuckets.set(date, (dayBuckets.get(date) ?? 0) + 1);
     }
 
-    // Fill all 24 hours for a complete series even when no calls
-    const callsPerHour: Array<{ hour: string; count: number }> = [];
-    for (let i = 23; i >= 0; i--) {
-      const slotDate = new Date(Date.now() - i * 60 * 60 * 1000);
-      // Round to current hour
-      slotDate.setMinutes(0, 0, 0);
-      const slotHour = slotDate.toISOString();
-      callsPerHour.push({
-        hour: slotHour,
-        count: hourBuckets.get(slotHour) ?? 0,
-      });
-    }
+    // Sort dates and prepare series
+    const sortedDates = Array.from(dayBuckets.keys()).sort();
+    const callsPerDay: Array<{ hour: string; count: number }> = sortedDates.map(
+      (date) => ({
+        hour: date,
+        count: dayBuckets.get(date) ?? 0,
+      }),
+    );
 
     return {
       kpis: {
@@ -117,7 +111,7 @@ export class AnalyticsService {
         totalCostUSD,
         successRate,
       },
-      trends: { callsPerHour },
+      trends: { callsPerHour: callsPerDay },
     };
   }
 }
