@@ -27,6 +27,7 @@ export interface GlobalKpis {
 
 export interface TopTenantEntry {
   tenantId: string;
+  tenantName: string;
   totalCalls: number;
   totalCampaigns: number;
   totalCostUSD: number;
@@ -35,4 +36,7 @@ export interface TopTenantEntry {
 export interface GlobalAnalyticsResponse {
   kpis: GlobalKpis;
   topTenants: TopTenantEntry[];
+  trends: {
+    callsPerHour: CallsPerHourPoint[];
+  };
 }

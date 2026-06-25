@@ -126,7 +126,7 @@ export function AnalyticOverview({
           <div className="space-y-2">
             {topTenants.map((t: any) => (
               <div key={t.tenantId} className="flex justify-between text-sm">
-                <span>Tenant ID: {t.tenantId.substring(0, 8)}...</span>
+                <span>{t.tenantName ?? t.tenantId}</span>
                 <span className="font-mono">
                   {formatNumber(t.totalCalls)} calls
                 </span>
