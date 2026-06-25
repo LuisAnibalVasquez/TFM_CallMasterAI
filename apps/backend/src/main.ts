@@ -2,13 +2,18 @@ import { NestFactory } from "@nestjs/core";
 import { ValidationPipe } from "@nestjs/common";
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 import { serve } from "inngest/express";
+import { NestExpressApplication } from "@nestjs/platform-express";
 import { AppModule } from "./app.module";
 import * as cookieParser from "cookie-parser";
 
 async function bootstrap() {
-  // rawBody: true preserves the raw request buffer on req.rawBody so
-  // Inngest can verify webhook signatures in production.
-  const app = await NestFactory.create(AppModule, { rawBody: true });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    rawBody: true,
+  });
+
+  // Ensure JSON body parsing supports larger payloads (e.g. CSV uploads)
+  // and is available globally for both our API and Inngest.
+  app.useBodyParser("json", { limit: "50mb" });
 
   app.use(cookieParser());
 
@@ -60,8 +65,10 @@ async function bootstrap() {
   // invoke registered background functions (Campaign Processing, Campaign
   // Purge). The InngestClient and INNGEST_FUNCTIONS tokens are provided
   // by CampaignsInngestModule / CampaignsModule respectively.
+
   const inngestClient = app.get("InngestClient");
   const inngestFunctions = app.get("INNGEST_FUNCTIONS");
+
   app.use(
     "/api/inngest",
     serve({ client: inngestClient, functions: inngestFunctions }),

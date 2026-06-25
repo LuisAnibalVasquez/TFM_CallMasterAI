@@ -17,9 +17,24 @@ import { TenantsModule } from "../../tenants/tenants.module";
     {
       provide: "InngestClient",
       useFactory: () => {
+        const isProd = process.env.NODE_ENV === "production";
+        console.log(
+          "[Inngest] NODE_ENV:",
+          process.env.NODE_ENV,
+          "isProd:",
+          isProd,
+        );
         return new Inngest({
           id: "callmaster-ai",
-          baseUrl: process.env.INNGEST_BASE_URL || "http://localhost:8288",
+          isDev: !isProd,
+          // En producción, Inngest usa Inngest Cloud automáticamente si no pasas baseUrl.
+          // En local, forzamos 127.0.0.1 para evitar problemas de IPv6 con Node 18+.
+          ...(isProd
+            ? {}
+            : {
+                baseUrl:
+                  process.env.INNGEST_BASE_URL || "http://127.0.0.1:8288",
+              }),
           eventKey: process.env.INNGEST_EVENT_KEY || "local-dev-key",
         });
       },
