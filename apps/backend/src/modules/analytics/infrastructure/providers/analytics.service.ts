@@ -89,9 +89,10 @@ export class AnalyticsService {
     // Group calls by hour
     const hourBuckets = new Map<string, number>();
     for (const call of callRows) {
+      // Standardize to YYYY-MM-DDTHH:00:00.000Z
       const hour = new Date(call.created_at)
         .toISOString()
-        .replace(/:\d{2}\.\d{3}Z$/, ":00:00Z");
+        .replace(/:[0-9]{2}\.[0-9]{3}Z$/, ":00:00.000Z");
       hourBuckets.set(hour, (hourBuckets.get(hour) ?? 0) + 1);
     }
 
