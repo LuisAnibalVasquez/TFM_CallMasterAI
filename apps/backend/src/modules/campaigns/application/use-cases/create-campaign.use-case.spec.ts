@@ -29,6 +29,7 @@ describe("CreateCampaignUseCase", () => {
       findCallsByCampaign: jest.fn(),
       updateCall: jest.fn(),
       redactCalls: jest.fn(),
+      delete: jest.fn(),
       getTemplateDownloadUrl: jest.fn(),
     };
 

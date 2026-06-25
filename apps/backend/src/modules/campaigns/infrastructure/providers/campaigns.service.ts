@@ -236,6 +236,22 @@ export class CampaignsService implements ICampaignRepository {
     return data.signedUrl;
   }
 
+  async delete(id: string): Promise<void> {
+    // Delete associated calls first to respect FK constraints
+    await this.getClient().from("calls").delete().eq("campaign_id", id);
+
+    const { error } = await this.getClient()
+      .from("campaigns")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      throw new InternalServerErrorException(
+        `Failed to delete campaign: ${error.message}`,
+      );
+    }
+  }
+
   /**
    * Generates a SHA256 hash of the phone number for indexed lookups.
    * This is a one-way hash — the original phone cannot be recovered from it.

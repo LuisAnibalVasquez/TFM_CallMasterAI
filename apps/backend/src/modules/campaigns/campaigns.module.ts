@@ -10,6 +10,7 @@ import { CreateCampaignUseCase } from "./application/use-cases/create-campaign.u
 import { ListCampaignsUseCase } from "./application/use-cases/list-campaigns.use-case";
 import { StartCampaignUseCase } from "./application/use-cases/start-campaign.use-case";
 import { CancelCampaignUseCase } from "./application/use-cases/cancel-campaign.use-case";
+import { DeleteCampaignUseCase } from "./application/use-cases/delete-campaign.use-case";
 import { AuthModule } from "../auth/auth.module";
 import { CampaignsInngestModule } from "./inngest/campaigns-inngest.module";
 import { ICampaignRepository } from "./domain/ports/campaign-repository.port";
@@ -28,6 +29,7 @@ import { createCampaignPurgeFunction } from "./inngest/campaign-purge.function";
     ListCampaignsUseCase,
     StartCampaignUseCase,
     CancelCampaignUseCase,
+    DeleteCampaignUseCase,
     // HTTP path: tenant-scoped client via TenantSupabaseService (RLS enforced)
     {
       provide: "ICampaignRepository",
