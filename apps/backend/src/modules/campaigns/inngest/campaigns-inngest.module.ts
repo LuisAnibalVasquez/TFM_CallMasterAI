@@ -2,15 +2,17 @@
 import { Module } from "@nestjs/common";
 import { Inngest } from "inngest";
 import { CampaignsAdminService } from "../infrastructure/providers/campaigns-admin.service";
+import { TenantsModule } from "../../tenants/tenants.module";
 
 /**
- * Provides the Inngest client singleton and the admin-scoped
- * ICampaignRepository implementation used by background jobs.
+ * Provides the Inngest client singleton, the admin-scoped
+ * ICampaignRepository implementation, and tenant services used by background jobs.
  *
  * CampaignsAdminService uses SERVICE_ROLE_KEY to bypass RLS,
  * allowing Inngest functions to access all tenant data.
  */
 @Module({
+  imports: [TenantsModule],
   providers: [
     {
       provide: "InngestClient",
@@ -24,6 +26,6 @@ import { CampaignsAdminService } from "../infrastructure/providers/campaigns-adm
     },
     CampaignsAdminService,
   ],
-  exports: ["InngestClient", CampaignsAdminService],
+  exports: ["InngestClient", CampaignsAdminService, TenantsModule],
 })
 export class CampaignsInngestModule {}
