@@ -8,7 +8,7 @@ export function KpiCard({
   icon: React.ReactNode;
   label: string;
   value: string;
-  delta: string;
+  delta?: string;
   highlight?: boolean;
 }) {
   return (
@@ -20,13 +20,15 @@ export function KpiCard({
       <p className="mt-1.5 text-base font-semibold tracking-tight text-foreground sm:text-lg">
         {value}
       </p>
-      <p
-        className={`font-mono text-[10px] ${
-          highlight ? "text-accent" : "text-muted-foreground"
-        }`}
-      >
-        {delta}
-      </p>
+      {delta !== undefined && (
+        <p
+          className={`font-mono text-[10px] ${
+            highlight ? "text-accent" : "text-muted-foreground"
+          }`}
+        >
+          {delta}
+        </p>
+      )}
     </div>
   );
 }

@@ -8,16 +8,14 @@ vi.mock("../../tenants/components/TenantList", () => ({
 }));
 
 describe("PlatformOwnerDashboard", () => {
-  it("should render AnalyticOverview instead of TenantList after restructuring", () => {
+  it("should render AnalyticOverview with empty state (platform analytics out of scope)", () => {
     render(<PlatformOwnerDashboard />);
 
-    // After restructuring, should NOT render TenantList
+    // Should NOT render TenantList
     expect(screen.queryByTestId("tenant-list")).not.toBeInTheDocument();
 
-    // Should show KPI labels from AnalyticOverview
-    expect(screen.getByText("Calls")).toBeInTheDocument();
-    expect(screen.getByText("Conversion")).toBeInTheDocument();
-    expect(screen.getByText("Agents")).toBeInTheDocument();
-    expect(screen.getByText("Calls / hour")).toBeInTheDocument();
+    // Platform Owner global analytics is out of scope, so empty state is shown
+    expect(screen.getByText("No campaign data yet")).toBeInTheDocument();
+    expect(screen.getByText(/Create your first campaign/)).toBeInTheDocument();
   });
 });

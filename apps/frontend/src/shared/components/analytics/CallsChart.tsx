@@ -1,10 +1,45 @@
-import { ArrowUpRight } from "lucide-react";
+interface CallsPerHourPoint {
+  hour: string;
+  count: number;
+}
 
 interface CallsChartProps {
   className?: string;
+  callsPerHour?: CallsPerHourPoint[];
 }
 
-export function CallsChart({ className }: CallsChartProps = {}) {
+function buildPath(
+  points: CallsPerHourPoint[],
+  width: number,
+  height: number,
+  paddingY: number,
+): string {
+  const maxCount = Math.max(...points.map((p) => p.count), 1);
+  const slotWidth = width / (points.length - 1 || 1);
+  const yRange = height - paddingY * 2;
+
+  return points
+    .map((p, i) => {
+      const x = Math.round(i * slotWidth);
+      const ratio = p.count / maxCount;
+      const y = Math.round(height - paddingY - ratio * yRange);
+      return `${i === 0 ? "M" : "L"}${x},${y}`;
+    })
+    .join(" ");
+}
+
+export function CallsChart({ className, callsPerHour = [] }: CallsChartProps) {
+  const hasData = callsPerHour.length > 0;
+  const width = 320;
+  const height = 90;
+  const paddingY = 12;
+  const linePath = hasData
+    ? buildPath(callsPerHour, width, height, paddingY)
+    : "M0,70 L320,70";
+  const areaPath = hasData
+    ? `${linePath} L${width},90 L0,90 Z`
+    : `${linePath} L320,90 L0,90 Z`;
+
   return (
     <div
       className={`rounded-xl border border-border bg-background p-4 ${className ?? ""}`}
@@ -16,14 +51,15 @@ export function CallsChart({ className }: CallsChartProps = {}) {
             last 24 h
           </p>
         </div>
-        <span className="inline-flex items-center gap-1 text-xs font-medium text-accent">
-          <ArrowUpRight className="h-3 w-3" />
-          +12.4%
-        </span>
+        {!hasData && (
+          <span className="font-mono text-[10px] text-muted-foreground">
+            no data
+          </span>
+        )}
       </div>
 
       <svg
-        viewBox="0 0 320 90"
+        viewBox={`0 0 ${width} ${height}`}
         className="h-20 w-full"
         preserveAspectRatio="none"
         role="img"
@@ -35,12 +71,9 @@ export function CallsChart({ className }: CallsChartProps = {}) {
             <stop offset="100%" stopColor="#3366FF" stopOpacity="0" />
           </linearGradient>
         </defs>
+        <path d={areaPath} fill="url(#cmai-area)" />
         <path
-          d="M0,70 L20,62 L40,66 L60,50 L80,55 L100,40 L120,46 L140,30 L160,38 L180,22 L200,28 L220,18 L240,26 L260,14 L280,20 L300,10 L320,16 L320,90 L0,90 Z"
-          fill="url(#cmai-area)"
-        />
-        <path
-          d="M0,70 L20,62 L40,66 L60,50 L80,55 L100,40 L120,46 L140,30 L160,38 L180,22 L200,28 L220,18 L240,26 L260,14 L280,20 L300,10 L320,16"
+          d={linePath}
           fill="none"
           stroke="#3366FF"
           strokeWidth="2"
