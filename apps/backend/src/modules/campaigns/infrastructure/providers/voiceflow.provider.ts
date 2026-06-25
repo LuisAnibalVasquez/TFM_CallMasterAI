@@ -17,7 +17,7 @@ export class VoiceflowProvider implements IAgentProvider {
         variables: {
           customer_name: client.name,
           customer_phone: client.phone,
-          customer_age: client.age,
+          customer_age: String(client.age),
           customer_language: client.language,
         },
       };
