@@ -12,30 +12,53 @@ export function useCampaigns(page = 1, limit = 20) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchCampaigns = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const result: PaginatedCampaigns = await campaignService.list(
-        page,
-        limit,
-      );
-      setCampaigns(result.data);
-      setTotal(result.total);
-    } catch (err: unknown) {
-      setError(
-        err instanceof Error ? err.message : "Failed to fetch campaigns",
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }, [page, limit]);
+  const fetchCampaigns = useCallback(
+    async (background = false) => {
+      if (!background) setIsLoading(true);
+      if (!background) setError(null);
+      try {
+        const result: PaginatedCampaigns = await campaignService.list(
+          page,
+          limit,
+        );
+        setCampaigns(result.data);
+        setTotal(result.total);
+      } catch (err: unknown) {
+        if (!background) {
+          setError(
+            err instanceof Error ? err.message : "Failed to fetch campaigns",
+          );
+        }
+      } finally {
+        if (!background) setIsLoading(false);
+      }
+    },
+    [page, limit],
+  );
 
   useEffect(() => {
     fetchCampaigns();
   }, [fetchCampaigns]);
 
-  return { campaigns, total, isLoading, error, refetch: fetchCampaigns };
+  // Polling: refresh every 3 seconds if there are any campaigns in progress
+  useEffect(() => {
+    const hasInProgress = campaigns.some((c) => c.status === "In-Progress");
+    if (!hasInProgress) return;
+
+    const intervalId = setInterval(() => {
+      fetchCampaigns(true);
+    }, 3000);
+
+    return () => clearInterval(intervalId);
+  }, [campaigns, fetchCampaigns]);
+
+  return {
+    campaigns,
+    total,
+    isLoading,
+    error,
+    refetch: () => fetchCampaigns(false),
+  };
 }
 
 export function useCreateCampaign() {

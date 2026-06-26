@@ -58,4 +58,14 @@ describe("KpiCard", () => {
     const deltaElement = screen.getByText("online");
     expect(deltaElement.className).toContain("text-muted-foreground");
   });
+
+  it("should not render delta when the prop is omitted", () => {
+    render(<KpiCard icon={<PhoneCall />} label="Campaigns" value="12" />);
+
+    expect(screen.getByText("Campaigns")).toBeInTheDocument();
+    expect(screen.getByText("12")).toBeInTheDocument();
+    // No delta element should be present — only the two text nodes above
+    const deltaElements = screen.queryAllByText(/[+%]/);
+    expect(deltaElements).toHaveLength(0);
+  });
 });

@@ -4,8 +4,13 @@ import { CreateCampaignUseCase } from "../../application/use-cases/create-campai
 import { ListCampaignsUseCase } from "../../application/use-cases/list-campaigns.use-case";
 import { StartCampaignUseCase } from "../../application/use-cases/start-campaign.use-case";
 import { CancelCampaignUseCase } from "../../application/use-cases/cancel-campaign.use-case";
+import { DeleteCampaignUseCase } from "../../application/use-cases/delete-campaign.use-case";
 import { Campaign } from "../../domain/entities/campaign.entity";
-import { CanActivate } from "@nestjs/common";
+import {
+  CanActivate,
+  BadRequestException,
+  NotFoundException,
+} from "@nestjs/common";
 import { AuthGuard } from "../../../auth/infrastructure/guards/auth.guard";
 import { RolesGuard } from "../../../auth/infrastructure/guards/roles.guard";
 import { CampaignStatus } from "@callmaster/shared";
@@ -16,6 +21,7 @@ describe("CampaignsController", () => {
   let listCampaignsUseCase: jest.Mocked<ListCampaignsUseCase>;
   let startCampaignUseCase: jest.Mocked<StartCampaignUseCase>;
   let cancelCampaignUseCase: jest.Mocked<CancelCampaignUseCase>;
+  let deleteCampaignUseCase: jest.Mocked<DeleteCampaignUseCase>;
   let mockRepo: { getTemplateDownloadUrl: jest.Mock };
 
   const mockGuard: CanActivate = { canActivate: jest.fn(() => true) };
@@ -31,6 +37,9 @@ describe("CampaignsController", () => {
       execute: jest.fn(),
     } as any;
     cancelCampaignUseCase = {
+      execute: jest.fn(),
+    } as any;
+    deleteCampaignUseCase = {
       execute: jest.fn(),
     } as any;
     mockRepo = {
@@ -55,6 +64,10 @@ describe("CampaignsController", () => {
         {
           provide: CancelCampaignUseCase,
           useValue: cancelCampaignUseCase,
+        },
+        {
+          provide: DeleteCampaignUseCase,
+          useValue: deleteCampaignUseCase,
         },
         {
           provide: "ICampaignRepository",
@@ -223,6 +236,45 @@ describe("CampaignsController", () => {
         tenantId: "tenant-1",
       });
       expect(result.status).toBe(CampaignStatus.CANCELLED);
+    });
+  });
+
+  describe("DELETE /campaigns/:id", () => {
+    const mockRequest = {
+      user: { tenantId: "tenant-1", role: "TenantAdmin" },
+    };
+
+    it("should delegate to DeleteCampaignUseCase", async () => {
+      deleteCampaignUseCase.execute.mockResolvedValue(undefined);
+
+      await controller.delete(mockRequest as any, "c1");
+
+      expect(deleteCampaignUseCase.execute).toHaveBeenCalledWith({
+        campaignId: "c1",
+        tenantId: "tenant-1",
+      });
+    });
+
+    it("should propagate BadRequestException from use case (completed/cancelled restriction)", async () => {
+      deleteCampaignUseCase.execute.mockRejectedValue(
+        new BadRequestException(
+          "Cannot delete a completed or cancelled campaign",
+        ),
+      );
+
+      await expect(controller.delete(mockRequest as any, "c1")).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it("should propagate NotFoundException from use case", async () => {
+      deleteCampaignUseCase.execute.mockRejectedValue(
+        new NotFoundException("Campaign not found"),
+      );
+
+      await expect(
+        controller.delete(mockRequest as any, "nonexistent"),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 

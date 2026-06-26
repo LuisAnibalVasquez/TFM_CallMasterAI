@@ -4,6 +4,7 @@ import {
   Post,
   Body,
   Get,
+  Delete,
   Query,
   Request,
   UseGuards,
@@ -30,6 +31,7 @@ import { CreateCampaignUseCase } from "../../application/use-cases/create-campai
 import { ListCampaignsUseCase } from "../../application/use-cases/list-campaigns.use-case";
 import { StartCampaignUseCase } from "../../application/use-cases/start-campaign.use-case";
 import { CancelCampaignUseCase } from "../../application/use-cases/cancel-campaign.use-case";
+import { DeleteCampaignUseCase } from "../../application/use-cases/delete-campaign.use-case";
 import { ICampaignRepository } from "../../domain/ports/campaign-repository.port";
 
 @ApiTags("campaigns")
@@ -42,6 +44,7 @@ export class CampaignsController {
     private readonly listCampaignsUseCase: ListCampaignsUseCase,
     private readonly startCampaignUseCase: StartCampaignUseCase,
     private readonly cancelCampaignUseCase: CancelCampaignUseCase,
+    private readonly deleteCampaignUseCase: DeleteCampaignUseCase,
     @Inject("ICampaignRepository")
     private readonly campaignRepository: ICampaignRepository,
   ) {}
@@ -113,6 +116,28 @@ export class CampaignsController {
   @ApiResponse({ status: 404, description: "Campaign not found" })
   async cancel(@Request() req: any, @Param("id") id: string) {
     return this.cancelCampaignUseCase.execute({
+      campaignId: id,
+      tenantId: req.user.tenantId,
+    });
+  }
+
+  @Delete(":id")
+  @Roles(UserRole.TenantAdmin)
+  @AllowOverride()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary:
+      "Delete a campaign (only allowed for Created or In-Progress campaigns)",
+  })
+  @ApiParam({ name: "id", description: "Campaign ID" })
+  @ApiResponse({ status: 204, description: "Campaign deleted" })
+  @ApiResponse({
+    status: 400,
+    description: "Cannot delete a completed or cancelled campaign",
+  })
+  @ApiResponse({ status: 404, description: "Campaign not found" })
+  async delete(@Request() req: any, @Param("id") id: string): Promise<void> {
+    return this.deleteCampaignUseCase.execute({
       campaignId: id,
       tenantId: req.user.tenantId,
     });

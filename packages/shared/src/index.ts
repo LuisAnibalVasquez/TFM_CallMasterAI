@@ -8,6 +8,7 @@ export * from "./interfaces/tenant.interface";
 export * from "./interfaces/campaign.interface";
 export * from "./interfaces/call.interface";
 export * from "./interfaces/profile.interface";
+export * from "./interfaces/analytics.interface";
 export { loginSchema } from "./schemas/login.schema";
 export type { LoginInput } from "./schemas/login.schema";
 export { campaignSchema } from "./schemas/campaign.schema";
