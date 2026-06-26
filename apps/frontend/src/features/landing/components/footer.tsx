@@ -2,25 +2,13 @@ import { Link } from "react-router-dom";
 import { PhoneCall, Code, MessageCircle, Share2 } from "lucide-react";
 
 const PRODUCT_LINKS = [
-  { href: "#features", label: "Features" },
-  { href: "#how-it-works", label: "How it works" },
-  { href: "#pricing", label: "Pricing" },
-  { href: "/changelog", label: "Changelog" },
+  { href: "/#features", label: "Features" },
+  { href: "/#how-it-works", label: "How it works" },
 ];
 
-const COMPANY_LINKS = [
-  { href: "/about", label: "About us" },
-  { href: "/contact", label: "Contact" },
-  { href: "/blog", label: "Blog" },
-  { href: "/careers", label: "Careers" },
-];
+const COMPANY_LINKS: { href: string; label: string }[] = [];
 
-const LEGAL_LINKS = [
-  { href: "/legal/terms", label: "Terms" },
-  { href: "/legal/privacy", label: "Privacy" },
-  { href: "/legal/security", label: "Security" },
-  { href: "/legal/dpa", label: "DPA" },
-];
+const LEGAL_LINKS: { href: string; label: string }[] = [];
 
 const SOCIAL = [
   { href: "https://twitter.com", label: "Twitter", icon: MessageCircle },

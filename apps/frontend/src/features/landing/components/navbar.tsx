@@ -3,10 +3,9 @@ import { PhoneCall } from "lucide-react";
 import { Button } from "../../../shared/components/ui/button";
 
 const NAV_LINKS = [
-  { href: "#features", label: "Features" },
-  { href: "#how-it-works", label: "How it works" },
-  { href: "#trust", label: "Trust" },
-  { href: "#pricing", label: "Pricing" },
+  { href: "/#features", label: "Features" },
+  { href: "/#how-it-works", label: "How it works" },
+  { href: "/#trust", label: "Trust" },
 ];
 
 export function Navbar() {
