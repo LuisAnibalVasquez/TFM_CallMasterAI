@@ -66,7 +66,12 @@ export function AnalyticOverview({
 
   const kpis = data?.kpis;
   const callsPerHour = data?.trends?.callsPerHour ?? [];
-  const topTenants = data?.topTenants ?? [];
+
+  // Type Guard para detectar si es GlobalAnalyticsResponse
+  const isGlobalAnalytics = (d: any): d is GlobalAnalyticsResponse =>
+    "topTenants" in d;
+  const topTenants = isGlobalAnalytics(data) ? data.topTenants : [];
+
   const isEmpty = !kpis || (kpis.totalCalls === 0 && topTenants.length === 0);
 
   if (isEmpty) {
