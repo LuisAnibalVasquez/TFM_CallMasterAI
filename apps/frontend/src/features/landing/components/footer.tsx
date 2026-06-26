@@ -6,10 +6,6 @@ const PRODUCT_LINKS = [
   { href: "/#how-it-works", label: "How it works" },
 ];
 
-const COMPANY_LINKS: { href: string; label: string }[] = [];
-
-const LEGAL_LINKS: { href: string; label: string }[] = [];
-
 const SOCIAL = [
   { href: "https://twitter.com", label: "Twitter", icon: MessageCircle },
   { href: "https://linkedin.com", label: "LinkedIn", icon: Share2 },
@@ -71,8 +67,6 @@ export function Footer() {
           </div>
 
           <FooterColumn title="Product" links={PRODUCT_LINKS} />
-          <FooterColumn title="Company" links={COMPANY_LINKS} />
-          <FooterColumn title="Legal" links={LEGAL_LINKS} />
         </div>
 
         <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-border pt-6 sm:flex-row sm:items-center">

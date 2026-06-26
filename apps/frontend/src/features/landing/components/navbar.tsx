@@ -39,13 +39,13 @@ export function Navbar() {
           className="hidden items-center gap-1 md:flex"
         >
           {NAV_LINKS.map((link) => (
-            <Link
+            <a
               key={link.href}
-              to={link.href}
+              href={link.href}
               className="rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
             >
               {link.label}
-            </Link>
+            </a>
           ))}
         </nav>
 
