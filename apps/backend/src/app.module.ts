@@ -5,6 +5,7 @@ import { ThrottlerModule } from "@nestjs/throttler";
 import { AuthModule } from "./modules/auth/auth.module";
 import { TenantsModule } from "./modules/tenants/tenants.module";
 import { CampaignsModule } from "./modules/campaigns/campaigns.module";
+import { AnalyticsModule } from "./modules/analytics/analytics.module";
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { CampaignsModule } from "./modules/campaigns/campaigns.module";
     AuthModule,
     TenantsModule,
     CampaignsModule,
+    AnalyticsModule,
   ],
   controllers: [],
   providers: [],

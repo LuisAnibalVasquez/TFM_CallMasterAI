@@ -13,6 +13,18 @@ describe("processCampaignCalls", () => {
   };
   let mockProvider: { triggerCall: jest.Mock };
   let mockSend: jest.Mock;
+  let mockTenantsService: { findById: jest.Mock };
+  let mockEncryptionService: { decryptSecret: jest.Mock };
+
+  const mockTenant = {
+    id: "tenant-1",
+    productionConfig: {
+      apiUrl: "https://api.voiceflow.com",
+      encryptedKey: "encrypted-hex-abc",
+    },
+  };
+
+  const masterKey = "mock-master-key";
 
   const mockCalls = [
     {
@@ -83,6 +95,12 @@ describe("processCampaignCalls", () => {
       triggerCall: jest.fn(),
     };
     mockSend = jest.fn().mockResolvedValue({ ids: ["sent-event-id"] });
+    mockTenantsService = {
+      findById: jest.fn().mockResolvedValue(mockTenant),
+    };
+    mockEncryptionService = {
+      decryptSecret: jest.fn().mockResolvedValue("decrypted-mock-api-key"),
+    };
   });
 
   afterEach(() => {
@@ -115,6 +133,9 @@ describe("processCampaignCalls", () => {
         repository: mockRepo as any,
         agentProvider: mockProvider as any,
         sendEvent: mockSend,
+        tenantsService: mockTenantsService as any,
+        encryptionService: mockEncryptionService as any,
+        masterKey,
       },
     );
 
@@ -178,6 +199,9 @@ describe("processCampaignCalls", () => {
         repository: mockRepo as any,
         agentProvider: mockProvider as any,
         sendEvent: mockSend,
+        tenantsService: mockTenantsService as any,
+        encryptionService: mockEncryptionService as any,
+        masterKey,
       },
     );
 
@@ -208,6 +232,9 @@ describe("processCampaignCalls", () => {
         repository: mockRepo as any,
         agentProvider: mockProvider as any,
         sendEvent: mockSend,
+        tenantsService: mockTenantsService as any,
+        encryptionService: mockEncryptionService as any,
+        masterKey,
       },
     );
 
