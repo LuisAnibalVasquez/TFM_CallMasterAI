@@ -58,13 +58,13 @@ export function Navbar() {
           >
             <Link to="/login">Log In</Link>
           </Button>
-          <Button
+          {/* <Button
             asChild
             size="sm"
             className="bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
           >
             <Link to="/signup">Get Started</Link>
-          </Button>
+          </Button> */}
         </div>
       </div>
     </header>
