@@ -2,24 +2,9 @@ import { Link } from "react-router-dom";
 import { PhoneCall, Code, MessageCircle, Share2 } from "lucide-react";
 
 const PRODUCT_LINKS = [
-  { href: "#features", label: "Features" },
-  { href: "#how-it-works", label: "How it works" },
-  { href: "#pricing", label: "Pricing" },
-  { href: "/changelog", label: "Changelog" },
-];
-
-const COMPANY_LINKS = [
-  { href: "/about", label: "About us" },
-  { href: "/contact", label: "Contact" },
-  { href: "/blog", label: "Blog" },
-  { href: "/careers", label: "Careers" },
-];
-
-const LEGAL_LINKS = [
-  { href: "/legal/terms", label: "Terms" },
-  { href: "/legal/privacy", label: "Privacy" },
-  { href: "/legal/security", label: "Security" },
-  { href: "/legal/dpa", label: "DPA" },
+  { href: "/#features", label: "Features" },
+  { href: "/#how-it-works", label: "How it works" },
+  { href: "/#trust", label: "Trust" },
 ];
 
 const SOCIAL = [
@@ -83,8 +68,6 @@ export function Footer() {
           </div>
 
           <FooterColumn title="Product" links={PRODUCT_LINKS} />
-          <FooterColumn title="Company" links={COMPANY_LINKS} />
-          <FooterColumn title="Legal" links={LEGAL_LINKS} />
         </div>
 
         <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-border pt-6 sm:flex-row sm:items-center">
@@ -119,6 +102,22 @@ function FooterColumn({
   title: string;
   links: { href: string; label: string }[];
 }) {
+  const handleNavClick = (
+    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
+    href: string,
+  ) => {
+    if (href.startsWith("/#")) {
+      e.preventDefault();
+      const id = href.substring(2);
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      } else {
+        window.location.href = href;
+      }
+    }
+  };
+
   return (
     <div className="lg:col-span-2 lg:col-start-auto">
       <h3 className="font-mono text-[11px] uppercase tracking-widest text-foreground">
@@ -127,12 +126,13 @@ function FooterColumn({
       <ul className="mt-4 space-y-2.5">
         {links.map((link) => (
           <li key={link.href}>
-            <Link
-              to={link.href}
-              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+            <a
+              href={link.href}
+              onClick={(e) => handleNavClick(e, link.href)}
+              className="text-sm text-muted-foreground transition-colors hover:text-foreground cursor-pointer"
             >
               {link.label}
-            </Link>
+            </a>
           </li>
         ))}
       </ul>
