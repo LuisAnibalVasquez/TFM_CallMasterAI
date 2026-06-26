@@ -4,6 +4,7 @@ import { PhoneCall, Code, MessageCircle, Share2 } from "lucide-react";
 const PRODUCT_LINKS = [
   { href: "/#features", label: "Features" },
   { href: "/#how-it-works", label: "How it works" },
+  { href: "/#trust", label: "Trust" },
 ];
 
 const SOCIAL = [
