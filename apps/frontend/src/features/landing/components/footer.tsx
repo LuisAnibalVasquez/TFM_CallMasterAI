@@ -102,6 +102,22 @@ function FooterColumn({
   title: string;
   links: { href: string; label: string }[];
 }) {
+  const handleNavClick = (
+    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
+    href: string,
+  ) => {
+    if (href.startsWith("/#")) {
+      e.preventDefault();
+      const id = href.substring(2);
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      } else {
+        window.location.href = href;
+      }
+    }
+  };
+
   return (
     <div className="lg:col-span-2 lg:col-start-auto">
       <h3 className="font-mono text-[11px] uppercase tracking-widest text-foreground">
@@ -110,12 +126,13 @@ function FooterColumn({
       <ul className="mt-4 space-y-2.5">
         {links.map((link) => (
           <li key={link.href}>
-            <Link
-              to={link.href}
-              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+            <a
+              href={link.href}
+              onClick={(e) => handleNavClick(e, link.href)}
+              className="text-sm text-muted-foreground transition-colors hover:text-foreground cursor-pointer"
             >
               {link.label}
-            </Link>
+            </a>
           </li>
         ))}
       </ul>
