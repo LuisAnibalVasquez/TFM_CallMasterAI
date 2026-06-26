@@ -14,6 +14,7 @@ El corazón de Call Master AI reside en su capacidad para procesar grandes volú
 - **Backend**: NestJS (arquitectura hexagonal/limpia), Inngest (orquestación basada en eventos).
 - **Base de Datos/Auth**: Supabase (PostgreSQL, RLS, Storage).
 - **IA/Voz**: API de Voiceflow Dialog Manager.
+- **Ecosistema de Desarrollo**: Construido con **Gentle-AI** y **OpenCode** para la orquestación de agentes, integrando **Google Gemini** y **DeepSeek** para las capacidades de razonamiento e inteligencia.
 - **Calidad de Código**: Estandarizada con Husky, Lint-staged, Commitlint, **SonarQube** (análisis estático de calidad) y **CodeRabbit** (revisión asistida por IA).
 
 ## c. Información sobre su instalación y ejecución
