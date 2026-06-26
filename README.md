@@ -1,46 +1,48 @@
 # Call Master AI 📞🤖
 
-Plataforma SaaS potenciada con Inteligencia Artificial diseñada para automatizar la gestión de analistas en call centers mediante agentes de voz inteligentes.
+Call Master AI es una plataforma SaaS de alto rendimiento, diseñada para la automatización inteligente de campañas de llamadas salientes (Outbound) en entornos de call center. La plataforma permite a los usuarios gestionar flujos de comunicación masivos mediante la orquestación asíncrona, asegurando una ejecución secuencial, segura y escalable a través de agentes de IA.
 
-## 🚀 Visión del Proyecto
-Call Master AI permite a las empresas (Tenants) crear campañas de llamadas automatizadas utilizando agentes de IA (Voiceflow) que siguen guiones predefinidos, gestionan clientes a través de archivos CSV y proporcionan analíticas detalladas de cada interacción.
+## a. Descripción general del proyecto
+El corazón de Call Master AI reside en su capacidad para procesar grandes volúmenes de llamadas manteniendo la integridad de los datos y el cumplimiento normativo. Sus funcionalidades clave incluyen:
+- **Orquestación inteligente**: Uso de colas distribuidas para el disparo de llamadas evitando bloqueos.
+- **Seguridad multicapa**: Aislamiento de datos mediante Row-Level Security (RLS) y cifrado avanzado (AES-256) para credenciales de terceros.
+- **Analíticas en tiempo real**: Dashboards estratificados para Tenants y administradores globales (PlatformOwner).
+- **Privacidad por diseño**: Purga automática de datos personales (PII) una vez finalizada la ejecución de las campañas.
 
-## 🏗️ Arquitectura
-El proyecto sigue una arquitectura **Monorepo** y principios de **Clean Architecture** para asegurar la escalabilidad y el desacoplamiento de infraestructura.
+## b. Stack tecnológico utilizado
+- **Frontend**: React, Vite, TypeScript, Recharts (visualización de datos), TailwindCSS + Lucide (UI).
+- **Backend**: NestJS (arquitectura hexagonal/limpia), Inngest (orquestación basada en eventos).
+- **Base de Datos/Auth**: Supabase (PostgreSQL, RLS, Storage).
+- **IA/Voz**: API de Voiceflow Dialog Manager.
+- **Ecosistema de Desarrollo**: Construido con **Gentle-AI** y **OpenCode** para la orquestación de agentes, integrando **Google Gemini** y **DeepSeek** para las capacidades de razonamiento e inteligencia.
+- **Calidad de Código**: Estandarizada con Husky, Lint-staged, Commitlint, **SonarQube** (análisis estático de calidad) y **CodeRabbit** (revisión asistida por IA).
 
-### Estructura de Carpetas
-- `apps/frontend`: React + Vite + TypeScript (Feature-First pattern).
-- `apps/backend`: NestJS Serverless (Clean Architecture).
-- `apps/mobile`: Espacio reservado para la App de monitoreo gerencial.
-- `packages/shared`: Interfaces, tipos y constantes compartidas entre todos los servicios.
-- `openspec/`: Documentación viva, especificaciones (Specs), diseños técnicos y seguimiento de tareas.
-- `supabase/`: Migraciones y configuración de la base de datos PostgreSQL.
+## c. Información sobre su instalación y ejecución
+Para iniciar el entorno de desarrollo, asegúrate de tener las variables de entorno configuradas (`.env` en backend y frontend). Luego ejecuta:
 
-## 🛠️ Stack Tecnológico
-- **Frontend**: React, Vite, TypeScript.
-- **Backend**: NestJS (Serverless ready para Vercel).
-- **Base de Datos**: Supabase (PostgreSQL + Auth + Storage).
-- **Orquestación Asíncrona**: Inngest (Manejo de colas y eventos).
-- **Proveedor de IA**: Voiceflow (Agentes de voz).
-- **Calidad de Código**: ESLint v10 (Flat Config), Prettier, Husky, Lint-staged y Commitlint (Conventional Commits).
-
-## 🔐 Seguridad
-- **Autenticación**: JWT con rotación de Refresh Tokens vía Supabase Auth.
-- **Autorización**: RBAC (PlatformOwner y TenantAdmin).
-- **Protección de Datos**: Cifrado AES-256 (pgcrypto) para llaves de proveedores en la DB.
-- **Entornos**: Aislamiento total entre Sandbox (testing) y Production.
-
-## 🛠️ Desarrollo
-Para instalar las dependencias de todo el monorepo:
 ```bash
 npm install
+npm run runTFM
 ```
 
-Para correr en modo desarrollo:
-```bash
-npm run dev:frontend  # Inicia React
-npm run dev:backend   # Inicia NestJS
-```
+Este comando levanta de forma concurrente:
+1. El backend (NestJS) en el puerto 3000.
+2. El frontend (Vite) en el puerto 5173.
+3. El servidor local de Inngest (Inngest Dev Server) en el puerto 8288.
+
+## d. Estructura del proyecto
+- `apps/frontend`: Dashboard administrativo, flujos de creación de campañas y analíticas.
+- `apps/backend`: Lógica central, módulos de Tenants, Campaigns, Analytics y funciones Inngest.
+- `packages/shared`: Tipos, interfaces y esquemas de validación compartidos.
+- `supabase/`: Migraciones SQL y scripts de seguridad RLS.
+- `sdd/`: Artefactos de Spec-Driven Development (Propuestas, Diseños, Especificaciones).
+
+## e. Funcionalidades principales
+- **Orquestación de Campañas**: Ejecución en segundo plano mediante colas secuenciales para evitar saturar las APIs.
+- **Seguridad Dinámica**: Integración multi-tenant con cifrado en reposo para credenciales de IA.
+- **Analíticas Avanzadas**: Dashboard interactivo con KPIs (llamadas, campañas, minutos, costo) y tendencias históricas (gráficos dinámicos).
+- **Privacidad**: Purga automática de datos sensibles (PII) post-campaña.
+- **RBAC**: Aislamiento de datos mediante Row Level Security (RLS) en Supabase y guardas de acceso a nivel de aplicación.
 
 ---
 *Trabajo final de master Big School*

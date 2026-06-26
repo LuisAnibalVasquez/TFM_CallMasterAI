@@ -3,10 +3,9 @@ import { PhoneCall } from "lucide-react";
 import { Button } from "../../../shared/components/ui/button";
 
 const NAV_LINKS = [
-  { href: "#features", label: "Features" },
-  { href: "#how-it-works", label: "How it works" },
-  { href: "#trust", label: "Trust" },
-  { href: "#pricing", label: "Pricing" },
+  { href: "/#features", label: "Features" },
+  { href: "/#how-it-works", label: "How it works" },
+  { href: "/#trust", label: "Trust" },
 ];
 
 export function Navbar() {
@@ -40,13 +39,13 @@ export function Navbar() {
           className="hidden items-center gap-1 md:flex"
         >
           {NAV_LINKS.map((link) => (
-            <Link
+            <a
               key={link.href}
-              to={link.href}
+              href={link.href}
               className="rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
             >
               {link.label}
-            </Link>
+            </a>
           ))}
         </nav>
 
@@ -59,13 +58,13 @@ export function Navbar() {
           >
             <Link to="/login">Log In</Link>
           </Button>
-          <Button
+          {/* <Button
             asChild
             size="sm"
             className="bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
           >
             <Link to="/signup">Get Started</Link>
-          </Button>
+          </Button> */}
         </div>
       </div>
     </header>
